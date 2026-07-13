@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "dojutsu",
+  "version": "${version}",
+  "name": "Dojutsu",
+  "description": "Sistema de habilidades ninja (Naruto/Boruto) para Minecraft.",
+  "authors": [
+    "Zamu"
+  ],
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.zamu.dojutsu.fabric.DojutsuFabric"
+    ],
+    "client": [
+      "com.zamu.dojutsu.fabric.DojutsuFabricClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.10",
+    "minecraft": "~1.21.1",
+    "java": ">=21",
+    "fabric-api": "*",
+    "architectury": ">=13.0.0"
+  }
+}

@@ -1,0 +1,13 @@
+# Normaliza los finales de linea a LF dentro del repositorio.
+* text=auto eol=lf
+
+# Scripts de Windows: CRLF.
+*.bat text eol=crlf
+
+# El wrapper de Gradle debe conservar LF para ejecutarse en Linux (CI).
+gradlew text eol=lf
+
+# Ficheros binarios (no tocar).
+*.jar binary
+*.png binary
+*.ogg binary

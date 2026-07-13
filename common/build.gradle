@@ -1,0 +1,13 @@
+architectury {
+    // Declara este modulo como comun para los loaders habilitados en gradle.properties.
+    common(rootProject.enabled_platforms.split(","))
+}
+
+dependencies {
+    // Fabric Loader se usa SOLO por las anotaciones @Environment (se remapean por plataforma).
+    // No usar otras clases de Fabric Loader desde common.
+    modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
+
+    // Architectury API (variante comun) para los puertos cross-loader (@ExpectPlatform).
+    modApi "dev.architectury:architectury:$rootProject.architectury_api_version"
+}
