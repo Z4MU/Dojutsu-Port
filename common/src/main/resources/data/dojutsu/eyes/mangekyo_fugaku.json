@@ -1,0 +1,15 @@
+{
+  "id": "mangekyo_fugaku",
+  "family": "mangekyo",
+  "awakenMaxChakraBonus": 20,
+  "awakenNinjaXpBonus": 80,
+  "chakraVision": true,
+  "abilities": [
+    "tsukuyomi",
+    "susanoo"
+  ],
+  "eternalRequirements": [
+    { "type": "clan", "value": "otsutsuki_uchiha" },
+    { "type": "use_level", "min": 864000 }
+  ]
+}

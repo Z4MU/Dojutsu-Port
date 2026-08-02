@@ -3,6 +3,11 @@ architectury {
     common(rootProject.enabled_platforms.split(","))
 }
 
+repositories {
+    // Necesario para resolver JUnit (dominio testeable sin Minecraft, F1).
+    mavenCentral()
+}
+
 dependencies {
     // Fabric Loader se usa SOLO por las anotaciones @Environment (se remapean por plataforma).
     // No usar otras clases de Fabric Loader desde common.
@@ -10,4 +15,22 @@ dependencies {
 
     // Architectury API (variante comun) para los puertos cross-loader (@ExpectPlatform).
     modApi "dev.architectury:architectury:$rootProject.architectury_api_version"
+
+    // TDD del dominio (JUnit 5). El BOM alinea jupiter y el platform-launcher.
+    testImplementation platform("org.junit:junit-bom:$rootProject.junit_version")
+    testImplementation "org.junit.jupiter:junit-jupiter"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+}
+
+test {
+    // El dominio se prueba con JUnit Platform (sin arrancar Minecraft).
+    useJUnitPlatform()
+
+    // Banco de pruebas manual de F10/DJT-222. Los benchmarks van @Disabled porque miden tiempo, y un test que
+    // mide tiempo falla en CI el dia que la maquina va cargada. Con -Pbench se activan y se ve su salida:
+    //   ./gradlew :common:test --tests "*Benchmark*" -Pbench
+    if (project.hasProperty("bench")) {
+        systemProperty "junit.jupiter.conditions.deactivate", "org.junit.*DisabledCondition"
+        testLogging.showStandardStreams = true
+    }
 }

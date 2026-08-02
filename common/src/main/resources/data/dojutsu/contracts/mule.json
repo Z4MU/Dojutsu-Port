@@ -1,0 +1,8 @@
+{
+  "id": "mule",
+  "entityType": "minecraft:mule",
+  "tier": "mid",
+  "tame": true,
+  "saddle": true,
+  "chest": true
+}

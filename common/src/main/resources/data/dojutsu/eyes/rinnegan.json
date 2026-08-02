@@ -1,0 +1,15 @@
+{
+  "id": "rinnegan",
+  "family": "rinnegan",
+  "awakenMaxChakraBonus": 100,
+  "awakenNinjaXpBonus": 150,
+  "chakraVision": true,
+  "abilities": [
+    "shinra_tensei",
+    "bansho_tenin",
+    "amenotejikara",
+    "chibaku_tensei",
+    "preta_path",
+    "asura_path"
+  ]
+}

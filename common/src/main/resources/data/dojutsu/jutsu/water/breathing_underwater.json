@@ -1,0 +1,9 @@
+{
+  "id": "breathing_underwater",
+  "chakraCost": 20,
+  "cooldownTicks": 20,
+  "affinity": { "nature": "water", "amount": 50 },
+  "category": "water",
+  "effect": "buff",
+  "effectParams": { "effects": [ { "id": "minecraft:water_breathing", "seconds": 60, "amplifier": 0 } ] }
+}

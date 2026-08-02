@@ -1,0 +1,1 @@
+{ "id": "hatake", "teamColor": "gray", "natures": ["lightning"], "affinityBonus": { "lightning": 25 }, "skillBonus": { "taijutsu": 10, "kenjutsu": 10, "genjutsu": 5 }, "maxChakra": 120, "ninjaXp": 85, "startingItems": ["white_light_chakra_sabre"] }

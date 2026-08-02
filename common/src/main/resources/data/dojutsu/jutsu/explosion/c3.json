@@ -1,0 +1,4 @@
+{ "id": "c3", "chakraCost": 280, "cooldownTicks": 300,
+  "affinity": [ { "nature": "earth", "amount": 280 }, { "nature": "lightning", "amount": 280 } ],
+  "kekkeiGenkai": "explosion", "category": "explosion", "effect": "area",
+  "effectParams": { "radius": 8.0, "damage": 16.0 } }

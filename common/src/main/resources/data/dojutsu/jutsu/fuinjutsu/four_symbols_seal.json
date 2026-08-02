@@ -1,0 +1,4 @@
+{ "id": "four_symbols_seal", "chakraCost": 100, "cooldownTicks": 300,
+  "affinity": { "nature": "yang", "amount": 200 },
+  "skill": { "skill": "fuinjutsu", "amount": 300 }, "category": "fuinjutsu", "effect": "area",
+  "effectParams": { "radius": 6.0, "damage": 6.0, "effects": [ { "id": "minecraft:slowness", "seconds": 5, "amplifier": 2 }, { "id": "minecraft:weakness", "seconds": 5, "amplifier": 1 } ] } }

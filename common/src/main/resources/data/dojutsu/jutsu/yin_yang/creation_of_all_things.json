@@ -1,0 +1,3 @@
+{ "id": "creation_of_all_things", "chakraCost": 4000, "cooldownTicks": 1200,
+  "affinity": { "nature": "yin_yang", "amount": 500 }, "category": "yin_yang", "effect": "heal",
+  "effectParams": { "radius": 8.0, "effects": [ { "id": "minecraft:regeneration", "seconds": 3, "amplifier": 20 }, { "id": "minecraft:absorption", "seconds": 30, "amplifier": 3 } ] } }

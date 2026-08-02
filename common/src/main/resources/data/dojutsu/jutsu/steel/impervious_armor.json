@@ -1,0 +1,4 @@
+{ "id": "impervious_armor", "chakraCost": 200, "cooldownTicks": 400,
+  "affinity": [ { "nature": "earth", "amount": 160 }, { "nature": "fire", "amount": 160 }, { "nature": "water", "amount": 160 } ],
+  "kekkeiGenkai": "steel", "category": "steel", "effect": "buff",
+  "effectParams": { "effects": [ { "id": "minecraft:resistance", "seconds": 30, "amplifier": 2 }, { "id": "minecraft:slowness", "seconds": 30, "amplifier": 0 } ] } }

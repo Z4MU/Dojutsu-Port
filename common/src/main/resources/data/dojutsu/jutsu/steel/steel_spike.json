@@ -1,0 +1,4 @@
+{ "id": "steel_spike", "chakraCost": 180, "cooldownTicks": 200,
+  "affinity": [ { "nature": "earth", "amount": 200 }, { "nature": "fire", "amount": 200 }, { "nature": "water", "amount": 200 } ],
+  "kekkeiGenkai": "steel", "category": "steel", "effect": "area",
+  "effectParams": { "radius": 5.0, "damage": 12.0, "effects": [ { "id": "minecraft:slowness", "seconds": 3, "amplifier": 1 } ] } }

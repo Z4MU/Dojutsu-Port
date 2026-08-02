@@ -1,0 +1,9 @@
+{
+  "id": "lightning_cutter",
+  "chakraCost": 200,
+  "cooldownTicks": 400,
+  "affinity": { "nature": "lightning", "amount": 200 },
+  "category": "lightning",
+  "effect": "primed_strike",
+  "effectParams": { "primingTicks": 40, "damage": 12.0 }
+}

@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "food",
+  "ingredients": [
+    { "item": "minecraft:egg" },
+    { "item": "minecraft:cooked_chicken" },
+    { "item": "minecraft:wheat" },
+    { "item": "minecraft:bowl" }
+  ],
+  "result": { "id": "dojutsu:ramen", "count": 1 }
+}

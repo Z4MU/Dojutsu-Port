@@ -1,0 +1,44 @@
+[
+  { "unlockId": "substitution", "skillId": "ninja_xp", "requiredLevel": 1000, "ninjaXp": 1 },
+
+  { "unlockId": "taijutsu_1_chakra_enhanced_strength", "skillId": "taijutsu", "requiredLevel": 25, "ninjaXp": 2 },
+  { "unlockId": "taijutsu_2_heavenly_foot_of_pain", "skillId": "taijutsu", "requiredLevel": 38, "ninjaXp": 2 },
+  { "unlockId": "taijutsu_3_crimson_drizzle", "skillId": "taijutsu", "requiredLevel": 50, "ninjaXp": 3 },
+  { "unlockId": "taijutsu_4_cherry_blossom_impact", "skillId": "taijutsu", "requiredLevel": 63, "ninjaXp": 5 },
+
+  { "unlockId": "eight_gates_1_gate_of_opening", "skillId": "taijutsu", "requiredLevel": 75, "ninjaXp": 100 },
+  { "unlockId": "eight_gates_2_gate_of_healing", "skillId": "taijutsu", "requiredLevel": 125, "ninjaXp": 50 },
+  { "unlockId": "eight_gates_3_gate_of_life", "skillId": "taijutsu", "requiredLevel": 175, "ninjaXp": 50 },
+  { "unlockId": "eight_gates_4_gate_of_pain", "skillId": "taijutsu", "requiredLevel": 225, "ninjaXp": 50 },
+  { "unlockId": "eight_gates_5_gate_of_limit", "skillId": "taijutsu", "requiredLevel": 275, "ninjaXp": 50 },
+  { "unlockId": "eight_gates_6_gate_of_view", "skillId": "taijutsu", "requiredLevel": 325, "ninjaXp": 50 },
+  { "unlockId": "eight_gates_7_gate_of_wonder", "skillId": "taijutsu", "requiredLevel": 375, "ninjaXp": 50 },
+  { "unlockId": "eight_gates_8_gate_of_death", "skillId": "taijutsu", "requiredLevel": 425, "ninjaXp": 50 },
+  { "unlockId": "eight_gates_mastery", "skillId": "taijutsu", "requiredLevel": 500, "ninjaXp": 100 },
+
+  { "unlockId": "kenjutsu_1_dancing_blade_risk", "skillId": "kenjutsu", "requiredLevel": 75, "ninjaXp": 10 },
+  { "unlockId": "kenjutsu_2_assassination_technique", "skillId": "kenjutsu", "requiredLevel": 88, "ninjaXp": 10 },
+  { "unlockId": "kenjutsu_3_chakra_shock_slash", "skillId": "kenjutsu", "requiredLevel": 125, "ninjaXp": 10 },
+  { "unlockId": "kenjutsu_4_chakra_shockwave_slash", "skillId": "kenjutsu", "requiredLevel": 150, "ninjaXp": 10 },
+  { "unlockId": "kenjutsu_5_secret_sword_snowstorm_beheading", "skillId": "kenjutsu", "requiredLevel": 350, "ninjaXp": 20 },
+
+  { "unlockId": "summoning_contract_empty", "skillId": "fuinjutsu", "requiredLevel": 75, "ninjaXp": 20 },
+  { "unlockId": "flying_thunder_god_kunai", "skillId": "fuinjutsu", "requiredLevel": 250, "requiredMaxChakra": 10000, "ninjaXp": 30 },
+  { "unlockId": "fuinjutsu_1_four_symbols_seal", "skillId": "fuinjutsu", "requiredLevel": 300, "ninjaXp": 10 },
+  { "unlockId": "fuinjutsu_2_reverse_four_symbols_sealing", "skillId": "fuinjutsu", "requiredLevel": 400, "ninjaXp": 10 },
+  { "unlockId": "fuinjutsu_3_four_red_yang_formation", "skillId": "fuinjutsu", "requiredLevel": 500, "ninjaXp": 10 },
+
+  { "unlockId": "genjutsu_1_paralysis", "skillId": "genjutsu", "requiredLevel": 15, "ninjaXp": 3 },
+  { "unlockId": "genjutsu_2_bringer_of_darkness", "skillId": "genjutsu", "requiredLevel": 18, "ninjaXp": 3 },
+  { "unlockId": "genjutsu_3_flower_hill", "skillId": "genjutsu", "requiredLevel": 18, "ninjaXp": 3 },
+  { "unlockId": "genjutsu_4_hundred_blooming_flowers", "skillId": "genjutsu", "requiredLevel": 20, "ninjaXp": 3 },
+  { "unlockId": "genjutsu_5_unknown_fire", "skillId": "genjutsu", "requiredLevel": 38, "ninjaXp": 3 },
+
+  { "unlockId": "medical_1_regenerative_healing", "skillId": "medical", "requiredLevel": 3, "ninjaXp": 3 },
+  { "unlockId": "medical_2_healing", "skillId": "medical", "requiredLevel": 5, "ninjaXp": 3 },
+  { "unlockId": "medical_3_wide_healing", "skillId": "medical", "requiredLevel": 13, "ninjaXp": 3 },
+  { "unlockId": "medical_4_mystical_palm", "skillId": "medical", "requiredLevel": 25, "ninjaXp": 3 },
+  { "unlockId": "medical_5_creation_rebirth", "skillId": "medical", "requiredLevel": 125, "requiredMaxChakra": 10000, "ninjaXp": 20 },
+  { "unlockId": "medical_6_strength_of_a_hundred_seal", "skillId": "medical", "requiredLevel": 375, "ninjaXp": 100 },
+  { "unlockId": "medical_7_creation_rebirth_soah", "skillId": "medical", "requiredLevel": 500, "requiredMaxChakra": 30000, "ninjaXp": 20 }
+]

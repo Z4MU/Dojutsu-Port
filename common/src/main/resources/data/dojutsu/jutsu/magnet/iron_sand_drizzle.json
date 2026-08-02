@@ -1,0 +1,4 @@
+{ "id": "iron_sand_drizzle", "chakraCost": 160, "cooldownTicks": 200,
+  "affinity": [ { "nature": "earth", "amount": 160 }, { "nature": "wind", "amount": 160 } ],
+  "kekkeiGenkai": "magnet", "category": "magnet", "effect": "area",
+  "effectParams": { "radius": 6.0, "damage": 10.0, "effects": [ { "id": "minecraft:slowness", "seconds": 3, "amplifier": 1 } ] } }

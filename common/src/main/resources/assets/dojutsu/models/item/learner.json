@@ -1,0 +1,30 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": { "layer0": "dojutsu:item/learner/fire" },
+  "overrides": [
+    { "predicate": { "custom_model_data": 1000 }, "model": "dojutsu:item/learner/fire" },
+    { "predicate": { "custom_model_data": 1001 }, "model": "dojutsu:item/learner/wind" },
+    { "predicate": { "custom_model_data": 1002 }, "model": "dojutsu:item/learner/lightning" },
+    { "predicate": { "custom_model_data": 1003 }, "model": "dojutsu:item/learner/earth" },
+    { "predicate": { "custom_model_data": 1004 }, "model": "dojutsu:item/learner/water" },
+    { "predicate": { "custom_model_data": 1005 }, "model": "dojutsu:item/learner/yin" },
+    { "predicate": { "custom_model_data": 1006 }, "model": "dojutsu:item/learner/yang" },
+    { "predicate": { "custom_model_data": 1007 }, "model": "dojutsu:item/learner/wood" },
+    { "predicate": { "custom_model_data": 1008 }, "model": "dojutsu:item/learner/blaze" },
+    { "predicate": { "custom_model_data": 1009 }, "model": "dojutsu:item/learner/ice" },
+    { "predicate": { "custom_model_data": 1010 }, "model": "dojutsu:item/learner/lava" },
+    { "predicate": { "custom_model_data": 1011 }, "model": "dojutsu:item/learner/storm" },
+    { "predicate": { "custom_model_data": 1012 }, "model": "dojutsu:item/learner/boil" },
+    { "predicate": { "custom_model_data": 1013 }, "model": "dojutsu:item/learner/dust" },
+    { "predicate": { "custom_model_data": 1014 }, "model": "dojutsu:item/learner/magnet" },
+    { "predicate": { "custom_model_data": 1015 }, "model": "dojutsu:item/learner/explosion" },
+    { "predicate": { "custom_model_data": 1016 }, "model": "dojutsu:item/learner/scorch" },
+    { "predicate": { "custom_model_data": 1017 }, "model": "dojutsu:item/learner/yin_yang" },
+    { "predicate": { "custom_model_data": 1018 }, "model": "dojutsu:item/learner/steel" },
+    { "predicate": { "custom_model_data": 1019 }, "model": "dojutsu:item/learner/dark" },
+    { "predicate": { "custom_model_data": 1020 }, "model": "dojutsu:item/learner/swift" },
+    { "predicate": { "custom_model_data": 1021 }, "model": "dojutsu:item/learner/crystal" },
+    { "predicate": { "custom_model_data": 1022 }, "model": "dojutsu:item/learner/typhoon" },
+    { "predicate": { "custom_model_data": 1023 }, "model": "dojutsu:item/learner/mud" }
+  ]
+}

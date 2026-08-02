@@ -1,0 +1,149 @@
+{
+	"credit": "Made with Blockbench",
+	"textures": {
+		"0": "dojutsu:item/weapon/tanto",
+		"particle": "dojutsu:item/weapon/tanto"
+	},
+	"elements": [
+		{
+			"name": "handle",
+			"from": [7.25, 7.5, 7.5],
+			"to": [8.75, 14, 8.5],
+			"rotation": {"angle": 0, "axis": "y", "origin": [0, 5, 0]},
+			"faces": {
+				"north": {"uv": [1.5, 0, 0, 8.5], "texture": "#0"},
+				"east": {"uv": [0, 0, 1.5, 8.5], "texture": "#0"},
+				"south": {"uv": [1.5, 0, 0, 8.5], "texture": "#0"},
+				"west": {"uv": [0, 0, 1.5, 8.5], "texture": "#0"},
+				"up": {"uv": [0, 10.125, 2, 11.25], "texture": "#0"},
+				"down": {"uv": [0, 7, 2, 8.125], "texture": "#missing"}
+			}
+		},
+		{
+			"name": "handle",
+			"from": [7.25, 6, 7.5],
+			"to": [8.75, 7.5, 8.5],
+			"rotation": {"angle": 0, "axis": "y", "origin": [0, 5, 0]},
+			"faces": {
+				"north": {"uv": [1.5, 8.625, 0, 10.125], "texture": "#0"},
+				"east": {"uv": [0, 8.625, 1.5, 10.125], "texture": "#0"},
+				"south": {"uv": [1.5, 8.625, 0, 10.125], "texture": "#0"},
+				"west": {"uv": [0, 8.625, 1.5, 10.125], "texture": "#0"},
+				"up": {"uv": [0, 5.875, 2, 7], "texture": "#missing"},
+				"down": {"uv": [0, 10.125, 2, 11.25], "texture": "#0"}
+			}
+		},
+		{
+			"name": "blade",
+			"from": [7.25, 15, 7.9],
+			"to": [8.75, 31.55, 8.1],
+			"faces": {
+				"north": {"uv": [6.5, 0, 8, 16], "texture": "#0"},
+				"east": {"uv": [6.5, 0, 6.7, 16], "texture": "#0"},
+				"south": {"uv": [8, 0, 6.5, 16], "texture": "#0"},
+				"west": {"uv": [7.75, 0, 7.95, 16], "texture": "#0"},
+				"up": {"uv": [8.5, 0.625, 9.125, 0.875], "texture": "#missing"},
+				"down": {"uv": [0, 0, 2, 0.2], "texture": "#missing"}
+			}
+		},
+		{
+			"name": "blade",
+			"from": [7.25, 14, 7.75],
+			"to": [8.75, 15, 8.25],
+			"rotation": {"angle": 0, "axis": "y", "origin": [0, 9, 0]},
+			"faces": {
+				"north": {"uv": [4, 1.5, 2.5, 2.875], "rotation": 180, "texture": "#0"},
+				"east": {"uv": [4, 1.5, 2.5, 2.875], "rotation": 180, "texture": "#0"},
+				"south": {"uv": [4, 1.5, 2.5, 2.875], "rotation": 180, "texture": "#0"},
+				"west": {"uv": [4, 1.5, 2.5, 2.875], "rotation": 180, "texture": "#0"},
+				"up": {"uv": [3, 2.375, 3.625, 2.625], "texture": "#0"},
+				"down": {"uv": [0, 0, 2, 0.2], "texture": "#missing"}
+			}
+		},
+		{
+			"name": "tip",
+			"from": [7.75, 30.9, 7.9],
+			"to": [8.75, 31.92, 8.1],
+			"rotation": {"angle": 0, "axis": "y", "origin": [0, 0.25, 0]},
+			"faces": {
+				"north": {"uv": [8, 1, 9, 2], "texture": "#0"},
+				"east": {"uv": [6.5, 0, 6.7, 16], "texture": "#0"},
+				"south": {"uv": [9, 1, 8, 2], "texture": "#0"},
+				"west": {"uv": [0, 0, 0.2, 1], "texture": "#missing"},
+				"up": {"uv": [0, 0, 1, 0.2], "texture": "#missing"},
+				"down": {"uv": [0, 0, 1, 0.2], "texture": "#missing"}
+			}
+		},
+		{
+			"name": "tip",
+			"from": [27.25, 16.45, 7.9],
+			"to": [28.58, 17.25, 8.1],
+			"rotation": {"angle": 45, "axis": "z", "origin": [0, 0.25, 0]},
+			"faces": {
+				"north": {"uv": [9.875, 0, 11, 1.125], "texture": "#0"},
+				"east": {"uv": [6.5, 0, 6.7, 16], "texture": "#0"},
+				"south": {"uv": [11, 0, 9.875, 1.125], "texture": "#0"},
+				"west": {"uv": [7.75, 0, 7.95, 16], "texture": "#0"},
+				"up": {"uv": [7.75, 0, 7.95, 16], "texture": "#0"},
+				"down": {"uv": [6.5, 0, 6.7, 16], "texture": "#0"}
+			}
+		}
+	],
+	"display": {
+		"thirdperson_righthand": {
+			"rotation": [6, -90, 0],
+			"translation": [0, -4, 0.75],
+			"scale": [0.82, 0.82, 0.82]
+		},
+		"thirdperson_lefthand": {
+			"rotation": [6, 90, 0],
+			"translation": [0, -4, 0.75],
+			"scale": [0.82, 0.82, 0.82]
+		},
+		"firstperson_righthand": {
+			"rotation": [-8, -90, 0],
+			"translation": [-0.75, 0.75, 4.5],
+			"scale": [0.53, 0.53, 0.53]
+		},
+		"firstperson_lefthand": {
+			"rotation": [-8, 90, 0],
+			"translation": [-0.75, 0.75, 4.5],
+			"scale": [0.53, 0.53, 0.53]
+		},
+		"ground": {
+			"rotation": [90, -180, 90],
+			"translation": [-7.75, 0, 0],
+			"scale": [0.74, 0.74, 0.74]
+		},
+		"gui": {
+			"rotation": [-180, 0, -134],
+			"translation": [-5.25, -5, 0],
+			"scale": [0.67, 0.67, 0.67]
+		},
+		"head": {
+			"rotation": [45, -180, 90],
+			"translation": [-9.25, 0, 0],
+			"scale": [1.47, 1.47, 1.47]
+		},
+		"fixed": {
+			"rotation": [0, 0, 45],
+			"translation": [4.75, -5, 0],
+			"scale": [0.67, 0.67, 0.67]
+		}
+	},
+	"groups": [
+		{
+			"name": "kurikara",
+			"origin": [8, 8, 8],
+			"color": 0,
+			"children": [0, 1,
+				{
+					"name": "blade",
+					"origin": [0, 0.7, 0],
+					"color": 0,
+					"children": [2, 3, 4, 5]
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,4 @@
+{ "id": "explosive_landmine", "chakraCost": 120, "cooldownTicks": 100,
+  "affinity": [ { "nature": "earth", "amount": 140 }, { "nature": "lightning", "amount": 140 } ],
+  "kekkeiGenkai": "explosion", "category": "explosion", "effect": "area",
+  "effectParams": { "radius": 4.0, "damage": 10.0, "effects": [ { "id": "minecraft:slowness", "seconds": 3, "amplifier": 1 } ] } }

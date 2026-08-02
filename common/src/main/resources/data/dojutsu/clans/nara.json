@@ -1,0 +1,1 @@
+{ "id": "nara", "_comment": "jutsuUnlockTicks: desbloqueo progresivo (predicate new_nara_jutsu, 78000 ticks = 65 min de juego). Secuencia F4: shadow_clutch -> shadow_sewing.", "teamColor": "black", "natures": ["yin"], "affinityBonus": { "yin": 10 }, "maxChakra": 100, "ninjaXp": 10, "startingJutsu": ["shadow_paralysis"], "jutsuUnlockTicks": 78000 }

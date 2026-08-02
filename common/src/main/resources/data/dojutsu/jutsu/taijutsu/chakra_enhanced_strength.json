@@ -1,0 +1,3 @@
+{ "id": "chakra_enhanced_strength", "chakraCost": 40, "cooldownTicks": 100,
+  "skill": { "skill": "taijutsu", "amount": 25 }, "category": "taijutsu", "effect": "primed_strike",
+  "effectParams": { "primingTicks": 60, "damage": 8.0 } }

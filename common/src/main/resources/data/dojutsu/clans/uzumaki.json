@@ -1,0 +1,1 @@
+{ "id": "uzumaki", "_comment": "regenFactor: la regen acelerada de [S02] (d.diff_cr) que F2 dejo enchufable en RegenPolicy.", "teamColor": "gold", "skillBonus": { "fuinjutsu": 30 }, "maxChakra": 500, "ninjaXp": 15, "regenFactor": "clan_uzumaki" }

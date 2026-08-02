@@ -1,0 +1,7 @@
+{
+  "ingredients": [
+    { "item": "minecraft:diamond" },
+    { "item": "dojutsu:dna" }
+  ],
+  "result": "dojutsu:dna"
+}

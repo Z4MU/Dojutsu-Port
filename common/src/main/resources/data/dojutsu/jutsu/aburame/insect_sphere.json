@@ -1,0 +1,3 @@
+{ "id": "insect_sphere", "chakraCost": 20, "cooldownTicks": 100,
+  "category": "aburame", "effect": "area",
+  "effectParams": { "radius": 4.0, "damage": 0.0, "effects": [ { "id": "minecraft:slowness", "seconds": 5, "amplifier": 2 }, { "id": "minecraft:weakness", "seconds": 5, "amplifier": 1 } ] } }

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "#P#",
+    "IDI",
+    "#P#"
+  ],
+  "key": {
+    "#": { "item": "minecraft:purple_dye" },
+    "P": { "item": "minecraft:paper" },
+    "I": { "item": "minecraft:ink_sac" },
+    "D": { "item": "minecraft:diamond" }
+  },
+  "result": { "id": "dojutsu:removal_scroll", "count": 1 }
+}

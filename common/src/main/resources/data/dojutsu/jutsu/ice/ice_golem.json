@@ -1,0 +1,4 @@
+{ "id": "ice_golem", "chakraCost": 100, "cooldownTicks": 600,
+  "affinity": [ { "nature": "water", "amount": 100 }, { "nature": "wind", "amount": 100 } ],
+  "kekkeiGenkai": "ice", "category": "ice", "effect": "structure",
+  "effectParams": { "block": "minecraft:snow_block", "width": 3, "height": 3, "forward": 2 } }

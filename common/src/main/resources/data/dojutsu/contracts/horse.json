@@ -1,0 +1,7 @@
+{
+  "id": "horse",
+  "entityType": "minecraft:horse",
+  "tier": "mid",
+  "tame": true,
+  "saddle": true
+}

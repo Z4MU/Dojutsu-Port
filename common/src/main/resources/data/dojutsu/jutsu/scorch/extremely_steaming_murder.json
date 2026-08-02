@@ -1,0 +1,4 @@
+{ "id": "extremely_steaming_murder", "chakraCost": 300, "cooldownTicks": 400,
+  "affinity": [ { "nature": "fire", "amount": 300 }, { "nature": "wind", "amount": 300 } ],
+  "kekkeiGenkai": "scorch", "category": "scorch", "effect": "area",
+  "effectParams": { "radius": 6.0, "damage": 16.0, "effects": [ { "id": "minecraft:weakness", "seconds": 8, "amplifier": 1 }, { "id": "minecraft:wither", "seconds": 4, "amplifier": 0 } ] } }

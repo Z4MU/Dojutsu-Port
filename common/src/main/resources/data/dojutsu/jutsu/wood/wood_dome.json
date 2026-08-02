@@ -1,0 +1,4 @@
+{ "id": "wood_dome", "chakraCost": 140, "cooldownTicks": 200,
+  "affinity": [ { "nature": "earth", "amount": 160 }, { "nature": "water", "amount": 160 } ],
+  "kekkeiGenkai": "wood", "category": "wood", "effect": "structure",
+  "effectParams": { "block": "minecraft:oak_log", "width": 5, "height": 4, "forward": 0 } }

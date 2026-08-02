@@ -1,0 +1,4 @@
+{ "id": "blizzard", "chakraCost": 120, "cooldownTicks": 200,
+  "affinity": [ { "nature": "water", "amount": 80 }, { "nature": "wind", "amount": 80 } ],
+  "kekkeiGenkai": "ice", "category": "ice", "effect": "area",
+  "effectParams": { "radius": 8.0, "effects": [ { "id": "minecraft:slowness", "seconds": 6, "amplifier": 2 }, { "id": "minecraft:blindness", "seconds": 4, "amplifier": 0 } ] } }

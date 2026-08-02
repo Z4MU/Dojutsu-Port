@@ -1,0 +1,4 @@
+{ "id": "creation_rebirth", "chakraCost": 1000, "cooldownTicks": 1200,
+  "affinity": { "nature": "yin", "amount": 50 },
+  "skill": { "skill": "medical", "amount": 125 }, "category": "medical", "effect": "heal",
+  "effectParams": { "radius": 3.0, "effects": [ { "id": "minecraft:regeneration", "seconds": 5, "amplifier": 20 }, { "id": "minecraft:absorption", "seconds": 30, "amplifier": 3 }, { "id": "minecraft:weakness", "seconds": 15, "amplifier": 1 } ] } }

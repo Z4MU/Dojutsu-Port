@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "###",
+    "EGE",
+    "DDD"
+  ],
+  "key": {
+    "#": { "item": "minecraft:paper" },
+    "E": { "item": "minecraft:emerald_block" },
+    "G": { "item": "minecraft:golden_apple" },
+    "D": { "item": "minecraft:glow_ink_sac" }
+  },
+  "result": { "id": "dojutsu:sage_scroll", "count": 1 }
+}

@@ -1,0 +1,1 @@
+{ "id": "ice", "components": ["wind", "water"], "ninjaXp": 8, "affinityBonus": { "water": 10 } }

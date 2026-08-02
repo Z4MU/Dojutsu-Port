@@ -1,14 +1,17 @@
 modLoader = "javafml"
 loaderVersion = "[4,)"
-license = "All Rights Reserved"
+license = "MIT (codigo) / CC BY-NC 4.0 (arte)"
 
 [[mods]]
 modId = "dojutsu"
 version = "${version}"
 displayName = "Dojutsu"
 authors = "Zamu"
+credits = "Arte original del resource pack de Dojutsu, por Prof Technic. Usado con permiso, solo para uso no comercial."
 description = '''
 Sistema de habilidades ninja (Naruto/Boruto) para Minecraft.
+
+Arte original del resource pack de Dojutsu, por Prof Technic, usado con permiso y solo para uso no comercial.
 '''
 
 [[dependencies.dojutsu]]

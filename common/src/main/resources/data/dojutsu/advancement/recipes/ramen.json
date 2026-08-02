@@ -1,0 +1,25 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_bowl": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          { "items": "minecraft:bowl" }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "dojutsu:ramen"
+      }
+    }
+  },
+  "requirements": [
+    [ "has_bowl", "has_the_recipe" ]
+  ],
+  "rewards": {
+    "recipes": [ "dojutsu:ramen" ]
+  }
+}

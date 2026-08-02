@@ -1,0 +1,16 @@
+{
+  "kind": "wandering_trader",
+  "offers": [
+    { "item": "dojutsu:eye_sharingan",        "price": 64, "maxUses": 1 },
+    { "item": "dojutsu:eye_byakugan",         "price": 64, "maxUses": 1 },
+    { "item": "dojutsu:eye_ketsuryugan",      "price": 64, "maxUses": 1 },
+    { "item": "dojutsu:eye_mangekyo_obito",   "price": 64, "maxUses": 1 },
+    { "item": "dojutsu:eye_mangekyo_itachi",  "price": 64, "maxUses": 1 },
+    { "item": "dojutsu:eye_mangekyo_sasuke",  "price": 64, "maxUses": 1 },
+    { "item": "dojutsu:removal_scroll",       "price": 48, "maxUses": 1, "xp": 6 },
+    { "item": "dojutsu:dna",                  "price": 48, "maxUses": 4 },
+    { "item": "dojutsu:contract",             "price": 28, "maxUses": 2 },
+    { "item": "dojutsu:mask_anbu_1",          "price": 16, "maxUses": 2 },
+    { "item": "dojutsu:fuma_shuriken",        "price": 16, "maxUses": 8 }
+  ]
+}

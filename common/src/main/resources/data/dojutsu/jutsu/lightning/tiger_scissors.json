@@ -1,0 +1,9 @@
+{
+  "id": "tiger_scissors",
+  "chakraCost": 100,
+  "cooldownTicks": 200,
+  "affinity": { "nature": "lightning", "amount": 100 },
+  "category": "lightning",
+  "effect": "area",
+  "effectParams": { "radius": 4.0, "damage": 8.0 }
+}

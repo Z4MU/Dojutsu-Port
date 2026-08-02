@@ -1,0 +1,1 @@
+{ "id": "lee", "_comment": "skipsAffinity: Lee no elige afinidad NI recibe el roll de KG (join_main y join_finish condicionan ambas ramas a is_lee).", "teamColor": "dark_green", "skillBonus": { "taijutsu": 30 }, "maxChakra": 50, "ninjaXp": 90, "skipsAffinity": true }

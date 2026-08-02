@@ -1,0 +1,1 @@
+{ "id": "akimichi", "_comment": "jutsuUnlockTicks: desbloqueo progresivo (predicate new_akimichi_jutsu, 78000 ticks = 65 min).", "teamColor": "dark_red", "natures": ["yang"], "maxChakra": 110, "startingItems": ["three_coloured_pills"], "jutsuUnlockTicks": 78000 }

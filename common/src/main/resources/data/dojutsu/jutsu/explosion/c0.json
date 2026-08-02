@@ -1,0 +1,4 @@
+{ "id": "c0", "chakraCost": 600, "cooldownTicks": 1200,
+  "affinity": [ { "nature": "earth", "amount": 500 }, { "nature": "lightning", "amount": 500 } ],
+  "kekkeiGenkai": "explosion", "category": "explosion", "effect": "area",
+  "effectParams": { "radius": 10.0, "damage": 20.0, "effects": [ { "id": "minecraft:slowness", "seconds": 5, "amplifier": 3 } ] } }

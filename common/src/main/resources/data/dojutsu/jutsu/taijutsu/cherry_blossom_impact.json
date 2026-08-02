@@ -1,0 +1,3 @@
+{ "id": "cherry_blossom_impact", "chakraCost": 200, "cooldownTicks": 300,
+  "skill": { "skill": "taijutsu", "amount": 63 }, "category": "taijutsu", "effect": "area",
+  "effectParams": { "radius": 6.0, "damage": 14.0, "effects": [ { "id": "minecraft:slowness", "seconds": 4, "amplifier": 2 } ] } }

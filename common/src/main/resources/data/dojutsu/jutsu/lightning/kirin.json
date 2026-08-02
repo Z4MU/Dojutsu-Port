@@ -1,0 +1,12 @@
+{
+  "id": "kirin",
+  "chakraCost": 300,
+  "cooldownTicks": 1200,
+  "affinity": { "nature": "lightning", "amount": 500 },
+  "category": "lightning",
+  "effect": "area",
+  "effectParams": {
+    "radius": 8.0, "damage": 16.0,
+    "effects": [ { "id": "minecraft:glowing", "seconds": 3, "amplifier": 0 } ]
+  }
+}

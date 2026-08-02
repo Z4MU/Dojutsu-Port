@@ -1,0 +1,4 @@
+{ "id": "multiple_falling_suns", "chakraCost": 230, "cooldownTicks": 300,
+  "affinity": [ { "nature": "fire", "amount": 200 }, { "nature": "wind", "amount": 200 } ],
+  "kekkeiGenkai": "scorch", "category": "scorch", "effect": "area",
+  "effectParams": { "radius": 7.0, "damage": 13.0, "effects": [ { "id": "minecraft:slowness", "seconds": 3, "amplifier": 1 } ] } }

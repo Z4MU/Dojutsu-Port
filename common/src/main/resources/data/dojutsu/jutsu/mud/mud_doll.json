@@ -1,0 +1,4 @@
+{ "id": "mud_doll", "chakraCost": 240, "cooldownTicks": 300,
+  "affinity": [ { "nature": "earth", "amount": 200 }, { "nature": "water", "amount": 200 } ],
+  "kekkeiGenkai": "mud", "category": "mud", "effect": "area",
+  "effectParams": { "radius": 5.0, "damage": 12.0, "effects": [ { "id": "minecraft:slowness", "seconds": 4, "amplifier": 1 } ] } }

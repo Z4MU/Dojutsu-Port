@@ -1,0 +1,4 @@
+{ "id": "hundred_blooming_flowers", "chakraCost": 80, "cooldownTicks": 300,
+  "affinity": { "nature": "yin", "amount": 30 },
+  "skill": { "skill": "genjutsu", "amount": 20 }, "category": "genjutsu", "effect": "area",
+  "effectParams": { "radius": 7.0, "damage": 0.0, "effects": [ { "id": "minecraft:blindness", "seconds": 8, "amplifier": 0 }, { "id": "minecraft:weakness", "seconds": 6, "amplifier": 1 } ] } }

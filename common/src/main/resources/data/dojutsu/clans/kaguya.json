@@ -1,0 +1,1 @@
+{ "id": "kaguya", "_comment": "jutsuUnlockTicks: desbloqueo progresivo (predicate new_kaguya_jutsu, 78000 ticks = 65 min). Secuencia F4: dances restantes.", "teamColor": "red", "kekkeiGenkai": ["shikotsumyaku"], "skillBonus": { "kenjutsu": 10 }, "maxChakra": 100, "ninjaXp": 20, "startingJutsu": ["dance_of_the_camellia"], "jutsuUnlockTicks": 78000 }

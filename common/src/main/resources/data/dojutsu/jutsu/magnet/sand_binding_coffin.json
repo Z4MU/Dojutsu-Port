@@ -1,0 +1,4 @@
+{ "id": "sand_binding_coffin", "chakraCost": 180, "cooldownTicks": 300,
+  "affinity": [ { "nature": "earth", "amount": 180 }, { "nature": "wind", "amount": 180 } ],
+  "kekkeiGenkai": "magnet", "category": "magnet", "effect": "area",
+  "effectParams": { "radius": 4.0, "damage": 8.0, "effects": [ { "id": "minecraft:slowness", "seconds": 8, "amplifier": 4 }, { "id": "minecraft:weakness", "seconds": 8, "amplifier": 1 } ] } }

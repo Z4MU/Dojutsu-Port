@@ -1,0 +1,11 @@
+{
+  "id": "fireproof",
+  "chakraCost": 20,
+  "cooldownTicks": 0,
+  "affinity": { "nature": "fire", "amount": 50 },
+  "category": "fire",
+  "effect": "buff",
+  "effectParams": {
+    "effects": [ { "id": "minecraft:fire_resistance", "seconds": 1, "amplifier": 0 } ]
+  }
+}

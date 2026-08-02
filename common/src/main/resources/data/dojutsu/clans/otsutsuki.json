@@ -1,0 +1,1 @@
+{ "id": "otsutsuki", "_comment": "regenFactor: la regen acelerada de [S02] (d.diff_cr) que F2 dejo enchufable en RegenPolicy.", "teamColor": "white", "maxChakra": 250, "potentialDojutsu": ["byakugan", "sharingan"], "regenFactor": "clan_otsutsuki" }

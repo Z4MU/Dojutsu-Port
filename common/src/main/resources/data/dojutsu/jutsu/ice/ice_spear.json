@@ -1,0 +1,4 @@
+{ "id": "ice_spear", "chakraCost": 100, "cooldownTicks": 100,
+  "affinity": [ { "nature": "water", "amount": 120 }, { "nature": "wind", "amount": 120 } ],
+  "kekkeiGenkai": "ice", "category": "ice", "effect": "structure",
+  "effectParams": { "block": "minecraft:packed_ice", "width": 1, "height": 1, "forward": 5 } }

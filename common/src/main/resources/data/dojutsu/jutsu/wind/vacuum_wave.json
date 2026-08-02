@@ -1,0 +1,13 @@
+{
+  "id": "vacuum_wave",
+  "chakraCost": 70,
+  "cooldownTicks": 300,
+  "affinity": { "nature": "wind", "amount": 70 },
+  "category": "wind",
+  "effect": "area",
+  "effectParams": {
+    "radius": 10.0,
+    "launchY": 8.0,
+    "effects": [ { "id": "minecraft:slow_falling", "seconds": 6, "amplifier": 8 } ]
+  }
+}

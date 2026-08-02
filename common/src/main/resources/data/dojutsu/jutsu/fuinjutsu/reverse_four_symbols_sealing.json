@@ -1,0 +1,4 @@
+{ "id": "reverse_four_symbols_sealing", "chakraCost": 1200, "cooldownTicks": 600,
+  "affinity": { "nature": "yang", "amount": 400 },
+  "skill": { "skill": "fuinjutsu", "amount": 400 }, "category": "fuinjutsu", "effect": "area",
+  "effectParams": { "radius": 8.0, "damage": 16.0, "effects": [ { "id": "minecraft:weakness", "seconds": 6, "amplifier": 2 } ] } }

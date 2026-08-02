@@ -1,0 +1,3 @@
+{ "id": "rasengan", "chakraCost": 100, "cooldownTicks": 200,
+  "affinity": { "nature": "wind", "amount": 150 }, "category": "wind", "effect": "primed_strike",
+  "effectParams": { "primingTicks": 60, "damage": 10.0 } }

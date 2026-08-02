@@ -1,0 +1,4 @@
+{
+  "element": "steel",
+  "sequence": [ "steel_projectile", "impervious_armor", "steel_shield", "steel_spike" ]
+}

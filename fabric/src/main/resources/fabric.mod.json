@@ -3,10 +3,14 @@
   "id": "dojutsu",
   "version": "${version}",
   "name": "Dojutsu",
-  "description": "Sistema de habilidades ninja (Naruto/Boruto) para Minecraft.",
+  "description": "Sistema de habilidades ninja (Naruto/Boruto) para Minecraft. Arte original del resource pack de Dojutsu, por Prof Technic, usado con permiso y solo para uso no comercial.",
   "authors": [
     "Zamu"
   ],
+  "contributors": [
+    "Prof Technic (arte original)"
+  ],
+  "license": "MIT (codigo) / CC BY-NC 4.0 (arte)",
   "environment": "*",
   "entrypoints": {
     "main": [
@@ -16,6 +20,9 @@
       "com.zamu.dojutsu.fabric.DojutsuFabricClient"
     ]
   },
+  "mixins": [
+    "dojutsu.mixins.json"
+  ],
   "depends": {
     "fabricloader": ">=0.16.10",
     "minecraft": "~1.21.1",

@@ -1,0 +1,12 @@
+{
+  "id": "lightning_net",
+  "chakraCost": 80,
+  "cooldownTicks": 800,
+  "affinity": { "nature": "lightning", "amount": 80 },
+  "category": "lightning",
+  "effect": "area",
+  "effectParams": {
+    "radius": 8.0, "damage": 6.0,
+    "effects": [ { "id": "minecraft:slowness", "seconds": 4, "amplifier": 2 } ]
+  }
+}

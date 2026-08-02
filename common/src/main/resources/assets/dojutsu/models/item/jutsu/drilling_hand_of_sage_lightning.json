@@ -1,0 +1,4 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": { "layer0": "dojutsu:item/jutsu/drilling_hand_of_sage_lightning" }
+}

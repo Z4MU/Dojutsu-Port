@@ -1,0 +1,4 @@
+{ "id": "crystal_needles", "chakraCost": 120, "cooldownTicks": 100,
+  "affinity": [ { "nature": "earth", "amount": 80 }, { "nature": "water", "amount": 80 }, { "nature": "yang", "amount": 80 } ],
+  "kekkeiGenkai": "crystal", "category": "crystal", "effect": "projectile",
+  "effectParams": { "speed": 1.6, "lifetimeTicks": 100, "radius": 2.0, "damage": 8.0, "displayItem": "minecraft:amethyst_shard" } }

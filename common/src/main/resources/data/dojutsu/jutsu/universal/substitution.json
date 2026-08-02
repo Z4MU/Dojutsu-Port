@@ -1,0 +1,12 @@
+{
+  "id": "substitution",
+  "chakraCost": 20,
+  "cooldownTicks": 600,
+  "category": "universal",
+  "effect": "teleport",
+  "effectParams": {
+    "minRange": 5.0,
+    "maxRange": 10.0,
+    "invisibilitySeconds": 6
+  }
+}

@@ -1,0 +1,4 @@
+{ "id": "shadowless_flight", "chakraCost": 100, "cooldownTicks": 300,
+  "affinity": [ { "nature": "lightning", "amount": 160 }, { "nature": "wind", "amount": 160 } ],
+  "kekkeiGenkai": "swift", "category": "swift", "effect": "buff",
+  "effectParams": { "effects": [ { "id": "minecraft:speed", "seconds": 20, "amplifier": 3 }, { "id": "minecraft:jump_boost", "seconds": 20, "amplifier": 2 }, { "id": "minecraft:invisibility", "seconds": 20, "amplifier": 0 } ] } }

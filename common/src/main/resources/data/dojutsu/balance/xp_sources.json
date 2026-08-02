@@ -1,0 +1,139 @@
+{
+  "_comment": "DJT-034 - Auditoria de economia (RA-4). Fuentes de XP/puntos y costes del datapack Dojutsu, desde [S06]/[S13]/[S20]. Dataset de REFERENCIA (no cargado por codigo). F10/DJT-221: CERRADO - no queda ningun 'TBD_datapack'. Los 16 que quedaban se resolvieron leyendo main/internal/unlocks.mcfunction y predicates/unlocks/*.json; los umbrales reales estan ahora en data/dojutsu/unlocks/progression.json.",
+  "_escala": "REGLA DE CONVERSION (F10/DJT-221, verificada): habilidades y afinidades = datapack / 4; chakra maximo, ninja_xp y contadores de uso (d.<eye>_use) = 1:1. No es arbitrario: el techo de habilidad del mod es 500 (XpCurve) y los requisitos mas altos del datapack valen exactamente 2000 (maestria Ocho Puertas, fuinjutsu 3, Blaze, Creation Rebirth SOAH). 2000/4 = 500. Son la misma escala con distinto zoom.",
+  "skill_points": {
+    "_comment": "Ganancia por kills (config 'properties', S01/S13); defaults del datapack.",
+    "gains": [
+      { "source": "kill_mob", "config_key": "KillMobPoints", "points": 1, "system": "S13", "datapack_event": "advancement player/killed_mob" },
+      { "source": "kill_player", "config_key": "KillPlayerPoints", "points": 3, "system": "S13", "datapack_event": "advancement player/killed_ply" },
+      { "source": "kill_boss", "config_key": "KillBossPoints", "points": 200, "system": "S13", "datapack_event": "advancement player/killed_boss" }
+    ],
+    "spend": {
+      "_comment": "1 skill point -> +1 al stat y +2 ninja_xp. El clan afin rinde mas por punto. Afinidad y skill point comparten la MISMA escala/variable (S13-R1): no son dos ejes.",
+      "cost_points": 1,
+      "stat_increment_base": 1,
+      "ninja_xp_base": 2,
+      "clan_affine": {
+        "_comment": "Ejemplos confirmados: Lee -> taijutsu +3; Uchiha -> afinidad fuego +2.",
+        "stat_increment_taijutsu_lee": 3,
+        "stat_increment_affinity_uchiha_fire": 2,
+        "ninja_xp": 6
+      }
+    }
+  },
+  "leveling": {
+    "_comment": "Auto-nivelacion por XP de afinidad/habilidad (S13). Curva = XpCurve (dominio, DJT-014). La XP se gana usando jutsus del elemento (S06).",
+    "max_level": 500,
+    "xp_curve_bands": [
+      { "level_range": "0-10", "xp_to_level": 10 },
+      { "level_range": "11-20", "xp_to_level": 15 },
+      { "level_range": "21-40", "xp_to_level": 20 },
+      { "level_range": "41-80", "xp_to_level": 30 },
+      { "level_range": "81-90", "xp_to_level": 50 },
+      { "level_range": "91-99", "xp_to_level": 60 },
+      { "level_range": "100-299", "xp_to_level": 80 },
+      { "level_range": "300-499", "xp_to_level": 100 },
+      { "level_range": "500", "xp_to_level": 120 }
+    ],
+    "ninja_xp_per_autolevel": 3,
+    "_ninja_xp_per_autolevel_note": "DJT-221: confirmado en menu/leveling/inc/<aff>.mcfunction ('scoreboard players add @s d.ninja_xp 3'). Era el mismo valor que ya decia ninja_xp_sources/auto_level_up; el TBD estaba duplicado y sin resolver.",
+    "affinities": ["fire", "wind", "lightning", "water", "earth", "yin", "yang"],
+    "skills_autolevel": ["taijutsu", "genjutsu", "medical", "fuinjutsu", "kenjutsu"],
+    "skills_no_autolevel": ["senjutsu", "cc"],
+    "_note_no_autolevel": "senjutsu y cc son gastables por puntos pero SIN banda de auto-nivelacion en leveling/main (postura [ADD/00 §3]; confirmar contra datapack)."
+  },
+  "affinity_xp_per_jutsu": {
+    "_comment": "DJT-078: cuantificado contra el datapack. Cada cast exitoso de un jutsu con afinidad hace 'scoreboard players add @s d.<nat>_xp 1' -> +1 UNIFORME (verificado en great_fireball/fire_bullet/fireproof/vacuum_wave/chidori/... cast.mcfunction). Los jutsus universales (substitution, healing) NO dan XP de afinidad. Implementado en JutsuXpHandler.AFFINITY_XP_PER_CAST.",
+    "value_per_jutsu": 1
+  },
+  "ninja_xp_sources": {
+    "_comment": "d.ninja_xp es el sumidero global (S20-R1) que alimenta el rango. Auditar TODOS los 'ninja_xp +=' del datapack.",
+    "sources": [
+      { "source": "spend_skill_point", "ninja_xp": 2, "clan_affine": 6, "system": "S13" },
+      { "source": "auto_level_up", "ninja_xp": 3, "system": "S13", "_note": "DJT-051: cuantificado en menu/leveling/inc/<aff> (aff +2, ninja_xp +3). El mod usa LeveledStat (+1 nivel con arrastre), divergencia consciente de [S13-R3]." },
+      {
+        "source": "gain_nature",
+        "system": "S03",
+        "_note": "DJT-051: cuantificado uno a uno en natures/give/<nat>. NO es uniforme: [S03] resume 'basicas = 25' y es FALSO. Los natures/take/<nat> restan exactamente lo mismo. Implementado en NatureType.ninjaXp().",
+        "ninja_xp_per_nature": {
+          "fire": 25, "lightning": 25, "wind": 20, "earth": 20, "water": 20,
+          "yin": 30, "yang": 30, "yin_yang": 100
+        },
+        "ninja_xp_per_kekkei_genkai": "variable, por KG (wood 10, ice 8, jugo_clan 20, shikotsumyaku 10, hashirama_cells 30): se extrae por KG en DJT-052 (JSON data-driven)"
+      },
+      { "source": "learn_jutsu", "ninja_xp": 0, "system": "S06", "_note": "DJT-221: **aprender un jutsu no da ninja_xp**. Verificado: ningun give/jutsu/*.mcfunction ni give/learner/* toca d.ninja_xp. La XP de aprender llega por el hito de desbloqueo, no por el jutsu." },
+      { "source": "unlock_milestone", "ninja_xp": "por hito, 1..100", "system": "S20", "_note": "DJT-221: los 25 hitos cuantificados uno a uno en main/internal/unlocks.mcfunction; ver unlock_milestones. Implementado en UnlockDefinition.ninjaXp y pagado por XpApi al otorgarse." }
+    ]
+  },
+  "rank": {
+    "_comment": "Rango 0..11 derivado de ninja_xp (S20). Cosmetico/informativo: NO gatea habilidades ([ADD/00 §3]). = NinjaRank (dominio, DJT-014).",
+    "thresholds": [
+      { "rank": 0, "title": "Academy Student", "min_xp": 0 },
+      { "rank": 1, "title": "Genin", "min_xp": 1000 },
+      { "rank": 2, "title": "Chunin", "min_xp": 2000 },
+      { "rank": 3, "title": "Tokubetsu Jonin", "min_xp": 5000 },
+      { "rank": 4, "title": "Jonin", "min_xp": 9000 },
+      { "rank": 5, "title": "Sannin", "min_xp": 12000 },
+      { "rank": 6, "title": "Kage", "min_xp": 15000 },
+      { "rank": 7, "title": "Legendary", "min_xp": 18000 },
+      { "rank": 8, "title": "God of Shinobi", "min_xp": 24000 },
+      { "rank": 9, "title": "Sage of the Six Paths", "min_xp": 30000 },
+      { "rank": 10, "title": "Demigod", "min_xp": 35000 },
+      { "rank": 11, "title": "God", "min_xp": 40000 }
+    ]
+  },
+  "unlock_milestones": {
+    "_comment": "Desbloqueos por hito (S20). F10/DJT-221: los 25 cuantificados contra main/internal/unlocks.mcfunction + predicates/unlocks/*.json. 'datapack' = valor literal; 'mod' = el mismo en escala del mod (habilidades /4; chakra y ninja_xp 1:1). Los implementados viven en data/dojutsu/unlocks/progression.json. Idempotente (flag d.ulk_*).",
+    "milestones": [
+      { "id": "substitution", "requirement": "ninja_xp >= 1000", "mod": "ninja_xp >= 1000", "ninja_xp": 1, "implemented": true },
+      { "id": "taijutsu_1_chakra_enhanced_strength", "requirement": "taijutsu >= 100", "mod": 25, "ninja_xp": 2, "implemented": true },
+      { "id": "taijutsu_2_heavenly_foot_of_pain", "requirement": "taijutsu >= 150", "mod": 38, "ninja_xp": 2, "implemented": true },
+      { "id": "taijutsu_3_crimson_drizzle", "requirement": "taijutsu >= 200", "mod": 50, "ninja_xp": 3, "implemented": true },
+      { "id": "taijutsu_4_cherry_blossom_impact", "requirement": "taijutsu >= 250", "mod": 63, "ninja_xp": 5, "implemented": true },
+      { "id": "eight_gates_1_gate_of_opening", "requirement": "taijutsu >= 300", "mod": 75, "ninja_xp": 100, "implemented": true },
+      { "id": "eight_gates_2_gate_of_healing", "requirement": "taijutsu >= 500", "mod": 125, "ninja_xp": 50, "implemented": true },
+      { "id": "eight_gates_3_gate_of_life", "requirement": "taijutsu >= 700", "mod": 175, "ninja_xp": 50, "implemented": true },
+      { "id": "eight_gates_4_gate_of_pain", "requirement": "taijutsu >= 900", "mod": 225, "ninja_xp": 50, "implemented": true },
+      { "id": "eight_gates_5_gate_of_limit", "requirement": "taijutsu >= 1100", "mod": 275, "ninja_xp": 50, "implemented": true },
+      { "id": "eight_gates_6_gate_of_view", "requirement": "taijutsu >= 1300", "mod": 325, "ninja_xp": 50, "implemented": true },
+      { "id": "eight_gates_7_gate_of_wonder", "requirement": "taijutsu >= 1500", "mod": 375, "ninja_xp": 50, "implemented": true },
+      { "id": "eight_gates_8_gate_of_death", "requirement": "taijutsu >= 1700", "mod": 425, "ninja_xp": 50, "implemented": true },
+      { "id": "eight_gates_mastery", "requirement": "taijutsu >= 2000", "mod": 500, "ninja_xp": 100, "implemented": true },
+      { "id": "kenjutsu_1_dancing_blade_risk", "requirement": "kenjutsu >= 300", "mod": 75, "ninja_xp": 10, "implemented": true },
+      { "id": "kenjutsu_2_assassination_technique", "requirement": "kenjutsu >= 350", "mod": 88, "ninja_xp": 10, "implemented": true },
+      { "id": "kenjutsu_3_chakra_shock_slash", "requirement": "kenjutsu >= 500", "mod": 125, "ninja_xp": 10, "implemented": true },
+      { "id": "kenjutsu_4_chakra_shockwave_slash", "requirement": "kenjutsu >= 600", "mod": 150, "ninja_xp": 10, "implemented": true },
+      { "id": "kenjutsu_5_secret_sword_snowstorm_beheading", "requirement": "kenjutsu >= 1400", "mod": 350, "ninja_xp": 20, "implemented": true },
+      { "id": "summoning_contract_empty", "requirement": "fuinjutsu >= 300", "mod": 75, "ninja_xp": 20, "implemented": true },
+      { "id": "flying_thunder_god_kunai", "requirement": "fuinjutsu >= 1000 AND max_chakra >= 10000", "mod": "250 + 10000", "ninja_xp": 30, "implemented": true },
+      { "id": "fuinjutsu_1_four_symbols_seal", "requirement": "fuinjutsu >= 1200", "mod": 300, "ninja_xp": 10, "implemented": true },
+      { "id": "fuinjutsu_2_reverse_four_symbols_sealing", "requirement": "fuinjutsu >= 1600", "mod": 400, "ninja_xp": 10, "implemented": true },
+      { "id": "fuinjutsu_3_four_red_yang_formation", "requirement": "fuinjutsu >= 2000", "mod": 500, "ninja_xp": 10, "implemented": true },
+      { "id": "genjutsu_1_paralysis", "requirement": "genjutsu >= 60", "mod": 15, "ninja_xp": 3, "implemented": true },
+      { "id": "genjutsu_2_bringer_of_darkness", "requirement": "genjutsu >= 70", "mod": 18, "ninja_xp": 3, "implemented": true },
+      { "id": "genjutsu_3_flower_hill", "requirement": "genjutsu >= 70", "mod": 18, "ninja_xp": 3, "implemented": true, "_bug_datapack": "flower_hill usa gj_req_2 (el de bringer_of_darkness), no un gj_req_3 propio: no existe ese predicate. Los dos salen a la vez. Se porta tal cual." },
+      { "id": "genjutsu_4_hundred_blooming_flowers", "requirement": "genjutsu >= 80", "mod": 20, "ninja_xp": 3, "implemented": true },
+      { "id": "genjutsu_5_unknown_fire", "requirement": "genjutsu >= 150", "mod": 38, "ninja_xp": 3, "implemented": true },
+      { "id": "medical_1_regenerative_healing", "requirement": "medical >= 10", "mod": 3, "ninja_xp": 3, "implemented": true },
+      { "id": "medical_2_healing", "requirement": "medical >= 20", "mod": 5, "ninja_xp": 3, "implemented": true },
+      { "id": "medical_3_wide_healing", "requirement": "medical >= 50", "mod": 13, "ninja_xp": 3, "implemented": true },
+      { "id": "medical_4_mystical_palm", "requirement": "medical >= 100", "mod": 25, "ninja_xp": 3, "implemented": true },
+      { "id": "medical_5_creation_rebirth", "requirement": "medical >= 500 AND max_chakra >= 10000", "mod": "125 + 10000", "ninja_xp": 20, "implemented": true },
+      { "id": "medical_6_strength_of_a_hundred_seal", "requirement": "medical >= 1500", "mod": 375, "ninja_xp": 100, "implemented": true },
+      { "id": "medical_7_creation_rebirth_soah", "requirement": "medical >= 2000 AND max_chakra >= 30000", "mod": "500 + 30000", "ninja_xp": 20, "implemented": true },
+      { "id": "izanagi", "requirement": "aff_yin >= 1000 AND aff_yang >= 1000 (+ predicate de ojo)", "mod": "250 + 250", "ninja_xp": 100, "implemented": false, "_pendiente": "Requiere DOS afinidades a la vez y ademas una referencia a otro predicate (ojo). El esquema de UnlockDefinition solo expresa una habilidad + chakra maximo. Necesita requisitos compuestos." },
+      { "id": "senjutsu_access", "requirement": "max_chakra >= 6000", "mod": 6000, "ninja_xp": 3, "implemented": false, "_pendiente": "Sin requisito de habilidad: es un hito SOLO de chakra maximo, y el disparador reactivo del mod es el cambio de nivel de habilidad. Ademas en el mod nada impide gastar puntos en Senjutsu, asi que el hito seria solo el aviso." },
+      { "id": "blaze_release", "requirement": "aff_fire >= 2000", "mod": 500, "ninja_xp": 0, "implemented": "parcial", "_nota": "No es un unlock de jutsu sino la concesion del KG Blaze, y no paga ninja_xp. En el mod se concede por EyeDefinition.awakenKekkeiGenkai (Mangekyo de Sasuke); la via por afinidad de fuego 2000 NO esta portada." },
+      { "id": "ems_item_eyes_of_a_close_one", "requirement": "sharingan_use >= 864000 (+ clan otsutsuki_uchiha)", "mod": "864000 (1:1)", "ninja_xp": 0, "implemented": true, "_nota": "Portado como EternalAwakeningService (F5), no como hito de esta tabla." }
+    ]
+  },
+  "notes": [
+    "S13-R1: afinidad y skill point comparten la misma escala/variable (d.aff_<x> / d.<x>). No duplicar en dos ejes.",
+    "S13-R3: el datapack limita 1 level-up por tick global (d.dolvl); el mod lo corrige (LeveledStat sube multi-nivel de una, DJT-036).",
+    "S20: el rango es cosmetico; los desbloqueos dependen del NIVEL de habilidad, no del rango ([ADD/00 §3]).",
+    "Caps: nivel de habilidad/afinidad 500 (XpCurve); rango 11 (God, 40000+ ninja_xp).",
+    "DJT-221: no quedan 'TBD_datapack'. Los 16 que habia se resolvieron leyendo el datapack; los dos ultimos hitos sin portar (izanagi, senjutsu_access) estan marcados con su motivo, no con un TBD.",
+    "DJT-221 - los cinco umbrales de kenjutsu del mod estaban INVENTADOS (5/10/20/30/40); los reales son 75/88/125/150/350. Era la unica familia sin verificar contra el datapack.",
+    "DJT-221 - punto ciego del modelo reactivo: cuatro hitos exigen habilidad Y chakra maximo, que pueden cumplirse en momentos distintos. El datapack revisaba los hitos cada tick; el mod lo recupera con un barrido de puesta al dia al entrar (UnlockService.onJoin)."
+  ]
+}

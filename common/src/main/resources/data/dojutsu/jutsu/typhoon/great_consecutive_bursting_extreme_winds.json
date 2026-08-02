@@ -1,0 +1,4 @@
+{ "id": "great_consecutive_bursting_extreme_winds", "chakraCost": 230, "cooldownTicks": 300,
+  "affinity": [ { "nature": "water", "amount": 250 }, { "nature": "wind", "amount": 250 } ],
+  "kekkeiGenkai": "typhoon", "category": "typhoon", "effect": "area",
+  "effectParams": { "radius": 8.0, "damage": 14.0, "effects": [ { "id": "minecraft:slowness", "seconds": 5, "amplifier": 2 } ] } }

@@ -1,0 +1,4 @@
+{ "id": "four_pillar_prison", "chakraCost": 400, "cooldownTicks": 400,
+  "affinity": [ { "nature": "earth", "amount": 350 }, { "nature": "water", "amount": 350 } ],
+  "kekkeiGenkai": "wood", "category": "wood", "effect": "structure",
+  "effectParams": { "block": "minecraft:oak_log", "width": 5, "height": 5, "forward": 2 } }

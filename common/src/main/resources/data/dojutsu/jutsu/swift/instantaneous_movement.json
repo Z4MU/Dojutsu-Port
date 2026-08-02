@@ -1,0 +1,4 @@
+{ "id": "instantaneous_movement", "chakraCost": 200, "cooldownTicks": 100,
+  "affinity": [ { "nature": "lightning", "amount": 300 }, { "nature": "wind", "amount": 300 } ],
+  "kekkeiGenkai": "swift", "category": "swift", "effect": "teleport",
+  "effectParams": { "minRange": 6.0, "maxRange": 14.0 } }

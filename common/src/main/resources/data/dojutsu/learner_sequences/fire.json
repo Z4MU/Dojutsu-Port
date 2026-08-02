@@ -1,0 +1,13 @@
+{
+  "element": "fire",
+  "sequence": [
+    "fire_bullet",
+    "fireproof",
+    "fire_transport",
+    "fire_dragon_flame_bullet",
+    "exploding_dragon_strike",
+    "great_fireball",
+    "great_fire_annihilation",
+    "fire_cloak"
+  ]
+}

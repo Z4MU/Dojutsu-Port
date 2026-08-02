@@ -1,0 +1,4 @@
+{ "id": "sand_waterfall_funeral", "chakraCost": 300, "cooldownTicks": 400,
+  "affinity": [ { "nature": "earth", "amount": 250 }, { "nature": "wind", "amount": 250 } ],
+  "kekkeiGenkai": "magnet", "category": "magnet", "effect": "area",
+  "effectParams": { "radius": 8.0, "damage": 15.0, "effects": [ { "id": "minecraft:slowness", "seconds": 5, "amplifier": 3 } ] } }

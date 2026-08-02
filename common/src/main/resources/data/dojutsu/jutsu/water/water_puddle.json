@@ -1,0 +1,9 @@
+{
+  "id": "water_puddle",
+  "chakraCost": 30,
+  "cooldownTicks": 600,
+  "affinity": { "nature": "water", "amount": 40 },
+  "category": "water",
+  "effect": "structure",
+  "effectParams": { "block": "minecraft:water", "width": 3, "height": 1, "forward": 1 }
+}

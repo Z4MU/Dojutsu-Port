@@ -1,0 +1,9 @@
+{
+  "id": "drilling_hand_of_sage_lightning",
+  "chakraCost": 400,
+  "cooldownTicks": 600,
+  "affinity": { "nature": "lightning", "amount": 500 },
+  "category": "lightning",
+  "effect": "primed_strike",
+  "effectParams": { "primingTicks": 60, "damage": 14.0 }
+}

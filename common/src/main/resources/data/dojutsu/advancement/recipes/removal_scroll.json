@@ -1,0 +1,25 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_purple_dye": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          { "items": "minecraft:purple_dye" }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "dojutsu:removal_scroll"
+      }
+    }
+  },
+  "requirements": [
+    [ "has_purple_dye", "has_the_recipe" ]
+  ],
+  "rewards": {
+    "recipes": [ "dojutsu:removal_scroll" ]
+  }
+}

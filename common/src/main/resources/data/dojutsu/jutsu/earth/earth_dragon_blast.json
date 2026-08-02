@@ -1,0 +1,9 @@
+{
+  "id": "earth_dragon_blast",
+  "chakraCost": 120,
+  "cooldownTicks": 600,
+  "affinity": { "nature": "earth", "amount": 150 },
+  "category": "earth",
+  "effect": "projectile",
+  "effectParams": { "speed": 1.0, "gravity": 0.02, "lifetimeTicks": 100, "radius": 4.0, "damage": 11.0, "displayItem": "minecraft:cobblestone" }
+}

@@ -1,0 +1,4 @@
+{
+  "element": "explosion",
+  "sequence": [ "c1", "explosive_landmine", "landmine_fist", "exploding_palm", "c3", "clay_doll", "c0" ]
+}

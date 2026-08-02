@@ -1,0 +1,9 @@
+{
+  "id": "rising_water_slicer",
+  "chakraCost": 100,
+  "cooldownTicks": 300,
+  "affinity": { "nature": "water", "amount": 100 },
+  "category": "water",
+  "effect": "projectile",
+  "effectParams": { "speed": 1.2, "lifetimeTicks": 100, "damage": 8.0, "displayItem": "minecraft:prismarine_shard" }
+}

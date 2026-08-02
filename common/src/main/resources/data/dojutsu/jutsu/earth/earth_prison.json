@@ -1,0 +1,9 @@
+{
+  "id": "earth_prison",
+  "chakraCost": 30,
+  "cooldownTicks": 600,
+  "affinity": { "nature": "earth", "amount": 30 },
+  "category": "earth",
+  "effect": "area",
+  "effectParams": { "radius": 5.0, "effects": [ { "id": "minecraft:slowness", "seconds": 5, "amplifier": 5 } ] }
+}

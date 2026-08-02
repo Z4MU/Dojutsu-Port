@@ -1,0 +1,13 @@
+{
+  "element": "earth",
+  "sequence": [
+    "earth_prison",
+    "rock_gun",
+    "earth_wall",
+    "earth_instantaneous_body",
+    "earth_golem",
+    "earth_dragon_blast",
+    "tunnelling",
+    "earth_cloak"
+  ]
+}

@@ -1,0 +1,1 @@
+{ "id": "uchiha", "teamColor": "dark_red", "natures": ["fire"], "affinityBonus": { "fire": 10 }, "skillBonus": { "genjutsu": 10 }, "maxChakra": 150, "ninjaXp": 30, "potentialDojutsu": ["sharingan"] }

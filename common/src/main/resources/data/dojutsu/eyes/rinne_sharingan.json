@@ -1,0 +1,22 @@
+{
+  "id": "rinne_sharingan",
+  "family": "rinne_sharingan",
+  "awakenMaxChakraBonus": 100,
+  "awakenNinjaXpBonus": 1000,
+  "chakraVision": true,
+  "abilities": [
+    "shinra_tensei",
+    "amenominaka_overworld",
+    "amenominaka_nether",
+    "amenominaka_the_end",
+    "amenominaka_original",
+    "bansho_tenin",
+    "amenotejikara",
+    "chibaku_tensei",
+    "preta_path",
+    "asura_path",
+    "copy_jutsu",
+    "genjutsu_stun",
+    "susanoo"
+  ]
+}

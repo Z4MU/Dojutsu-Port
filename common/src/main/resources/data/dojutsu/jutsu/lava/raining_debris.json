@@ -1,0 +1,4 @@
+{ "id": "raining_debris", "chakraCost": 200, "cooldownTicks": 200,
+  "affinity": [ { "nature": "earth", "amount": 200 }, { "nature": "fire", "amount": 200 } ],
+  "kekkeiGenkai": "lava", "category": "lava", "effect": "area",
+  "effectParams": { "radius": 6.0, "damage": 10.0, "effects": [ { "id": "minecraft:slowness", "seconds": 3, "amplifier": 1 } ] } }

@@ -1,0 +1,11 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": { "layer0": "dojutsu:item/ration_pills/pills_5" },
+  "overrides": [
+    { "predicate": { "damage": 0.0 }, "model": "dojutsu:item/ration_pills/pills_5" },
+    { "predicate": { "damage": 0.2 }, "model": "dojutsu:item/ration_pills/pills_4" },
+    { "predicate": { "damage": 0.4 }, "model": "dojutsu:item/ration_pills/pills_3" },
+    { "predicate": { "damage": 0.6 }, "model": "dojutsu:item/ration_pills/pills_2" },
+    { "predicate": { "damage": 0.8 }, "model": "dojutsu:item/ration_pills/pills_1" }
+  ]
+}

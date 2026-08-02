@@ -1,0 +1,4 @@
+{ "id": "detachment_of_the_primitive_world", "chakraCost": 600, "cooldownTicks": 1200,
+  "affinity": [ { "nature": "fire", "amount": 500 }, { "nature": "wind", "amount": 500 }, { "nature": "earth", "amount": 500 } ],
+  "kekkeiGenkai": "dust", "category": "dust", "effect": "area",
+  "effectParams": { "radius": 10.0, "damage": 22.0, "effects": [ { "id": "minecraft:slowness", "seconds": 6, "amplifier": 3 }, { "id": "minecraft:weakness", "seconds": 6, "amplifier": 2 } ] } }

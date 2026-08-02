@@ -1,0 +1,9 @@
+{
+  "id": "water_severing_wave",
+  "chakraCost": 140,
+  "cooldownTicks": 300,
+  "affinity": { "nature": "water", "amount": 160 },
+  "category": "water",
+  "effect": "projectile",
+  "effectParams": { "speed": 1.0, "lifetimeTicks": 100, "radius": 4.0, "damage": 12.0, "displayItem": "minecraft:prismarine_shard" }
+}

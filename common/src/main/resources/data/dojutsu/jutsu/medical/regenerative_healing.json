@@ -1,0 +1,3 @@
+{ "id": "regenerative_healing", "chakraCost": 40, "cooldownTicks": 200,
+  "skill": { "skill": "medical", "amount": 3 }, "category": "medical", "effect": "heal",
+  "effectParams": { "radius": 3.0, "effects": [ { "id": "minecraft:regeneration", "seconds": 8, "amplifier": 1 } ] } }

@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    { "item": "minecraft:paper" },
+    { "item": "minecraft:gunpowder" },
+    { "item": "minecraft:paper" },
+    { "item": "minecraft:gunpowder" }
+  ],
+  "result": { "id": "dojutsu:explosive_tag", "count": 2 }
+}

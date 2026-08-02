@@ -18,6 +18,7 @@ public final class DojutsuNeoForge {
 
     public DojutsuNeoForge() {
         DojutsuMod.init();
+        DojutsuNeoForgeServerEvents.register(); // eventos nativos de NeoForge (server-side): despertar -> chakra
         if (FMLEnvironment.dist == Dist.CLIENT) {
             DojutsuMod.initClient();
         }

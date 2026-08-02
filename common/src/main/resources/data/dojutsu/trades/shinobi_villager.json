@@ -1,0 +1,19 @@
+{
+  "kind": "shinobi_villager",
+  "offers": [
+    { "item": "dojutsu:shuriken",        "price": 6,  "maxUses": 24 },
+    { "item": "dojutsu:kunai",           "price": 6,  "maxUses": 24 },
+    { "item": "dojutsu:explosive_kunai", "price": 6,  "maxUses": 24 },
+    { "item": "dojutsu:explosive_tag",   "price": 3,  "maxUses": 64 },
+    { "item": "dojutsu:smoke_bomb",      "price": 12, "maxUses": 64 },
+    { "item": "dojutsu:chakra_blade",    "price": 32, "maxUses": 2,  "xp": 10 },
+    { "item": "dojutsu:surgical_tools",  "price": 24, "maxUses": 3 },
+    { "item": "dojutsu:kotaro",          "price": 24, "maxUses": 64 },
+    { "item": "dojutsu:toad_oil",        "price": 18, "maxUses": 64 },
+    { "item": "dojutsu:experience_scroll", "price": 64, "maxUses": 1 },
+    { "item": "dojutsu:training_scroll",   "price": 64, "maxUses": 3 },
+    { "item": "dojutsu:coloured_pills",    "price": 64, "maxUses": 64 },
+    { "item": "dojutsu:ramen",             "price": 8,  "maxUses": 64 },
+    { "item": "dojutsu:ration_pills",      "price": 40, "maxUses": 64 }
+  ]
+}

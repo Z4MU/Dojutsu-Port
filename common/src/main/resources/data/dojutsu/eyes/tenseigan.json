@@ -1,0 +1,12 @@
+{
+  "id": "tenseigan",
+  "family": "tenseigan",
+  "awakenMaxChakraBonus": 100,
+  "awakenNinjaXpBonus": 100,
+  "chakraVision": true,
+  "abilities": [
+    "tenseigan_chakra_mode",
+    "truth_seeking_orbs",
+    "kinrin_tensei_baku"
+  ]
+}

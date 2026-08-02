@@ -1,0 +1,34 @@
+{
+  "id": "sharingan",
+  "family": "sharingan",
+  "awakenMaxChakraBonus": 20,
+  "awakenNinjaXpBonus": 20,
+  "awakenTicks": 78000,
+  "awakenInitialUse": 78000,
+  "chakraVision": true,
+  "chakraVisionUseLevel": 216000,
+  "abilities": [
+    "genjutsu_stun",
+    "copy_jutsu"
+  ],
+  "evolutions": [
+    {
+      "to": "mangekyo_itachi",
+      "requirements": [
+        { "type": "clan", "value": "otsutsuki_uchiha" },
+        { "type": "use_level", "min": 360000 }
+      ],
+      "variants": [
+        "mangekyo_itachi", "mangekyo_obito", "mangekyo_sasuke", "mangekyo_madara",
+        "mangekyo_indra", "mangekyo_shisui", "mangekyo_fugaku", "mangekyo_shin"
+      ]
+    },
+    {
+      "to": "rinnegan",
+      "requirements": [
+        { "type": "clan", "value": "uchiha" },
+        { "type": "flag", "value": "hashirama_dna" }
+      ]
+    }
+  ]
+}

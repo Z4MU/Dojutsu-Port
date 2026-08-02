@@ -1,0 +1,9 @@
+{
+  "id": "chidori",
+  "chakraCost": 100,
+  "cooldownTicks": 400,
+  "affinity": { "nature": "lightning", "amount": 120 },
+  "category": "lightning",
+  "effect": "primed_strike",
+  "effectParams": { "primingTicks": 60, "damage": 10.0 }
+}

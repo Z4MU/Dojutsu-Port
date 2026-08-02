@@ -1,0 +1,4 @@
+{ "id": "unknown_fire", "chakraCost": 120, "cooldownTicks": 300,
+  "affinity": { "nature": "yin", "amount": 60 },
+  "skill": { "skill": "genjutsu", "amount": 38 }, "category": "genjutsu", "effect": "area",
+  "effectParams": { "radius": 7.0, "damage": 6.0, "effects": [ { "id": "minecraft:blindness", "seconds": 6, "amplifier": 0 }, { "id": "minecraft:weakness", "seconds": 6, "amplifier": 1 } ] } }

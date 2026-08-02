@@ -1,0 +1,25 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_glow_ink_sac": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          { "items": "minecraft:glow_ink_sac" }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "dojutsu:sage_scroll"
+      }
+    }
+  },
+  "requirements": [
+    [ "has_glow_ink_sac", "has_the_recipe" ]
+  ],
+  "rewards": {
+    "recipes": [ "dojutsu:sage_scroll" ]
+  }
+}

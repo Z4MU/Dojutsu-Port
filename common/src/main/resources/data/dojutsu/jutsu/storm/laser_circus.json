@@ -1,0 +1,4 @@
+{ "id": "laser_circus", "chakraCost": 180, "cooldownTicks": 100,
+  "affinity": [ { "nature": "lightning", "amount": 180 }, { "nature": "water", "amount": 180 } ],
+  "kekkeiGenkai": "storm", "category": "storm", "effect": "projectile",
+  "effectParams": { "speed": 1.8, "lifetimeTicks": 100, "radius": 2.0, "damage": 11.0, "displayItem": "minecraft:end_rod" } }

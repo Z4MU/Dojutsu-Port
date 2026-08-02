@@ -1,0 +1,3 @@
+{ "id": "heavenly_foot_of_pain", "chakraCost": 80, "cooldownTicks": 150,
+  "skill": { "skill": "taijutsu", "amount": 38 }, "category": "taijutsu", "effect": "primed_strike",
+  "effectParams": { "primingTicks": 60, "damage": 11.0 } }

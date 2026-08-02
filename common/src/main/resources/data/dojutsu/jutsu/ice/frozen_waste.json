@@ -1,0 +1,4 @@
+{ "id": "frozen_waste", "chakraCost": 80, "cooldownTicks": 100,
+  "affinity": [ { "nature": "water", "amount": 60 }, { "nature": "wind", "amount": 60 } ],
+  "kekkeiGenkai": "ice", "category": "ice", "effect": "area",
+  "effectParams": { "radius": 5.0, "effects": [ { "id": "minecraft:slowness", "seconds": 6, "amplifier": 2 } ] } }

@@ -1,0 +1,4 @@
+{ "id": "the_gods_crossing", "chakraCost": 150, "cooldownTicks": 300,
+  "affinity": [ { "nature": "earth", "amount": 160 }, { "nature": "water", "amount": 160 }, { "nature": "yang", "amount": 160 } ],
+  "kekkeiGenkai": "crystal", "category": "crystal", "effect": "area",
+  "effectParams": { "radius": 8.0, "damage": 14.0, "effects": [ { "id": "minecraft:slowness", "seconds": 4, "amplifier": 2 } ] } }

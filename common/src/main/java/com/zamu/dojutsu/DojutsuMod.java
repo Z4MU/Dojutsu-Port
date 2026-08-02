@@ -1,20 +1,47 @@
 package com.zamu.dojutsu;
 
 import com.mojang.logging.LogUtils;
-import com.zamu.dojutsu.debug.DummyAttachment;
-import com.zamu.dojutsu.debug.DummyAttachmentCommand;
-import com.zamu.dojutsu.debug.PingPongClientDebug;
-import com.zamu.dojutsu.debug.PingPongDebug;
-import com.zamu.dojutsu.core.DataReloadListener;
+import com.zamu.dojutsu.client.ClientDialogue;
+import com.zamu.dojutsu.client.ClientEyeMenu;
+import com.zamu.dojutsu.client.ClientNinjaData;
+import com.zamu.dojutsu.client.ClientOnboardingOptions;
+import com.zamu.dojutsu.client.ClientWaterWalk;
+import com.zamu.dojutsu.client.WaterWalkClient;
+import com.zamu.dojutsu.client.hud.HudOverlays;
+import com.zamu.dojutsu.client.keybind.KeyBindings;
+import com.zamu.dojutsu.client.screen.DialogueOpener;
+import com.zamu.dojutsu.client.screen.NinjaCreationOpener;
+import com.zamu.dojutsu.debug.AnchorDebugCommand;
+import com.zamu.dojutsu.debug.ChakraDebugCommand;
+import com.zamu.dojutsu.debug.EyeDebugCommand;
+import com.zamu.dojutsu.debug.GodTreeDebugCommand;
+import com.zamu.dojutsu.debug.BeastDebugCommand;
+import com.zamu.dojutsu.debug.CursedSealDebugCommand;
+import com.zamu.dojutsu.debug.EightGatesDebugCommand;
+import com.zamu.dojutsu.debug.ItemDebugCommand;
+import com.zamu.dojutsu.debug.SageDebugCommand;
+import com.zamu.dojutsu.debug.ShinobiDebugCommand;
+import com.zamu.dojutsu.debug.SoahDebugCommand;
+import com.zamu.dojutsu.debug.JutsuDebugCommand;
+import com.zamu.dojutsu.debug.ClanDebugCommand;
+import com.zamu.dojutsu.debug.NatureDebugCommand;
+import com.zamu.dojutsu.debug.NinjaDataDebugCommand;
+import com.zamu.dojutsu.debug.OnboardingDebugCommand;
+import com.zamu.dojutsu.debug.ProgressionDebugCommand;
+import com.zamu.dojutsu.debug.StoryDebugCommand;
+import com.zamu.dojutsu.debug.WeaponDebugCommand;
+import com.zamu.dojutsu.debug.SchedulerDebugCommand;
+import com.zamu.dojutsu.core.DojutsuLifecycle;
+import com.zamu.dojutsu.core.command.AdminCommands;
+import dev.architectury.event.events.client.ClientPlayerEvent;
 import com.zamu.dojutsu.registry.ModAttachments;
+import com.zamu.dojutsu.registry.ModDataComponents;
 import com.zamu.dojutsu.registry.ModAttributes;
 import com.zamu.dojutsu.registry.ModEntities;
 import com.zamu.dojutsu.registry.ModItems;
 import com.zamu.dojutsu.registry.ModParticles;
 import com.zamu.dojutsu.registry.ModSounds;
-import dev.architectury.registry.ReloadListenerRegistry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackType;
 import org.slf4j.Logger;
 
 /**
@@ -60,22 +87,65 @@ public final class DojutsuMod {
         ModAttributes.register();
         ModSounds.register();
         ModParticles.register();
+        ModDataComponents.register();
         ModAttachments.register();
 
-        // Reload listener del datapack del mod (datos de servidor).
-        ReloadListenerRegistry.register(PackType.SERVER_DATA, new DataReloadListener(), id("data_reload"));
+        // Ciclo de vida: suscribe los listeners del loader y el setup de arranque (config, tick, reload,
+        // join/quit, muerte/respawn, cambio de dimension, payloads de sync). Centraliza lo estatico de main/load.
+        DojutsuLifecycle.init();
 
-        // Andamiaje de validacion de plataforma (F0): attachment dummy + comando + red ping-pong.
-        DummyAttachment.register();
-        DummyAttachmentCommand.register();
-        PingPongDebug.registerReceivers();
+        // Comandos de administracion (/dojutsu reset_ninja + stubs).
+        AdminCommands.register();
+
+        // Comandos de depuracion (temporales; se retiran cuando el HUD de F2 permita observar el estado).
+        NinjaDataDebugCommand.register();
+        SchedulerDebugCommand.register();
+        ChakraDebugCommand.register();
+        ProgressionDebugCommand.register();
+        NatureDebugCommand.register();
+        ClanDebugCommand.register();
+        OnboardingDebugCommand.register();
+        AnchorDebugCommand.register();
+        JutsuDebugCommand.register();
+        WeaponDebugCommand.register();
+        EyeDebugCommand.register();
+        SageDebugCommand.register(); // andamiaje F6: energia natural/modo sabio
+        CursedSealDebugCommand.register(); // andamiaje F6: sello maldito (el Injector es item de F8)
+        EightGatesDebugCommand.register(); // andamiaje F6: Ocho Puertas (fatiga y vetos son muy time-gated)
+        SoahDebugCommand.register(); // andamiaje F6: SOAH (requisitos altisimos; el item del sello es de F8)
+        BeastDebugCommand.register(); // andamiaje F7: bestias (los huevos de invocacion son items de F8)
+        ItemDebugCommand.register(); // andamiaje F8: ADN, mascaras y pildoras (medicina y azar muy time-gated)
+        ShinobiDebugCommand.register(); // andamiaje F8: shinobi NPC (el huevo de invocacion no tiene ticket)
+        StoryDebugCommand.register(); // andamiaje F9: Sabios (rango Kage + cola de 1 h + tirada del 5%)
+        GodTreeDebugCommand.register(); // andamiaje F9: Arbol Divino (25 min de crecimiento + forma del Diez Colas)
         LOGGER.info("[{}] Inicializacion comun completada.", MOD_NAME);
     }
 
     /** Inicializacion exclusiva de cliente (keybinds, HUD, renders, pantallas). */
     public static void initClient() {
-        // Andamiaje de validacion de plataforma (F0): disparador de cliente del ping-pong.
-        PingPongClientDebug.registerClientTrigger();
+        // Limpia las caches read-only (estado ninja y opciones de clan) al salir del mundo / desconectar.
+        ClientPlayerEvent.CLIENT_PLAYER_QUIT.register(player -> {
+            ClientNinjaData.clear();
+            ClientOnboardingOptions.clear();
+            ClientEyeMenu.clear();
+            ClientDialogue.clear();
+            ClientWaterWalk.clear();
+        });
+
+        // Keybinds del mod (abrir menu ninja; input real remapeable).
+        KeyBindings.register();
+
+        // Creacion del ninja: abre (y reabre) la Screen mientras la fase sincronizada sea de seleccion.
+        NinjaCreationOpener.register();
+
+        // Dialogo del Sabio: abre la Screen cuando el servidor anuncia un encuentro (F9/DJT-200).
+        DialogueOpener.register();
+
+        // Caminar sobre el agua: el cliente se sostiene solo para no pelearse con el servidor (F9/DJT-205).
+        WaterWalkClient.register();
+
+        // Overlays del HUD (chakra y rango), leidos de la cache read-only.
+        HudOverlays.register();
         LOGGER.info("[{}] Inicializacion de cliente completada.", MOD_NAME);
     }
 }

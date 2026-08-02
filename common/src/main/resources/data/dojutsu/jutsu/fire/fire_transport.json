@@ -1,0 +1,9 @@
+{
+  "id": "fire_transport",
+  "chakraCost": 80,
+  "cooldownTicks": 100,
+  "affinity": { "nature": "fire", "amount": 60 },
+  "category": "fire",
+  "effect": "teleport",
+  "effectParams": { "minRange": 3.0, "maxRange": 8.0 }
+}

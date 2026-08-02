@@ -1,0 +1,9 @@
+{
+  "id": "dancing_blade_risk",
+  "chakraCost": 0,
+  "cooldownTicks": 60,
+  "skill": { "skill": "kenjutsu", "amount": 75 },
+  "category": "kenjutsu",
+  "effect": "area",
+  "effectParams": { "radius": 4.0, "damage": 6.0 }
+}

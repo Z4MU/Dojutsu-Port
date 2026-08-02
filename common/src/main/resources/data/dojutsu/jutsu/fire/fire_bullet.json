@@ -1,0 +1,15 @@
+{
+  "id": "fire_bullet",
+  "chakraCost": 60,
+  "cooldownTicks": 100,
+  "affinity": { "nature": "fire", "amount": 30 },
+  "category": "fire",
+  "effect": "projectile",
+  "effectParams": {
+    "speed": 1.0,
+    "lifetimeTicks": 100,
+    "radius": 3.0,
+    "fireTicks": 100,
+    "displayItem": "minecraft:fire_charge"
+  }
+}

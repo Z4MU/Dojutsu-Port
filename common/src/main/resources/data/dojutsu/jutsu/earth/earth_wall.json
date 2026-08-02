@@ -1,0 +1,14 @@
+{
+  "id": "earth_wall",
+  "chakraCost": 60,
+  "cooldownTicks": 0,
+  "affinity": { "nature": "earth", "amount": 50 },
+  "category": "earth",
+  "effect": "structure",
+  "effectParams": {
+    "block": "minecraft:dirt",
+    "width": 3,
+    "height": 4,
+    "forward": 2
+  }
+}

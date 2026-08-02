@@ -1,0 +1,9 @@
+{
+  "id": "lightning_instantaneous_body",
+  "chakraCost": 80,
+  "cooldownTicks": 100,
+  "affinity": { "nature": "lightning", "amount": 60 },
+  "category": "lightning",
+  "effect": "teleport",
+  "effectParams": { "minRange": 4.0, "maxRange": 10.0 }
+}

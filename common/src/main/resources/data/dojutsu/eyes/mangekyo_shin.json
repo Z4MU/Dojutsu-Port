@@ -1,0 +1,16 @@
+{
+  "id": "mangekyo_shin",
+  "family": "mangekyo",
+  "awakenMaxChakraBonus": 20,
+  "awakenNinjaXpBonus": 80,
+  "chakraVision": true,
+  "abilities": [
+    "chakra_blades",
+    "phase_shift",
+    "susanoo"
+  ],
+  "eternalRequirements": [
+    { "type": "clan", "value": "otsutsuki_uchiha" },
+    { "type": "use_level", "min": 864000 }
+  ]
+}

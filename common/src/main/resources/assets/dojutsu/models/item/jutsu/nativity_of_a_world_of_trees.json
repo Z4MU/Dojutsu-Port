@@ -1,0 +1,4 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": { "layer0": "dojutsu:item/jutsu/nativity_of_a_world_of_trees" }
+}

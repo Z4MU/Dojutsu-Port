@@ -12,5 +12,6 @@ public final class DojutsuFabric implements ModInitializer {
     @Override
     public void onInitialize() {
         DojutsuMod.init();
+        DojutsuFabricServerEvents.register(); // eventos nativos de Fabric (server-side): fin del sueno -> chakra
     }
 }

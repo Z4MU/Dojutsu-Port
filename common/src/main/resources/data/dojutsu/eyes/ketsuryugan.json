@@ -1,0 +1,13 @@
+{
+  "id": "ketsuryugan",
+  "family": "ketsuryugan",
+  "awakenMaxChakraBonus": 30,
+  "awakenNinjaXpBonus": 30,
+  "awakenTicks": 24000,
+  "abilities": [
+    "blood_eruption",
+    "exploding_human",
+    "iron_blood_fist",
+    "rising_blood_spear"
+  ]
+}

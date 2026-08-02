@@ -1,0 +1,40 @@
+{
+  "_comment": "DJT-054 - Asignacion aleatoria del onboarding (main/internal/get_random_kg + random_aff). Pesos extraidos de las loot tables *_rng (RA-4). El datapack saca un entero UNIFORME en [1, range] (truco 'rolls:{min,max}' + 'store result run loot spawn') y ramifica por rangos; por eso cada entrada declara su [min, max] y se puede auditar linea a linea contra get_random_kg. Los enteros que no cubre ninguna entrada = SIN PREMIO (-> se tira la 2a afinidad).",
+  "_comment_ranges": "range 50 = loot dojutsu:random_kg_rng. Las entradas 1..17 marcan d.rkg_gkg (premio: +20 ninja_xp y sin 2a afinidad). 18..50 sin premio. NOTA: blaze, shikotsumyaku y jugo_clan NO entran en esta tabla (son de clan/evento).",
+
+  "range": 50,
+  "entries": [
+    {
+      "min": 1, "max": 2, "nature": "yang",
+      "_comment": "[S03-R1] el datapack llama aqui a natures/give/kg/yang, que NO EXISTE (ni el predicate has_yang): la rama esta MUERTA y estas 2/50 tiradas no hacen nada. Corregido (DJT-051): se otorga la naturaleza Yang. Evidencia del arreglo: natures/give/kg/random tira 1 -> natures/give/yang, la referencia correcta."
+    },
+    { "min": 3, "max": 3, "kekkeiGenkai": "wood" },
+    { "min": 4, "max": 4, "kekkeiGenkai": "ice" },
+    { "min": 5, "max": 5, "kekkeiGenkai": "lava" },
+    { "min": 6, "max": 6, "kekkeiGenkai": "storm" },
+    { "min": 7, "max": 7, "kekkeiGenkai": "boil" },
+    { "min": 8, "max": 8, "kekkeiGenkai": "dust" },
+    { "min": 9, "max": 9, "kekkeiGenkai": "magnet" },
+    { "min": 10, "max": 10, "kekkeiGenkai": "explosion" },
+    { "min": 11, "max": 11, "kekkeiGenkai": "scorch" },
+    { "min": 12, "max": 12, "kekkeiGenkai": "steel" },
+    { "min": 13, "max": 13, "kekkeiGenkai": "dark" },
+    { "min": 14, "max": 14, "kekkeiGenkai": "swift" },
+    { "min": 15, "max": 15, "kekkeiGenkai": "crystal" },
+    { "min": 16, "max": 16, "kekkeiGenkai": "typhoon" },
+    { "min": 17, "max": 17, "kekkeiGenkai": "mud" },
+    {
+      "min": 30, "max": 40, "kekkeiGenkai": "wood", "senjuOnly": true,
+      "_comment": "Solo clan Senju (predicate clan/is_senju): 11/50 = 22% de empezar con Madera."
+    }
+  ],
+
+  "_comment_secondAffinity": "loot dojutsu:random_aff_rng_2 = uniforme 1..10; acierta con 'matches 1'. Solo se tira si NO hubo premio de KG.",
+  "secondAffinityOneIn": 10,
+
+  "_comment_genjutsu": "loot dojutsu:gen_ulk_rng = uniforme 1..7; acierta con 'matches 1'. Se tira SIEMPRE (haya habido KG o no): da genjutsu +10, ninja_xp +10 y la naturaleza Yin.",
+  "genjutsuOneIn": 7,
+
+  "_comment_basicAffinities": "loot dojutsu:random_aff_rng = uniforme 1..5 (main/internal/random_aff): 1=fire, 2=wind, 3=ligh, 4=earth, 5=water. La afinidad elegida arranca en 50 (lo aplica el onboarding, DJT-059).",
+  "basicAffinities": ["fire", "wind", "lightning", "earth", "water"]
+}

@@ -1,0 +1,4 @@
+{ "id": "intense_flow", "chakraCost": 400, "cooldownTicks": 300,
+  "affinity": [ { "nature": "earth", "amount": 300 }, { "nature": "fire", "amount": 300 } ],
+  "kekkeiGenkai": "lava", "category": "lava", "effect": "area",
+  "effectParams": { "radius": 8.0, "damage": 13.0, "effects": [ { "id": "minecraft:slowness", "seconds": 4, "amplifier": 2 } ] } }

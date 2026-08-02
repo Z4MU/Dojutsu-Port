@@ -1,0 +1,4 @@
+{ "id": "ice_rock_dome", "chakraCost": 140, "cooldownTicks": 200,
+  "affinity": [ { "nature": "water", "amount": 160 }, { "nature": "wind", "amount": 160 } ],
+  "kekkeiGenkai": "ice", "category": "ice", "effect": "structure",
+  "effectParams": { "block": "minecraft:packed_ice", "width": 5, "height": 4, "forward": 0 } }

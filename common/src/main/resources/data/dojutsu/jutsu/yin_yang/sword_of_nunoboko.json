@@ -1,0 +1,3 @@
+{ "id": "sword_of_nunoboko", "chakraCost": 200, "cooldownTicks": 200,
+  "affinity": { "nature": "yin_yang", "amount": 500 }, "category": "yin_yang", "effect": "primed_strike",
+  "effectParams": { "primingTicks": 60, "damage": 14.0 } }

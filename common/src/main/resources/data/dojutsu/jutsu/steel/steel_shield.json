@@ -1,0 +1,4 @@
+{ "id": "steel_shield", "chakraCost": 140, "cooldownTicks": 200,
+  "affinity": [ { "nature": "earth", "amount": 160 }, { "nature": "fire", "amount": 160 }, { "nature": "water", "amount": 160 } ],
+  "kekkeiGenkai": "steel", "category": "steel", "effect": "structure",
+  "effectParams": { "block": "minecraft:iron_block", "width": 5, "height": 4, "forward": 1 } }

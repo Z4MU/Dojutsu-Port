@@ -1,0 +1,3 @@
+{ "id": "honoikazuchi", "chakraCost": 180, "cooldownTicks": 600,
+  "kekkeiGenkai": "blaze", "category": "blaze", "effect": "projectile",
+  "effectParams": { "speed": 1.7, "lifetimeTicks": 100, "radius": 2.0, "damage": 12.0, "displayItem": "minecraft:coal" } }

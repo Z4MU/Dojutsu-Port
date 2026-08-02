@@ -1,0 +1,4 @@
+{ "id": "sand_wave", "chakraCost": 120, "cooldownTicks": 100,
+  "affinity": [ { "nature": "earth", "amount": 120 }, { "nature": "wind", "amount": 120 } ],
+  "kekkeiGenkai": "magnet", "category": "magnet", "effect": "area",
+  "effectParams": { "radius": 6.0, "damage": 8.0, "effects": [ { "id": "minecraft:slowness", "seconds": 4, "amplifier": 1 } ] } }

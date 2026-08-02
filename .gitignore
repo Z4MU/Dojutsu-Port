@@ -23,6 +23,9 @@ out/
 bin/
 .vscode/
 
+# Serena (config del language server y su cache; se regenera solo)
+.serena/
+
 # OS
 .DS_Store
 Thumbs.db

@@ -1,0 +1,9 @@
+{
+  "ingredients": [
+    { "item": "minecraft:nether_star" },
+    { "item": "minecraft:diamond_block" },
+    { "item": "minecraft:gold_block" },
+    { "item": "minecraft:red_wool" }
+  ],
+  "result": "dojutsu:spawn_egg_four_tails"
+}

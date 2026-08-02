@@ -1,0 +1,8 @@
+{
+  "ingredients": [
+    { "item": "minecraft:birch_planks", "count": 5 },
+    { "item": "minecraft:black_wool",   "count": 3 },
+    { "item": "minecraft:white_dye",    "count": 3 }
+  ],
+  "result": "dojutsu:mask_tobi_3"
+}

@@ -1,0 +1,9 @@
+{
+  "id": "lightning_bolt",
+  "chakraCost": 60,
+  "cooldownTicks": 200,
+  "affinity": { "nature": "lightning", "amount": 30 },
+  "category": "lightning",
+  "effect": "primed_strike",
+  "effectParams": { "primingTicks": 30, "damage": 6.0 }
+}

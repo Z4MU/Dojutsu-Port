@@ -1,0 +1,22 @@
+{
+  "id": "byakugan",
+  "family": "byakugan",
+  "awakenMaxChakraBonus": 20,
+  "awakenNinjaXpBonus": 20,
+  "awakenTicks": 78000,
+  "chakraVision": true,
+  "abilities": [
+    "vacuum_palm",
+    "sixty_four_palms",
+    "hundred_twenty_eight_palms"
+  ],
+  "evolutions": [
+    {
+      "to": "tenseigan",
+      "requirements": [
+        { "type": "clan", "value": "otsutsuki" },
+        { "type": "use_level", "min": 864000 }
+      ]
+    }
+  ]
+}

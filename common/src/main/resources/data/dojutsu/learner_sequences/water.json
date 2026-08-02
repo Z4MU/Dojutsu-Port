@@ -1,0 +1,13 @@
+{
+  "element": "water",
+  "sequence": [
+    "water_prison",
+    "water_puddle",
+    "breathing_underwater",
+    "water_instantaneous_body",
+    "hidden_mist",
+    "rising_water_slicer",
+    "water_severing_wave",
+    "water_cloak"
+  ]
+}

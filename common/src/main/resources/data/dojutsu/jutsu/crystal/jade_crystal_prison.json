@@ -1,0 +1,4 @@
+{ "id": "jade_crystal_prison", "chakraCost": 150, "cooldownTicks": 200,
+  "affinity": [ { "nature": "earth", "amount": 120 }, { "nature": "water", "amount": 120 }, { "nature": "yang", "amount": 120 } ],
+  "kekkeiGenkai": "crystal", "category": "crystal", "effect": "structure",
+  "effectParams": { "block": "minecraft:amethyst_block", "width": 3, "height": 3, "forward": 2 } }

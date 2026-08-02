@@ -1,0 +1,4 @@
+{ "id": "nativity_of_a_world_of_trees", "chakraCost": 1000, "cooldownTicks": 1200,
+  "affinity": [ { "nature": "earth", "amount": 500 }, { "nature": "water", "amount": 500 } ],
+  "kekkeiGenkai": "wood", "category": "wood", "effect": "structure",
+  "effectParams": { "block": "minecraft:oak_leaves", "width": 9, "height": 6, "forward": 4 } }

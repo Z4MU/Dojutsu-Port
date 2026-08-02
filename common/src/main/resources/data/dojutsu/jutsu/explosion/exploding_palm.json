@@ -1,0 +1,4 @@
+{ "id": "exploding_palm", "chakraCost": 250, "cooldownTicks": 200,
+  "affinity": [ { "nature": "earth", "amount": 250 }, { "nature": "lightning", "amount": 250 } ],
+  "kekkeiGenkai": "explosion", "category": "explosion", "effect": "area",
+  "effectParams": { "radius": 5.0, "damage": 12.0 } }

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "###",
+    "EGE",
+    "III"
+  ],
+  "key": {
+    "#": { "item": "minecraft:paper" },
+    "E": { "item": "minecraft:emerald" },
+    "G": { "item": "minecraft:golden_apple" },
+    "I": { "item": "minecraft:ink_sac" }
+  },
+  "result": { "id": "dojutsu:medical_scroll", "count": 1 }
+}

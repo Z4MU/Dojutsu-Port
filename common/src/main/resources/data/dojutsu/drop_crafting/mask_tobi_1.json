@@ -1,0 +1,7 @@
+{
+  "ingredients": [
+    { "item": "minecraft:acacia_planks", "count": 5 },
+    { "item": "minecraft:black_wool",    "count": 3 }
+  ],
+  "result": "dojutsu:mask_tobi_1"
+}

@@ -1,0 +1,4 @@
+{ "id": "erupting_propulsion_fist", "chakraCost": 200, "cooldownTicks": 200,
+  "affinity": [ { "nature": "fire", "amount": 180 }, { "nature": "water", "amount": 180 } ],
+  "kekkeiGenkai": "boil", "category": "boil", "effect": "primed_strike",
+  "effectParams": { "primingTicks": 60, "damage": 12.0 } }

@@ -1,0 +1,4 @@
+{ "id": "four_red_yang_formation", "chakraCost": 2000, "cooldownTicks": 1200,
+  "affinity": { "nature": "yang", "amount": 500 },
+  "skill": { "skill": "fuinjutsu", "amount": 500 }, "category": "fuinjutsu", "effect": "structure",
+  "effectParams": { "block": "minecraft:red_stained_glass", "width": 5, "height": 4, "forward": 0 } }

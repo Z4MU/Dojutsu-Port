@@ -1,0 +1,9 @@
+{
+  "id": "water_prison",
+  "chakraCost": 30,
+  "cooldownTicks": 500,
+  "affinity": { "nature": "water", "amount": 30 },
+  "category": "water",
+  "effect": "area",
+  "effectParams": { "radius": 5.0, "effects": [ { "id": "minecraft:slowness", "seconds": 5, "amplifier": 4 } ] }
+}

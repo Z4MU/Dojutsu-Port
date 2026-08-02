@@ -1,0 +1,9 @@
+{
+  "id": "hidden_mist",
+  "chakraCost": 60,
+  "cooldownTicks": 200,
+  "affinity": { "nature": "water", "amount": 80 },
+  "category": "water",
+  "effect": "area",
+  "effectParams": { "radius": 8.0, "effects": [ { "id": "minecraft:blindness", "seconds": 6, "amplifier": 0 } ] }
+}

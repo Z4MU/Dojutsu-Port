@@ -1,0 +1,7 @@
+{
+  "element": "wind",
+  "sequence": [
+    "propelling_winds", "wind_torpedo", "wind_instantaneous_body", "vacuum_wave",
+    "drilling_air_bullet", "wind_mode", "rasengan", "big_ball_rasengan", "wind_cloak", "rasenshuriken"
+  ]
+}

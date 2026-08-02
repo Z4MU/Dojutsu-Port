@@ -1,0 +1,6 @@
+{
+  "id": "llama",
+  "entityType": "minecraft:llama",
+  "tier": "mid",
+  "tame": true
+}

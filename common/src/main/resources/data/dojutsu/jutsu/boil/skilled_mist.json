@@ -1,0 +1,4 @@
+{ "id": "skilled_mist", "chakraCost": 330, "cooldownTicks": 400,
+  "affinity": [ { "nature": "fire", "amount": 300 }, { "nature": "water", "amount": 300 } ],
+  "kekkeiGenkai": "boil", "category": "boil", "effect": "area",
+  "effectParams": { "radius": 8.0, "damage": 14.0, "effects": [ { "id": "minecraft:weakness", "seconds": 8, "amplifier": 1 }, { "id": "minecraft:slowness", "seconds": 6, "amplifier": 1 } ] } }

@@ -1,0 +1,9 @@
+{
+  "id": "earth_golem",
+  "chakraCost": 100,
+  "cooldownTicks": 600,
+  "affinity": { "nature": "earth", "amount": 100 },
+  "category": "earth",
+  "effect": "structure",
+  "effectParams": { "block": "minecraft:stone", "width": 3, "height": 3, "forward": 2 }
+}

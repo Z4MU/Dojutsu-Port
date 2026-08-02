@@ -1,0 +1,9 @@
+{
+  "id": "tunnelling",
+  "chakraCost": 160,
+  "cooldownTicks": 100,
+  "affinity": { "nature": "earth", "amount": 180 },
+  "category": "earth",
+  "effect": "teleport",
+  "effectParams": { "minRange": 8.0, "maxRange": 16.0 }
+}

@@ -1,0 +1,4 @@
+{ "id": "landmine_fist", "chakraCost": 180, "cooldownTicks": 200,
+  "affinity": [ { "nature": "earth", "amount": 180 }, { "nature": "lightning", "amount": 180 } ],
+  "kekkeiGenkai": "explosion", "category": "explosion", "effect": "primed_strike",
+  "effectParams": { "primingTicks": 60, "damage": 12.0 } }

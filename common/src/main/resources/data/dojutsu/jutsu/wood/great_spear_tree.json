@@ -1,0 +1,4 @@
+{ "id": "great_spear_tree", "chakraCost": 100, "cooldownTicks": 100,
+  "affinity": [ { "nature": "earth", "amount": 120 }, { "nature": "water", "amount": 120 } ],
+  "kekkeiGenkai": "wood", "category": "wood", "effect": "structure",
+  "effectParams": { "block": "minecraft:oak_log", "width": 1, "height": 1, "forward": 5 } }

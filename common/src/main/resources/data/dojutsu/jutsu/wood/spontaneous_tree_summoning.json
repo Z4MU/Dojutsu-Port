@@ -1,0 +1,4 @@
+{ "id": "spontaneous_tree_summoning", "chakraCost": 300, "cooldownTicks": 300,
+  "affinity": [ { "nature": "earth", "amount": 250 }, { "nature": "water", "amount": 250 } ],
+  "kekkeiGenkai": "wood", "category": "wood", "effect": "structure",
+  "effectParams": { "block": "minecraft:oak_log", "width": 3, "height": 8, "forward": 2 } }

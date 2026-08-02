@@ -1,0 +1,9 @@
+{
+  "id": "water_instantaneous_body",
+  "chakraCost": 80,
+  "cooldownTicks": 100,
+  "affinity": { "nature": "water", "amount": 60 },
+  "category": "water",
+  "effect": "teleport",
+  "effectParams": { "minRange": 4.0, "maxRange": 10.0 }
+}

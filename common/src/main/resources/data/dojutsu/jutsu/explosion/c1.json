@@ -1,0 +1,4 @@
+{ "id": "c1", "chakraCost": 140, "cooldownTicks": 100,
+  "affinity": [ { "nature": "earth", "amount": 120 }, { "nature": "lightning", "amount": 120 } ],
+  "kekkeiGenkai": "explosion", "category": "explosion", "effect": "projectile",
+  "effectParams": { "speed": 1.5, "lifetimeTicks": 100, "radius": 3.0, "damage": 10.0, "displayItem": "minecraft:clay_ball" } }

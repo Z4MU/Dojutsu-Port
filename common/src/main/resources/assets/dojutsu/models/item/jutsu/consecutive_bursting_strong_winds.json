@@ -1,0 +1,4 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": { "layer0": "dojutsu:item/jutsu/consecutive_bursting_strong_winds" }
+}

@@ -1,0 +1,16 @@
+{
+  "id": "great_fireball",
+  "chakraCost": 140,
+  "cooldownTicks": 100,
+  "affinity": { "nature": "fire", "amount": 170 },
+  "category": "fire",
+  "effect": "projectile",
+  "effectParams": {
+    "speed": 1.0,
+    "lifetimeTicks": 100,
+    "radius": 3.0,
+    "fireTicks": 100,
+    "igniteGround": true,
+    "displayItem": "minecraft:fire_charge"
+  }
+}

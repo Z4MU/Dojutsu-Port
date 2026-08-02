@@ -1,0 +1,4 @@
+{ "id": "weather_manipulation", "chakraCost": 250, "cooldownTicks": 400,
+  "affinity": [ { "nature": "lightning", "amount": 250 }, { "nature": "water", "amount": 250 } ],
+  "kekkeiGenkai": "storm", "category": "storm", "effect": "area",
+  "effectParams": { "radius": 8.0, "damage": 14.0, "effects": [ { "id": "minecraft:slowness", "seconds": 4, "amplifier": 2 } ] } }
