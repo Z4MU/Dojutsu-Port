@@ -42,7 +42,7 @@ public final class StoryDebugCommand {
     /** Suscribe el registro del comando. Debe llamarse durante la inicializacion del mod. */
     public static void register() {
         dev.architectury.event.events.common.CommandRegistrationEvent.EVENT.register((dispatcher, registry, selection) ->
-                dispatcher.register(Commands.literal("dojutsustory")
+                dispatcher.register(DebugCommands.root("dojutsustory")
                         .then(Commands.literal("get").executes(StoryDebugCommand::get))
                         .then(Commands.literal("try").executes(StoryDebugCommand::tryEncounter))
                         .then(Commands.literal("force").executes(StoryDebugCommand::force))

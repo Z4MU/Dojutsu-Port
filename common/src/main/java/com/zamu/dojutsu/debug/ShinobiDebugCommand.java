@@ -46,7 +46,7 @@ public final class ShinobiDebugCommand {
     /** Suscribe el registro del comando. Debe llamarse durante la inicializacion del mod. */
     public static void register() {
         dev.architectury.event.events.common.CommandRegistrationEvent.EVENT.register((dispatcher, registry, selection) ->
-                dispatcher.register(Commands.literal("dojutsushinobi")
+                dispatcher.register(DebugCommands.root("dojutsushinobi")
                         .then(Commands.literal("spawn")
                                 .then(Commands.argument("threat", StringArgumentType.word())
                                         .suggests(THREATS)

@@ -57,7 +57,8 @@ public record ClanDefinition(String id, List<NatureType> natures, List<KekkeiGen
         Map<NatureType, Integer> affinityBonus, Map<Skill, Integer> skillBonus, int maxChakra, int ninjaXp,
         List<String> startingJutsu, List<String> startingItems, List<String> potentialDojutsu,
         Optional<RandomNature> randomNature, Optional<RegenFactor> regenFactor,
-        Optional<Integer> jutsuUnlockTicks, Optional<ChatFormatting> teamColor, boolean skipsAffinity) {
+        Optional<Integer> jutsuUnlockTicks, Optional<ChatFormatting> teamColor, boolean skipsAffinity,
+        List<String> unlockJutsu) {
 
     /** Codec estricto de un color de chat vanilla por nombre ({@code "dark_red"}); un color falso falla. */
     private static final Codec<ChatFormatting> COLOR_CODEC = Codec.STRING.comapFlatMap(name -> {
@@ -87,10 +88,11 @@ public record ClanDefinition(String id, List<NatureType> natures, List<KekkeiGen
             Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("jutsuUnlockTicks")
                     .forGetter(ClanDefinition::jutsuUnlockTicks),
             COLOR_CODEC.optionalFieldOf("teamColor").forGetter(ClanDefinition::teamColor),
-            Codec.BOOL.optionalFieldOf("skipsAffinity", false).forGetter(ClanDefinition::skipsAffinity)
+            Codec.BOOL.optionalFieldOf("skipsAffinity", false).forGetter(ClanDefinition::skipsAffinity),
+            Codec.STRING.listOf().optionalFieldOf("unlockJutsu", List.of()).forGetter(ClanDefinition::unlockJutsu)
     ).apply(instance, ClanDefinition::new));
-    // Nota: el group() de RecordCodecBuilder admite 16 campos y este lleva 15. Si un ticket futuro necesita
-    // otro, agrupar campos relacionados en un sub-record (como RandomNature) en vez de crecer en plano.
+    // Nota: el group() de RecordCodecBuilder admite 16 campos y este lleva 16 — esta EN EL TOPE. El siguiente
+    // campo obliga a agrupar los relacionados en un sub-record (como RandomNature), no a crecer en plano.
 
     public ClanDefinition {
         natures = List.copyOf(natures);
@@ -98,8 +100,23 @@ public record ClanDefinition(String id, List<NatureType> natures, List<KekkeiGen
         affinityBonus = Map.copyOf(affinityBonus);
         skillBonus = Map.copyOf(skillBonus);
         startingJutsu = List.copyOf(startingJutsu);
+        unlockJutsu = List.copyOf(unlockJutsu);
         startingItems = List.copyOf(startingItems);
         potentialDojutsu = List.copyOf(potentialDojutsu);
+    }
+
+    /**
+     * Constructor de conveniencia <b>sin</b> {@code unlockJutsu} (F10): solo el Aburame entrega tecnicas por
+     * temporizador hoy, y asi añadir el campo no obliga a reescribir cada sitio que construye un clan a mano.
+     */
+    public ClanDefinition(String id, List<NatureType> natures, List<KekkeiGenkai> kekkeiGenkai,
+            Map<NatureType, Integer> affinityBonus, Map<Skill, Integer> skillBonus, int maxChakra, int ninjaXp,
+            List<String> startingJutsu, List<String> startingItems, List<String> potentialDojutsu,
+            Optional<RandomNature> randomNature, Optional<RegenFactor> regenFactor,
+            Optional<Integer> jutsuUnlockTicks, Optional<ChatFormatting> teamColor, boolean skipsAffinity) {
+        this(id, natures, kekkeiGenkai, affinityBonus, skillBonus, maxChakra, ninjaXp, startingJutsu,
+                startingItems, potentialDojutsu, randomNature, regenFactor, jutsuUnlockTicks, teamColor,
+                skipsAffinity, List.of());
     }
 
     /**

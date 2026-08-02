@@ -9,6 +9,7 @@ import com.zamu.dojutsu.data.NinjaData;
 import com.zamu.dojutsu.data.PlayerNinjaData;
 import com.zamu.dojutsu.data.state.ChakraState;
 import com.zamu.dojutsu.data.state.ClanMembership;
+import com.zamu.dojutsu.jutsu.JutsuGrantService;
 import com.zamu.dojutsu.data.state.JutsuKnowledge;
 import com.zamu.dojutsu.data.state.NatureProfile;
 import com.zamu.dojutsu.data.state.ProgressionState;
@@ -161,11 +162,13 @@ public final class ClanService {
         }
         ClanTeamService.sync(player); // el nametag toma el color y el sufijo del clan (DJT-062)
         NinjaSync.sendDelta(player); // chakra (max nuevo) y progresion son observables
-        if (!def.startingJutsu().isEmpty() || !def.startingItems().isEmpty()) {
-            // TODO F4 (jutsus iniciales) / F8 (items iniciales): la entrega llega con esos modulos.
-            LOGGER.info("[{}] {} tiene pendientes de entrega del clan {}: jutsus={} items={} (F4/F8).",
-                    DojutsuMod.MOD_NAME, player.getGameProfile().getName(), clanId,
-                    def.startingJutsu(), def.startingItems());
+        // Jutsus iniciales del clan (F10): el Aburame entra con el Orbe de Insectos, como en join_aburame. Los
+        // ids cuyo jutsu aun no esta portado (Kaguya, Nara) se saltan con aviso y no rompen el join.
+        JutsuGrantService.grantAll(player, def.startingJutsu());
+        if (!def.startingItems().isEmpty()) {
+            // TODO F8+: items iniciales del clan (pildoras Akimichi, sable Hatake, chakra blades Sarutobi).
+            LOGGER.info("[{}] {} tiene items del clan {} pendientes de entrega: {}.",
+                    DojutsuMod.MOD_NAME, player.getGameProfile().getName(), clanId, def.startingItems());
         }
         LOGGER.info("[{}] {} se unio al clan {} (maxChakra={}, +{} ninja_xp).",
                 DojutsuMod.MOD_NAME, player.getGameProfile().getName(), clanId, def.maxChakra(), def.ninjaXp());

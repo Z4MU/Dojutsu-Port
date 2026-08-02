@@ -45,7 +45,7 @@ public final class OnboardingDebugCommand {
     /** Suscribe el registro del comando. Debe llamarse durante la inicializacion del mod. */
     public static void register() {
         CommandRegistrationEvent.EVENT.register((dispatcher, registry, selection) ->
-                dispatcher.register(Commands.literal("dojutsuonboarding")
+                dispatcher.register(DebugCommands.root("dojutsuonboarding")
                         .then(Commands.literal("state").executes(OnboardingDebugCommand::state))
                         .then(Commands.literal("clan")
                                 .then(Commands.argument("clan", StringArgumentType.word())

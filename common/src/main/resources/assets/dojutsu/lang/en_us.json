@@ -557,5 +557,8 @@
   "screen.dojutsu.awaken_eternal.blocked": "Eternal Mangekyo — %s",
   "eternal.dojutsu.hint.needs_medical": "needs Medical Ninjutsu 150",
   "eternal.dojutsu.hint.wrong_clan": "needs an Uchiha or Otsutsuki bloodline",
-  "eternal.dojutsu.hint.needs_development": "keep the eye active for longer"
+  "eternal.dojutsu.hint.needs_development": "keep the eye active for longer",
+
+  "jutsu.dojutsu.granted": "You've learned %s!",
+  "clan.dojutsu.hiden_learned": "You've learned a new Hiden Jutsu!"
 }

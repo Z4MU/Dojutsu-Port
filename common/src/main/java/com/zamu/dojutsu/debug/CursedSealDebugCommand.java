@@ -47,7 +47,7 @@ public final class CursedSealDebugCommand {
     /** Suscribe el registro del comando. Debe llamarse durante la inicializacion del mod. */
     public static void register() {
         dev.architectury.event.events.common.CommandRegistrationEvent.EVENT.register((dispatcher, registry, selection) ->
-                dispatcher.register(Commands.literal("dojutsuseal")
+                dispatcher.register(DebugCommands.root("dojutsuseal")
                         .then(Commands.literal("get").executes(CursedSealDebugCommand::get))
                         .then(Commands.literal("inject").executes(CursedSealDebugCommand::inject))
                         .then(Commands.literal("give")

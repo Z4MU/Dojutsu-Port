@@ -225,11 +225,20 @@ Es la confirmación práctica de por qué existe este documento.
    eventos nativos — dormir por evento en ambos, comer por evento en NeoForge y por mixin en Fabric, tal y como
    documenta `[ADD/05]`. No se encontró ninguna asimetría.
 
-## 7. Deuda que este ticket deja anotada, no resuelta
+## 7. Deuda que este ticket dejó anotada
 
+- ~~**26 de 128 jutsus sin forma de obtenerse**~~ ✅ **RESUELTO**: los tres `TODO F4` cerrados con
+  `JutsuGrantService` — 23 técnicas por hito, `insect_sphere` al unirse al Aburame y `insect_tornado` por su
+  temporizador. Sólo queda `phantom_sound_chains`, que **tampoco tiene forma de obtenerse en el datapack**.
+- ~~**Los 20 comandos de depuración sin puerta de permisos**~~ ✅ **RESUELTO**: todos por `DebugCommands.root`,
+  nivel de operador 2 (el mismo que `/dojutsu reset_ninja`).
+- ~~**F1–F10 sin commitear**~~ ✅ **RESUELTO**: rama `f1-f10-port`, 1328 archivos.
 - **Catálogo del mercader errante divergente** del datapack (de DJT-190; detalle en `known_issues.md §2`).
-- **26 de 128 jutsus siguen sin forma de obtenerse** (tres `TODO F4` en `UnlockService`,
-  `ClanJutsuUnlockService` y `ClanService`, de la auditoría).
-- **20 de 28 sonidos registrados no los reproduce nadie.**
-- **Los 20 comandos de depuración no tienen puerta de permisos.**
-- **F1–F10 sigue sin commitear** (último commit: F0, 2026-07-12).
+- **19 de 28 sonidos registrados no los reproduce nadie** (eran 20; DJT-226 cableó el del Amenominaka).
+
+**Añadir al checklist tras la entrega de jutsus:**
+
+- [ ] Al cruzar un umbral de habilidad, **llega el ítem de jutsu al inventario** (no sólo el aviso).
+- [ ] Unirse al clan **Aburame** entrega el Orbe de Insectos en el acto.
+- [ ] A los 65 min con el Aburame llega el **Tornado de Insectos**, y no se repite después.
+- [ ] Un jugador **sin permiso de operador** no puede usar `/dojutsubeast` ni el resto de comandos de QA.

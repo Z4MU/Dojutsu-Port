@@ -8,6 +8,7 @@ import com.zamu.dojutsu.data.PlayerNinjaData;
 import com.zamu.dojutsu.data.state.ProgressionState;
 import com.zamu.dojutsu.data.state.Skill;
 import com.zamu.dojutsu.domain.event.NinjaXpChangedEvent;
+import com.zamu.dojutsu.jutsu.JutsuGrantService;
 import com.zamu.dojutsu.domain.event.SkillLevelChangedEvent;
 import dev.architectury.utils.GameInstance;
 import java.util.ArrayList;
@@ -140,7 +141,14 @@ public final class UnlockService {
         announce(player, applyReachedUnlocks(NinjaData.get(player)));
     }
 
-    /** Avisa y paga la ninja_xp de cada hito otorgado ({@code d.ninja_xp += N} del datapack). */
+    /**
+     * Avisa, paga la ninja_xp y <b>entrega la tecnica</b> de cada hito otorgado.
+     *
+     * <p>La entrega cierra el {@code TODO F4} que llevaba abierto desde F2 y que era la razon de que
+     * <b>26 de los 128 jutsus no se pudieran conseguir en partida</b>: el hito registraba su id y ahi se
+     * quedaba. Ahora hace lo que hace {@code main/internal/unlocks}: sumar la XP <b>y</b> llamar al
+     * {@code give/jutsu/<id>} correspondiente.
+     */
     private static void announce(ServerPlayer player, List<String> granted) {
         for (String unlockId : granted) {
             player.sendSystemMessage(Component.literal("Desbloqueado: " + unlockId + "!"));
@@ -148,9 +156,19 @@ public final class UnlockService {
             if (ninjaXp > 0) {
                 XpApi.addNinjaXp(player, ninjaXp); // unica puerta de escritura de la XP (regla 10)
             }
-            LOGGER.info("[{}] {} desbloqueo {} (+{} ninja_xp).",
-                    DojutsuMod.MOD_NAME, player.getGameProfile().getName(), unlockId, ninjaXp);
-            // TODO F4: entregar el item de jutsu / habilitar el contenido real del desbloqueo.
+            int jutsus = JutsuGrantService.grantAll(player, jutsusOf(unlockId));
+            LOGGER.info("[{}] {} desbloqueo {} (+{} ninja_xp, {} tecnica(s)).",
+                    DojutsuMod.MOD_NAME, player.getGameProfile().getName(), unlockId, ninjaXp, jutsus);
         }
+    }
+
+    /** Tecnicas que entrega un hito; vacia si no entrega ninguna (capacidad o item). */
+    private static List<String> jutsusOf(String unlockId) {
+        for (UnlockDefinition def : UnlockRegistry.all()) {
+            if (def.unlockId().equals(unlockId)) {
+                return def.grantsJutsus();
+            }
+        }
+        return List.of();
     }
 }

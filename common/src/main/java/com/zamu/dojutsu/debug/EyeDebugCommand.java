@@ -63,7 +63,7 @@ public final class EyeDebugCommand {
     /** Suscribe el registro del comando. Debe llamarse durante la inicializacion del mod. */
     public static void register() {
         dev.architectury.event.events.common.CommandRegistrationEvent.EVENT.register((dispatcher, registry, selection) ->
-                dispatcher.register(Commands.literal("dojutsudojutsu")
+                dispatcher.register(DebugCommands.root("dojutsudojutsu")
                         .then(Commands.literal("get").executes(EyeDebugCommand::get))
                         .then(Commands.literal("activate")
                                 .then(Commands.argument("eye", StringArgumentType.word())

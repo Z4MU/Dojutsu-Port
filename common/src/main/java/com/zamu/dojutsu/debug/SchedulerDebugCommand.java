@@ -28,7 +28,7 @@ public final class SchedulerDebugCommand {
     /** Suscribe el registro del comando. Debe llamarse durante la inicializacion del mod. */
     public static void register() {
         CommandRegistrationEvent.EVENT.register((dispatcher, registry, selection) ->
-                dispatcher.register(Commands.literal("dojutsusched")
+                dispatcher.register(DebugCommands.root("dojutsusched")
                         .then(Commands.literal("count").executes(ctx -> {
                             long ticks = ServerTickDispatcher.get().tickCount();
                             ctx.getSource().sendSuccess(

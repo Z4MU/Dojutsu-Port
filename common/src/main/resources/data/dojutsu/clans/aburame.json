@@ -1,1 +1,1 @@
-{ "id": "aburame", "_comment": "jutsuUnlockTicks: desbloqueo progresivo (predicate new_aburame_jutsu, 78000 ticks = 65 min).", "teamColor": "dark_purple", "maxChakra": 100, "startingJutsu": ["insect_sphere"], "jutsuUnlockTicks": 78000 }
+{ "id": "aburame", "_comment": "jutsuUnlockTicks: desbloqueo progresivo (predicate new_aburame_jutsu, 78000 ticks = 65 min).", "teamColor": "dark_purple", "maxChakra": 100, "startingJutsu": ["insect_sphere"], "unlockJutsu": ["insect_tornado"], "jutsuUnlockTicks": 78000 }

@@ -30,7 +30,7 @@ public final class ChakraDebugCommand {
     /** Suscribe el registro del comando. Debe llamarse durante la inicializacion del mod. */
     public static void register() {
         CommandRegistrationEvent.EVENT.register((dispatcher, registry, selection) ->
-                dispatcher.register(Commands.literal("dojutsuchakra")
+                dispatcher.register(DebugCommands.root("dojutsuchakra")
                         .then(Commands.literal("get").executes(ctx -> {
                             PlayerNinjaData d = NinjaData.get(ctx.getSource().getPlayerOrException());
                             ChakraState c = d.chakra();

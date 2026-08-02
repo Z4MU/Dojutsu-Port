@@ -38,7 +38,7 @@ public final class EightGatesDebugCommand {
     /** Suscribe el registro del comando. Debe llamarse durante la inicializacion del mod. */
     public static void register() {
         dev.architectury.event.events.common.CommandRegistrationEvent.EVENT.register((dispatcher, registry, selection) ->
-                dispatcher.register(Commands.literal("dojutsugates")
+                dispatcher.register(DebugCommands.root("dojutsugates")
                         .then(Commands.literal("get").executes(EightGatesDebugCommand::get))
                         .then(Commands.literal("open").executes(EightGatesDebugCommand::open))
                         .then(Commands.literal("close").executes(EightGatesDebugCommand::close))

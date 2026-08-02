@@ -32,7 +32,7 @@ public final class GodTreeDebugCommand {
     /** Suscribe el registro del comando. Debe llamarse durante la inicializacion del mod. */
     public static void register() {
         dev.architectury.event.events.common.CommandRegistrationEvent.EVENT.register((dispatcher, registry, selection) ->
-                dispatcher.register(Commands.literal("dojutsugodtree")
+                dispatcher.register(DebugCommands.root("dojutsugodtree")
                         .then(Commands.literal("plant").executes(GodTreeDebugCommand::plant))
                         .then(Commands.literal("get").executes(GodTreeDebugCommand::get))
                         .then(Commands.literal("advance")

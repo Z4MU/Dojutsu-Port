@@ -42,7 +42,7 @@ public final class ClanDebugCommand {
     /** Suscribe el registro del comando. Debe llamarse durante la inicializacion del mod. */
     public static void register() {
         CommandRegistrationEvent.EVENT.register((dispatcher, registry, selection) ->
-                dispatcher.register(Commands.literal("dojutsuclans")
+                dispatcher.register(DebugCommands.root("dojutsuclans")
                         .then(Commands.literal("list").executes(ClanDebugCommand::list))
                         .then(Commands.literal("get").executes(ClanDebugCommand::get))
                         .then(Commands.literal("join")

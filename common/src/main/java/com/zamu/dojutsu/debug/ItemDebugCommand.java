@@ -72,7 +72,7 @@ public final class ItemDebugCommand {
     /** Suscribe el registro del comando. Debe llamarse durante la inicializacion del mod. */
     public static void register() {
         dev.architectury.event.events.common.CommandRegistrationEvent.EVENT.register((dispatcher, registry, selection) ->
-                dispatcher.register(Commands.literal("dojutsuitem")
+                dispatcher.register(DebugCommands.root("dojutsuitem")
                         .then(Commands.literal("get").executes(ItemDebugCommand::get))
                         .then(Commands.literal("dna")
                                 .then(Commands.literal("give")

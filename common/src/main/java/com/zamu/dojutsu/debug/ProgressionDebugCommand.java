@@ -29,7 +29,7 @@ public final class ProgressionDebugCommand {
     /** Suscribe el registro del comando. Debe llamarse durante la inicializacion del mod. */
     public static void register() {
         CommandRegistrationEvent.EVENT.register((dispatcher, registry, selection) ->
-                dispatcher.register(Commands.literal("dojutsuprogression")
+                dispatcher.register(DebugCommands.root("dojutsuprogression")
                         .then(Commands.literal("get").executes(ctx -> {
                             ProgressionState p = NinjaData.get(ctx.getSource().getPlayerOrException()).progression();
                             StringBuilder sb = new StringBuilder("skillPoints=" + p.skillPoints()

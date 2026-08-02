@@ -38,7 +38,7 @@ public final class AnchorDebugCommand {
     /** Suscribe el registro del comando. Debe llamarse durante la inicializacion del mod. */
     public static void register() {
         CommandRegistrationEvent.EVENT.register((dispatcher, registry, selection) ->
-                dispatcher.register(Commands.literal("dojutsuanchor")
+                dispatcher.register(DebugCommands.root("dojutsuanchor")
                         .then(Commands.literal("spawn")
                                 .executes(ctx -> spawnAnchor(ctx, DEFAULT_LIFE_TICKS))
                                 .then(Commands.argument("life", IntegerArgumentType.integer(1, 12000))

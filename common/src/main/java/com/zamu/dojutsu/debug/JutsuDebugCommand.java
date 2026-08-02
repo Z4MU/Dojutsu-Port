@@ -31,7 +31,7 @@ public final class JutsuDebugCommand {
     /** Suscribe el registro del comando. Debe llamarse durante la inicializacion del mod. */
     public static void register() {
         CommandRegistrationEvent.EVENT.register((dispatcher, registry, selection) ->
-                dispatcher.register(Commands.literal("dojutsujutsu")
+                dispatcher.register(DebugCommands.root("dojutsujutsu")
                         .then(Commands.literal("list").executes(JutsuDebugCommand::list))
                         .then(Commands.literal("get")
                                 .then(Commands.argument("id", StringArgumentType.word())

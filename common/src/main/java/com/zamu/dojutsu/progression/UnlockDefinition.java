@@ -2,6 +2,7 @@ package com.zamu.dojutsu.progression;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.List;
 
 /**
  * Definicion data-driven de un desbloqueo por hito ({@code unlocks} del datapack, {@code [S20]}): al alcanzar
@@ -31,21 +32,37 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
  * @param ninjaXp           ninja_xp que suma el hito al otorgarse ({@code scoreboard players add @s d.ninja_xp N}
  *                          en {@code main/internal/unlocks}). <b>No es uniforme</b>: va de 1 (Substitution) a 100
  *                          (Izanagi, Ocho Puertas, SOAH)
+ * @param grantsJutsus      tecnicas que <b>entrega</b> el hito ({@code function dojutsu:give/jutsu/<id>}). Es
+ *                          una lista porque el datapack tiene un caso de dos: la octava puerta da a la vez el
+ *                          Elefante Nocturno y el Night Guy. Vacia = el hito no da tecnica (las Ocho Puertas
+ *                          dan una <b>capacidad</b>, el contrato y el kunai dan <b>items</b>)
  */
 public record UnlockDefinition(String unlockId, String skillId, int requiredLevel, int requiredMaxChakra,
-        int ninjaXp) {
+        int ninjaXp, List<String> grantsJutsus) {
 
     public static final Codec<UnlockDefinition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.fieldOf("unlockId").forGetter(UnlockDefinition::unlockId),
             Codec.STRING.fieldOf("skillId").forGetter(UnlockDefinition::skillId),
             Codec.INT.fieldOf("requiredLevel").forGetter(UnlockDefinition::requiredLevel),
             Codec.INT.optionalFieldOf("requiredMaxChakra", 0).forGetter(UnlockDefinition::requiredMaxChakra),
-            Codec.INT.optionalFieldOf("ninjaXp", 0).forGetter(UnlockDefinition::ninjaXp)
+            Codec.INT.optionalFieldOf("ninjaXp", 0).forGetter(UnlockDefinition::ninjaXp),
+            Codec.STRING.listOf().optionalFieldOf("grantsJutsus", List.of())
+                    .forGetter(UnlockDefinition::grantsJutsus)
     ).apply(instance, UnlockDefinition::new));
 
-    /** Constructor de conveniencia para los hitos sin co-requisito de chakra ni XP (tests). */
+    public UnlockDefinition {
+        grantsJutsus = List.copyOf(grantsJutsus);
+    }
+
+    /** Constructor de conveniencia para los hitos sin co-requisito, XP ni entrega (tests). */
     public UnlockDefinition(String unlockId, String skillId, int requiredLevel) {
-        this(unlockId, skillId, requiredLevel, 0, 0);
+        this(unlockId, skillId, requiredLevel, 0, 0, List.of());
+    }
+
+    /** Constructor de conveniencia sin entrega de tecnica (tests de balance). */
+    public UnlockDefinition(String unlockId, String skillId, int requiredLevel, int requiredMaxChakra,
+            int ninjaXp) {
+        this(unlockId, skillId, requiredLevel, requiredMaxChakra, ninjaXp, List.of());
     }
 
     /** Lista de definiciones (formato de cada archivo JSON: un array de hitos). */

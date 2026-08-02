@@ -34,7 +34,7 @@ public final class WeaponDebugCommand {
     /** Suscribe el registro del comando. Debe llamarse durante la inicializacion del mod. */
     public static void register() {
         CommandRegistrationEvent.EVENT.register((dispatcher, registry, selection) ->
-                dispatcher.register(Commands.literal("dojutsuweapon")
+                dispatcher.register(DebugCommands.root("dojutsuweapon")
                         .then(Commands.literal("chakra_blade")
                                 .executes(ctx -> give(ctx, ModItems.chakraBlade())))
                         .then(Commands.literal("kubikiribocho")

@@ -5980,3 +5980,84 @@ Fabric arrancan limpios. Sin JVMs zombie.
 **Pendiente de volver a mirar en partida** (va al checklist): que la bestia reciba golpes de verdad, que el
 Amaterasu se vea negro, que el botón del EMS aparezca sólo en los Mangekyō y con su motivo, y que la tecla U
 haga lo que promete.
+
+---
+
+## 2026-08-01 · F10 — Deuda de fondo: el commit, los 26 jutsus inalcanzables y la puerta de permisos
+
+Tres cosas que no eran tickets pero pesaban más que varios de los que sí lo eran.
+
+### 1. Nueve fases vivían sólo en el working tree
+
+El último commit era **F0, del 12 de julio**: andamiaje y nada más. Todo F1–F10 —unas 500 clases, 128 jutsus,
+15 ojos, la documentación entera— existía únicamente como archivos sin versionar. Un `git clean` mal escrito, un
+disco lleno o una carpeta movida y se perdían nueve fases.
+
+Commiteado en la rama **`f1-f10-port`**: 1328 archivos, 1302 altas, 19 modificaciones y 7 bajas. Las bajas son
+el andamiaje de F0 que ya tenía sustituto y estaba documentado como retirado: el ping-pong de red (DJT-005), el
+attachment de prueba (DJT-004) y `DebugMarkerEntity` (retirado en DJT-072). El `.gitignore` ya cubría
+`build/`, `run/`, `.gradle/` y `.serena/`, así que no entró nada que no fuera fuente, recursos o documentación.
+
+Va en rama y no directo a `main` a propósito: es un commit de 1328 archivos y conviene que quien lo integre lo
+vea antes. Un `git merge --ff-only f1-f10-port` lo pone en `main` cuando se quiera.
+
+### 2. Los 26 jutsus que nadie podía conseguir
+
+**El agujero más grande que quedaba, y llevaba abierto desde F2.** 26 de las 128 técnicas existían como datos
+—con su efecto, su coste y, desde DJT-221, su umbral— y **no había forma de obtenerlas en partida**. Las
+secuencias del Skill Learner cubren las naturalezas y los Kekkei Genkai; siete categorías se quedaban fuera:
+aburame (2), fuinjutsu (3), genjutsu (6), kenjutsu (5), medical (4), taijutsu (4) y universal (2).
+
+La causa eran **tres `TODO F4` distintos** esperando exactamente lo mismo: `UnlockService` (hitos),
+`ClanService` (jutsu inicial del clan) y `ClanJutsuUnlockService` (desbloqueo progresivo). Cada uno registraba
+el id, avisaba por chat o por log, y ahí se quedaba.
+
+Se escribe **una vez**, en `JutsuGrantService`: marca la técnica como conocida y pone el ítem en el inventario
+(al suelo si está lleno). El datapack tenía **145 funciones `give/jutsu/*`**, una por técnica, con el NBT
+copiado a mano en cada una.
+
+**Qué entrega cada cosa, verificado contra `main/internal/unlocks.mcfunction`:**
+
+- **23 técnicas por hito** — declaradas en el JSON (`grantsJutsus`), no derivadas del id del hito por cirugía de
+  cadenas. Es una **lista** porque el datapack tiene un caso de dos: la octava puerta da el Elefante Nocturno y
+  el Night Guy a la vez.
+- **`insect_sphere`** al unirse al clan Aburame (`startingJutsu`, que ya estaba declarado en datos desde F3 y
+  nadie leía).
+- **`insect_tornado`** por el temporizador del clan (`unlockJutsu`, campo nuevo). El datapack entrega **una por
+  vuelta** (`unless predicate has_<clan>_jutsu`), no todas de golpe, y así se porta.
+
+**Los hitos que no dan técnica es correcto que no la den**: las Ocho Puertas dan una *capacidad*, el contrato y
+el kunai del Dios del Trueno dan *items*. Hay un test que lo fija, para que nadie «arregle» eso más adelante.
+
+**La entrega es tolerante.** Un id sin jutsu se salta con aviso en vez de romper. Hace falta de verdad: el clan
+Kaguya declara `dance_of_the_camellia` y el Nara `shadow_paralysis`, y **ninguno de los dos está portado**. Es
+el mismo patrón del catálogo de comercio y el drop-crafting — los datos declaran el surtido completo y el código
+cuenta lo que falta.
+
+**Queda uno solo fuera de alcance, y también en el original:** `phantom_sound_chains` no tiene ninguna función
+`give/` en el datapack. Sólo sale de `jutsu/get_random`, o sea que en el datapack tampoco se puede pedir. Se
+deja igual.
+
+Y hay un test que comprueba que **toda técnica prometida por un hito existe como archivo**. Una errata ahí no
+rompería el arranque —la entrega es tolerante— y el jugador simplemente no recibiría nada, en silencio, meses
+después. Ese es justo el fallo que ningún test veía.
+
+### 3. Los veinte comandos de depuración estaban abiertos a cualquiera
+
+Sin una sola puerta de permisos: **0 de 20** usaban `requires`. En un servidor, cualquier jugador podía
+invocarse un Nueve Colas, sellárselo, ponerse la maestría del Susanoo al máximo o fijarse la fatiga ocular.
+
+Ahora todos pasan por `DebugCommands.root(...)`, que aplica el **mismo nivel de operador (2)** que
+`/dojutsu reset_ninja`. Es el nivel de los comandos de trampa de vanilla (`/give`, `/summon`), que es
+exactamente lo que hacen estos. Y un comando nuevo hereda la puerta por construcción — que es el punto de tener
+una raíz común en vez de veinte `requires` copiados que alguien acabará olvidando.
+
+En un mundo de un jugador el anfitrión suele ser operador, así que la sesión de QA no cambia. Lo que cambia es
+lo que pasa cuando entra alguien más.
+
+**Validación:** `./gradlew build` multiloader **verde**; **964 tests** (+3: que toda técnica prometida existe,
+que son 23, y que los hitos sin entrega son exactamente los que dan otra cosa). NeoForge y Fabric arrancan
+limpios. Sin JVMs zombie.
+
+**Sin validar en partida:** que el ítem llegue de verdad al inventario al cruzar un umbral, y que el Aburame
+reciba su segunda técnica a los 65 minutos. Va al checklist.

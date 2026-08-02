@@ -55,7 +55,7 @@ public final class NatureDebugCommand {
     /** Suscribe el registro del comando. Debe llamarse durante la inicializacion del mod. */
     public static void register() {
         CommandRegistrationEvent.EVENT.register((dispatcher, registry, selection) ->
-                dispatcher.register(Commands.literal("dojutsunatures")
+                dispatcher.register(DebugCommands.root("dojutsunatures")
                         .then(Commands.literal("get").executes(NatureDebugCommand::get))
                         .then(Commands.literal("grant")
                                 .then(Commands.argument("nature", StringArgumentType.word())

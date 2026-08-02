@@ -26,7 +26,7 @@ public final class NinjaDataDebugCommand {
     /** Suscribe el registro del comando. Debe llamarse durante la inicializacion del mod. */
     public static void register() {
         CommandRegistrationEvent.EVENT.register((dispatcher, registry, selection) ->
-                dispatcher.register(Commands.literal("dojutsuninja")
+                dispatcher.register(DebugCommands.root("dojutsuninja")
                         .then(Commands.literal("get").executes(ctx -> {
                             ServerPlayer player = ctx.getSource().getPlayerOrException();
                             PlayerNinjaData data = NinjaData.get(player);

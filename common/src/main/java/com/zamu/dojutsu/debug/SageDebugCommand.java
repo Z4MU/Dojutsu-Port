@@ -49,7 +49,7 @@ public final class SageDebugCommand {
     /** Suscribe el registro del comando. Debe llamarse durante la inicializacion del mod. */
     public static void register() {
         dev.architectury.event.events.common.CommandRegistrationEvent.EVENT.register((dispatcher, registry, selection) ->
-                dispatcher.register(Commands.literal("dojutsusage")
+                dispatcher.register(DebugCommands.root("dojutsusage")
                         .then(Commands.literal("get").executes(SageDebugCommand::get))
                         .then(Commands.literal("charge")
                                 .then(Commands.argument("value",

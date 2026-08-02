@@ -37,7 +37,7 @@ public final class SoahDebugCommand {
     /** Suscribe el registro del comando. Debe llamarse durante la inicializacion del mod. */
     public static void register() {
         dev.architectury.event.events.common.CommandRegistrationEvent.EVENT.register((dispatcher, registry, selection) ->
-                dispatcher.register(Commands.literal("dojutsusoah")
+                dispatcher.register(DebugCommands.root("dojutsusoah")
                         .then(Commands.literal("get").executes(SoahDebugCommand::get))
                         .then(Commands.literal("grant").executes(SoahDebugCommand::grant))
                         .then(Commands.literal("store")

@@ -55,7 +55,7 @@ public final class BeastDebugCommand {
     /** Suscribe el registro del comando. Debe llamarse durante la inicializacion del mod. */
     public static void register() {
         dev.architectury.event.events.common.CommandRegistrationEvent.EVENT.register((dispatcher, registry, selection) ->
-                dispatcher.register(Commands.literal("dojutsubeast")
+                dispatcher.register(DebugCommands.root("dojutsubeast")
                         .then(Commands.literal("summon")
                                 .then(Commands.argument("beast", StringArgumentType.word())
                                         .suggests(BEASTS)

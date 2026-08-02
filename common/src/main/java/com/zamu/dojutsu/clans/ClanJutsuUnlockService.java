@@ -7,7 +7,11 @@ import com.zamu.dojutsu.core.TickPhase;
 import com.zamu.dojutsu.data.NinjaData;
 import com.zamu.dojutsu.data.PlayerNinjaData;
 import com.zamu.dojutsu.data.state.ClanMembership;
+import com.zamu.dojutsu.jutsu.JutsuGrantService;
+import java.util.List;
 import java.util.Optional;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import org.slf4j.Logger;
 
@@ -49,9 +53,33 @@ public final class ClanJutsuUnlockService implements PlayerTickSystem {
         }
         PlayerNinjaData data = NinjaData.get(player);
         if (advance(data) && reachedThreshold(data)) {
-            // TODO F4/DJT-075: entregar el siguiente jutsu de la secuencia del clan y resetear el contador.
-            LOGGER.info("[{}] {} alcanzo el umbral de desbloqueo de jutsu de clan ({}): entrega pendiente de F4.",
-                    DojutsuMod.MOD_NAME, player.getGameProfile().getName(), data.clan().clan().orElse("?"));
+            deliver(player, data);
+        }
+    }
+
+    /**
+     * Entrega la <b>siguiente</b> tecnica del clan que el jugador aun no sepa y reinicia el contador (F10).
+     *
+     * <p>Cierra el {@code TODO F4} que hacia que el contador llegara al tope y se quedara ahi para siempre. El
+     * datapack hace justo esto en {@code clans/jutsu/<clan>/unlock_jutsu}: {@code unless predicate
+     * has_<clan>_jutsu run give ...}, o sea <b>una por vuelta del temporizador</b>, no todas de golpe.
+     *
+     * <p>Si el clan ya no tiene nada que dar, el contador <b>se reinicia igual</b>: dejarlo clavado en el tope
+     * haria que {@link #advance} lo diera por «sin progreso» y el sistema quedaria en un estado raro.
+     */
+    private static void deliver(ServerPlayer player, PlayerNinjaData data) {
+        String clanId = data.clan().clan().orElse(null);
+        List<String> pool = clanId == null
+                ? List.of()
+                : ClanRegistry.get(clanId).map(ClanDefinition::unlockJutsu).orElse(List.of());
+
+        boolean granted = JutsuGrantService.grantNextUnknown(player, pool);
+        data.setClan(data.clan().withJutsuTime(0)); // reinicia el contador, haya entregado o no
+        if (granted) {
+            player.sendSystemMessage(Component.translatable("clan.dojutsu.hiden_learned")
+                    .withStyle(ChatFormatting.GOLD));
+            LOGGER.info("[{}] {} recibio una tecnica secreta del clan {}.",
+                    DojutsuMod.MOD_NAME, player.getGameProfile().getName(), clanId);
         }
     }
 
