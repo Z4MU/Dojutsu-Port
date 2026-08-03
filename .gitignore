@@ -8,6 +8,8 @@ build/
 .architectury-transformer/
 run/
 *.log
+*.log.gz
+logs/
 
 # IntelliJ IDEA
 .idea/
