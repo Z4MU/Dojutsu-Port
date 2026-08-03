@@ -38,8 +38,17 @@
 >   antes no se pagaba). Y se tapó el punto ciego del modelo reactivo: los cuatro hitos con co-requisito de
 >   chakra se recuperan con un barrido al entrar.
 > - **DJT-224 🔄** — pasada 1 de assets hecha (ítems, iconos de clan, 28 sonidos, `LICENSE` + `ATTRIBUTION.md`).
-> - Pendientes: **DJT-223** (paridad **en cliente**, con checklist en `known_issues.md §1d`), DJT-226 (deuda de
->   sistemas), DJT-221/222/220.
+> - **Deuda de fondo ✅** — las nueve fases sin commitear pasaron a git (rama `f1-f10-port`), los **26 jutsus
+>   inalcanzables** bajaron a 1 con un `JutsuGrantService` compartido, y los **20 comandos de depuración** dejaron
+>   de estar abiertos a cualquier jugador (nivel de OP 2).
+> - **DJT-220 ✅** — **API pública** `com.zamu.dojutsu.api` v**1.0.0**: `DojutsuApi` (leer vía `NinjaView`,
+>   escribir por las puertas del mod, registrar efectos/habilidades/técnicas de bestia, suscribirse a los eventos
+>   de dominio) y `DojutsuRegistryEvents` (jutsu/ojo/clan/contrato, disparados **dentro de cada recarga**, de modo
+>   que el contenido de un tercero se recarga con `/reload`). Los 9 tests del criterio de la ficha se escriben
+>   **desde fuera**, importando sólo `api`. **973 tests**; ambos loaders cargan igual que antes — sin suscriptores
+>   la API no cambia nada. Uso en `docs/api.md`.
+> - **Pendiente de F10**: sólo **DJT-224 pasada 2** (arte: modelos de Susanoo y Mangekyō, protectores de frente)
+>   y la mitad interactiva de DJT-223, que únicamente se cierra jugando.
 >
 > ---
 >

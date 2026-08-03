@@ -723,7 +723,7 @@ implante de ojos ya existe desde F5) y los pergaminos. Ítems finos sobre servic
 
 ---
 
-## Fase 10 — Pulido, paridad, assets y API — 🔄 EN CURSO
+## Fase 10 — Pulido, paridad, assets y API — ✅ CERRADA (queda DJT-224 pasada 2, que es arte)
 
 | Ticket | Historia | Estado |
 |--------|----------|--------|
@@ -733,7 +733,7 @@ implante de ojos ya existe desde F5) y los pergaminos. Ítems finos sobre servic
 | **DJT-226** | Deuda de sistemas: `Susanoo`/`TenseiganChakraMode` al arnés, roster del Rinne Sharingan, 9 movimientos de bestia | ✅ (build multiloader verde + **947 tests**; ambos loaders registran **10** técnicas de bestia, no 1) |
 | **DJT-221** | Balance | ✅ (los 16 `TBD_datapack` resueltos; **5 umbrales de kenjutsu inventados** corregidos; recetario 23 → **36** hitos; **956 tests**) |
 | **DJT-222** | Rendimiento | ✅ (auditoría de los 21 puntos de entrada por tick en `docs/perf.md`; 3 correcciones con números; **949 tests**) |
-| DJT-220 | API pública (**al final**: congelarla antes de ver los sistemas funcionar sería firmar sobre lo no verificado) | ⬜ |
+| **DJT-220** | API pública (**al final**: congelarla antes de ver los sistemas funcionar sería firmar sobre lo no verificado) | ✅ (`com.zamu.dojutsu.api` v**1.0.0**: `DojutsuApi` + `NinjaView` + 4 eventos de aportación; **973 tests**, 9 escritos desde fuera de la API; `docs/api.md`) |
 
 ### DJT-225 — Ítems que nunca se crearon ✅
 
@@ -936,6 +936,50 @@ una vez por sesión. La Sustitución, que depende del ninja_xp global, gana su d
 **Fuera, con su motivo anotado:** Izanagi (dos afinidades + otro predicate: necesita requisitos compuestos),
 acceso a Senjutsu (sólo chakra, sin habilidad que lo dispare) y Blaze por afinidad de fuego.
 
+### DJT-220 — API pública ✅
+
+La ficha pedía «superficie pública estable (`DojutsuApi` + eventos de registro de jutsu/ojo/clan/contrato)
+versionada», y validarla con «un mod de prueba que registra un jutsu sin tocar el core». Ambas cosas, en
+`com.zamu.dojutsu.api` v**1.0.0**.
+
+**Ir la última era la decisión, no la consecuencia.** Una superficie pública es una promesa. Dos tickets antes de
+éste, la primera sesión de verificación en partida encontró **cinco fallos reales** que ningún test veía —entre
+ellos Bestias con Cola sin caja de colisión donde se las dibujaba—. Congelar la API en su hueco «natural» del
+backlog habría congelado eso.
+
+**El contrato es lo declarado, no lo que compila.** El mod es un solo jar: los paquetes internos son alcanzables
+desde fuera aunque no sean contrato. Por eso el límite va escrito en el `package-info` — `api` es público, todo
+lo demás es implementación aunque sea `public`. `API_VERSION` sigue semver sobre **esa superficie**, no sobre la
+versión del mod.
+
+**Tres cosas, y sólo tres:**
+
+- **Leer** — `NinjaView`, foto inmutable. No se entrega `PlayerNinjaData`: sus sub-estados son inmutables pero
+  **el agregado tiene puertas de escritura**, y repartirlo dejaría saltarse los servicios (reglas 10 y 10b valen
+  para terceros igual que para el mod). Un test lo comprueba por reflexión. Deliberadamente **no** expone
+  temporizadores de ejecución: serían contrato y cambiarían al afinar cualquier sistema.
+- **Escribir** — por las mismas puertas: chakra por `ChakraService`, XP por `XpApi`, técnicas por
+  `JutsuGrantService`. Esas puertas hacen el clamp, emiten los eventos de dominio y sincronizan al cliente.
+- **Aportar contenido** — y aquí está el diseño del ticket.
+
+**Datos y código no se registran igual porque no se recargan igual.** Técnicas, ojos, clanes y contratos son
+datos: van por `DojutsuRegistryEvents`, que salta **dentro de cada recarga** —tras leer los JSON del mod, antes
+de publicar el registro—, así el contenido de un tercero se recarga con `/reload` y no se queda pegado de un
+arranque anterior. Familias de efecto, habilidades oculares y técnicas de bestia son código: `DojutsuApi.register*`
+una vez en el arranque. Unificarlos habría sido más simétrico y habría estado mal.
+
+**Sustituir un id existente está permitido a propósito** (es cómo se rebalancea contenido base), pero cada
+listener **loguea cuántas entradas aportó** su evento: una sustitución no pasa desapercibida.
+
+**Un detalle de testabilidad que cambió el diseño.** Los eventos de Architectury no se pueden desuscribir: un
+test suscrito a `JUTSU` contaminaría a todos los siguientes del mismo JVM. La solución no fue una API de test
+sino hacer `create()` visible al paquete — cada test fabrica su evento y prueba la misma mecánica. Los 9 tests
+se escriben **desde fuera**, importando sólo `api`; si alguno necesitara un servicio interno, la API se habría
+quedado corta y ese archivo lo diría.
+
+Uso documentado en `docs/api.md`, con una sección de **lo que la API no hace** — que en un contrato importa
+tanto como lo que sí.
+
 ---
 
 ## Fases posteriores — ⬜ PENDIENTES
@@ -943,7 +987,7 @@ acceso a Senjutsu (sólo chakra, sin habilidad que lo dispare) y Blaze por afini
 | Fase | Tema | Estado |
 |------|------|--------|
 | F9 | Mundo, narrativa, Seis Caminos, Diez Colas, Árbol Divino | ✅ cerrada en código (`sixpaths`, `story`, `world`); esta sección del backlog nunca se escribió |
-| F10 | Pulido, balance, API pública, paridad, assets | 🔄 en curso (ver arriba) |
+| F10 | Pulido, balance, API pública, paridad, assets | ✅ cerrada en código (6 de 7 tickets ✅; queda **DJT-224 pasada 2**, que es arte, y la mitad interactiva de DJT-223, que sólo se cierra jugando) |
 
 Camino crítico del ADD: F0 → F1 → F2 → F4 → F5/F7 → F9. Vertical slice en F2.
 

@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.JsonOps;
 import com.zamu.dojutsu.DojutsuMod;
+import com.zamu.dojutsu.api.DojutsuRegistryEvents;
 import com.zamu.dojutsu.domain.eye.EyeEvolution;
 import java.util.Map;
 import java.util.Optional;
@@ -41,8 +42,13 @@ public final class EyeReloadListener extends SimpleJsonResourceReloadListener {
             parse(entry.getKey(), entry.getValue()).ifPresent(eye -> loaded.put(eye.id(), eye));
         }
         warnDanglingTargets(loaded);
+        int aportadas = DojutsuRegistryEvents.contribute(DojutsuRegistryEvents.EYE, loaded);
         EyeRegistry.load(loaded);
         LOGGER.info("[{}] Ojos cargados: {}.", DojutsuMod.MOD_NAME, loaded.size());
+        if (aportadas > 0) {
+            LOGGER.info("[{}] ... de las cuales {} aportadas por otros mods (DJT-220).",
+                    DojutsuMod.MOD_NAME, aportadas);
+        }
     }
 
     /**

@@ -6061,3 +6061,102 @@ limpios. Sin JVMs zombie.
 
 **Sin validar en partida:** que el ítem llegue de verdad al inventario al cruzar un umbral, y que el Aburame
 reciba su segunda técnica a los 65 minutos. Va al checklist.
+
+---
+
+## 2026-08-01 · F10/DJT-220 — La API pública, y por qué llegó la última · **FASE 10 CERRADA**
+
+El último ticket del proyecto. La ficha pedía «superficie pública estable (`DojutsuApi` + eventos de registro de
+jutsu/ojo/clan/contrato) versionada», y validarla con «un mod de prueba que registra un jutsu sin tocar el core».
+
+### Se dejó para el final a propósito, y valió la pena
+
+Una superficie pública es una **promesa**. Prometer sobre sistemas que aún no se habían visto funcionar habría
+sido firmar a ciegas — y la primera sesión de verificación en partida, dos tickets antes de éste, encontró
+**cinco fallos reales** que ningún test veía, incluido que las Bestias con Cola no tenían caja de colisión donde
+se las dibujaba. Si la API se hubiera congelado en su hueco «natural» del backlog, habría congelado eso.
+
+Lo que se publica ahora ya se ha ejecutado, mirado y corregido.
+
+### El contrato, en una frase
+
+Lo que está en `com.zamu.dojutsu.api` es público; **todo lo demás es implementación aunque sea `public`**. El
+mod es un solo jar y no hay forma de esconder los paquetes internos del compilador de un tercero, así que el
+contrato no puede ser «lo que compila»: tiene que ser **lo que está declarado**. Eso va escrito en el
+`package-info`, que es donde alguien lo va a leer.
+
+`API_VERSION` sigue *semver* sobre **esta superficie**, no sobre la versión del mod: son cosas distintas y
+mezclarlas obligaría a subir la mayor cada vez que cambie cualquier cosa del mod.
+
+### Tres cosas, y sólo tres
+
+**Leer** — `NinjaView`, una foto inmutable. No se entrega el `PlayerNinjaData` real, y no por purismo: sus
+sub-estados son inmutables pero **el agregado tiene puertas de escritura**, y repartirlo dejaría a cualquiera
+saltarse los servicios que existen para que el chakra no se toque por dos sitios. Hay un test que comprueba por
+reflexión que ningún método de la vista devuelve el agregado — si alguien añade ese getter, salta.
+
+Deliberadamente **no** expone temporizadores de ejecución (pulsos de modo, cooldowns internos, contadores de
+despertar). Serían contrato, y cambiarían cada vez que se afinara un sistema.
+
+**Escribir** — por las **mismas puertas** que usa el mod: el chakra sólo por `ChakraService`, la XP sólo por
+`XpApi`, las técnicas sólo por `JutsuGrantService`. No es ceremonia: esas puertas hacen el clamp, emiten los
+eventos de dominio y sincronizan al cliente. Una escritura por fuera dejaría el HUD mintiendo y los desbloqueos
+sin disparar. Las reglas 10 y 10b valen para terceros igual que para el propio mod.
+
+**Aportar contenido** — y aquí está la decisión de diseño del ticket.
+
+### Datos y código no se registran igual, porque no se recargan igual
+
+Las técnicas, los ojos, los clanes y los contratos son **datos**: se leen de JSON y se recargan con `/reload`.
+Las familias de efecto, las habilidades oculares y las técnicas de bestia son **código**: se registran una vez
+en el arranque.
+
+Meterlos en el mismo mecanismo habría sido más «uniforme» y habría estado mal. Los cuatro de datos van por
+`DojutsuRegistryEvents`, que **salta dentro de cada recarga** —después de leer los archivos del mod y antes de
+publicar el registro—, así que el contenido de un tercero se recarga con el resto y no se queda pegado de un
+arranque anterior. Los tres de código son un `DojutsuApi.register*` y ya.
+
+Los cuatro reload listeners tenían exactamente la misma forma (`parsear → load()`), así que el enganche es una
+línea en cada uno y el evento es genérico: un `Sink<T>` con validación de id delante.
+
+**Sustituir un id existente está permitido a propósito**: es cómo se rebalancea contenido base. Pero el arranque
+**dice en el log cuántas entradas aportó cada evento**, de modo que una sustitución no pasa desapercibida — el
+mismo criterio que el catálogo de comercio, que cuenta lo que le falta en vez de callarlo.
+
+### Un detalle de testabilidad que cambió el diseño
+
+Los eventos de Architectury **no se pueden desuscribir**. Un test que se suscribiera a `DojutsuRegistryEvents.JUTSU`
+dejaría su aportador puesto para todos los tests siguientes del mismo JVM: orden de ejecución significativo y
+fallos intermitentes, justo lo que un test no debe tener.
+
+La solución no fue una API de test sino hacer `create()` visible al paquete: cada test fabrica su propio evento
+y prueba **la misma mecánica** sin tocar los cuatro reales. Nueve tests escritos **desde fuera**, importando sólo
+`com.zamu.dojutsu.api` — si algún día uno de ellos necesitara un servicio interno, la API se habría quedado
+corta y ese archivo sería el que lo dijera.
+
+### Validación
+
+`./gradlew build` multiloader **verde**; **973 tests** (+9, el criterio de la ficha entre ellos: un tercero
+aporta un jutsu, varios aportan a la vez, uno sustituye contenido base, un id vacío o un valor nulo se rechazan
+sin envenenar el registro, y la vista no filtra el agregado). NeoForge y Fabric arrancan limpios y los cuatro
+registros cargan igual que antes: sin suscriptores, la API no cambia nada. Sin JVMs zombie.
+
+Documentación de uso en `docs/api.md`, con ejemplos copiables y una sección explícita de **lo que la API no
+hace** — que en un contrato importa tanto como lo que sí.
+
+---
+
+### Balance de la Fase 10, y del port
+
+Siete tickets: DJT-225 (los ítems que nunca se crearon), DJT-223 (paridad en cliente), DJT-226 (deuda de
+sistemas), DJT-222 (rendimiento), DJT-221 (balance), la deuda de fondo (commit, entrega de jutsus, permisos) y
+éste.
+
+**El hilo conductor de la fase fue mirar de verdad.** Cada ticket encontró algo que llevaba fases dándose por
+bueno: 9 combinaciones de crafteo inertes, 5 umbrales inventados, dos modos fuera de su propio arnés, 26 jutsus
+inalcanzables, veinte comandos sin permisos y nueve fases sin commitear. Ninguno era un bug difícil; todos eran
+cosas que nadie había ido a comprobar.
+
+Y la lección de F10 confirma la de DJT-205, ahora con datos: **el build verde no ve el juego**. 973 tests y dos
+loaders arrancando limpios convivieron con bestias sin caja de colisión y un Amaterasu naranja. La primera hora
+de alguien jugando encontró cinco fallos que nueve fases de tests no habían tocado.

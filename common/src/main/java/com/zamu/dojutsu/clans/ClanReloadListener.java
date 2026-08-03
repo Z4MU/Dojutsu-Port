@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.JsonOps;
 import com.zamu.dojutsu.DojutsuMod;
+import com.zamu.dojutsu.api.DojutsuRegistryEvents;
 import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.resources.ResourceLocation;
@@ -46,8 +47,13 @@ public final class ClanReloadListener extends SimpleJsonResourceReloadListener {
                         loaded.put(def.id(), def);
                     });
         }
+        int aportadas = DojutsuRegistryEvents.contribute(DojutsuRegistryEvents.CLAN, loaded);
         ClanRegistry.load(loaded);
         LOGGER.info("[{}] Clanes cargados: {}.", DojutsuMod.MOD_NAME, loaded.size());
+        if (aportadas > 0) {
+            LOGGER.info("[{}] ... de las cuales {} aportadas por otros mods (DJT-220).",
+                    DojutsuMod.MOD_NAME, aportadas);
+        }
         if (loaded.isEmpty()) {
             LOGGER.warn("[{}] Ningun clan cargado: el onboarding no tendra opciones.", DojutsuMod.MOD_NAME);
         }

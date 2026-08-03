@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.JsonOps;
 import com.zamu.dojutsu.DojutsuMod;
+import com.zamu.dojutsu.api.DojutsuRegistryEvents;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
@@ -45,8 +46,13 @@ public final class JutsuReloadListener extends SimpleJsonResourceReloadListener 
                 }
             });
         }
+        int aportadas = DojutsuRegistryEvents.contribute(DojutsuRegistryEvents.JUTSU, loaded);
         JutsuRegistry.load(loaded);
         LOGGER.info("[{}] Jutsus cargados: {}.", DojutsuMod.MOD_NAME, loaded.size());
+        if (aportadas > 0) {
+            LOGGER.info("[{}] ... de las cuales {} aportadas por otros mods (DJT-220).",
+                    DojutsuMod.MOD_NAME, aportadas);
+        }
     }
 
     /**

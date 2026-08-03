@@ -84,8 +84,9 @@ checklist de DJT-223.
 
 ## 2. Riesgos y limitaciones conocidas (no bugs)
 
-- **Sin control de versiones desde F0**: el repo git tiene solo 2 commits (F0); todo F1–F4 vive en el working
-  tree sin commitear. Riesgo de pérdida; conviene un checkpoint por fase.
+- ~~**Sin control de versiones desde F0**~~ ✅ **RESUELTO (F10)**: las nueve fases que vivían sin commitear están
+  en la rama **`f1-f10-port`**. `main` sigue en F0 a la espera de un `git merge --ff-only` cuando se quiera
+  publicar.
 - **Puerto `AttributeService` diferido**: kenjutsu lo evitó con `ItemAttributeModifiers` vanilla. Se retomará
   cuando un sistema necesite modificadores **sobre la entidad** (previsiblemente Ocho Puertas, F6).
 - ~~**Umbrales `unlocks/progression.json` provisionales** y `TBD_datapack` en `xp_sources.json`~~ ✅ **RESUELTO
@@ -114,6 +115,16 @@ checklist de DJT-223.
   **Susanoo** (56 modelos), **bijuu** (24, hoy con la malla prestada del ravager), bandanas/protectores; HUD
   con primitivas. El arte de Susanoo y bijuu del RP son **modelos de ítem**, no mallas de entidad, así que la
   pasada 2 es una capa de render que dibuja un `BakedModel`, no autoría de mallas.
+- **La API pública no tiene consumidor real todavía** (F10/DJT-220). Está validada por 9 tests escritos desde
+  fuera del paquete, que es el criterio que pedía la ficha, pero **ningún mod de terceros la ha usado en
+  ejecución**: un aportador que se registre tarde —después de la primera recarga de datos— no aparecerá hasta el
+  siguiente `/reload`, y eso sólo se ve con un segundo mod cargado de verdad. Lo mismo con las escrituras
+  (`restoreChakra`, `consumeChakra`, `addNinjaXp`, `grantJutsu`): necesitan un `ServerPlayer` y por tanto un
+  servidor, así que su verificación es de partida, no de test.
+- **La API no expone temporizadores ni nada de cliente**, a propósito: los pulsos de modo, los enfriamientos
+  internos y los contadores de despertar son detalle de implementación, y todo lo publicado es de servidor. Un
+  mod que quiera pintar algo tiene que usar sus propios hooks de cliente. Si alguna vez hace falta, es una subida
+  de versión **menor**, no un cambio de contrato.
 - ~~**`LICENSE` no-comercial pendiente**~~ ✅ **RESUELTO (DJT-224)**: `LICENSE` (MIT código / CC BY-NC arte,
   cláusula no comercial de Prof Technic marcada como vinculante y prevalente), atribución en los metadatos de
   los dos loaders y `ATTRIBUTION.md` con el inventario de qué asset vino de dónde.

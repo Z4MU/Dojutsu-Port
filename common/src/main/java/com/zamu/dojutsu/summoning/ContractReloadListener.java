@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.JsonOps;
 import com.zamu.dojutsu.DojutsuMod;
+import com.zamu.dojutsu.api.DojutsuRegistryEvents;
 import com.zamu.dojutsu.domain.summoning.SummonContractDef;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,7 +48,12 @@ public final class ContractReloadListener extends SimpleJsonResourceReloadListen
                         loaded.put(def.id(), def);
                     });
         }
+        int aportadas = DojutsuRegistryEvents.contribute(DojutsuRegistryEvents.CONTRACT, loaded);
         ContractRegistry.load(loaded);
         LOGGER.info("[{}] Contratos de invocacion cargados: {}.", DojutsuMod.MOD_NAME, loaded.size());
+        if (aportadas > 0) {
+            LOGGER.info("[{}] ... de las cuales {} aportadas por otros mods (DJT-220).",
+                    DojutsuMod.MOD_NAME, aportadas);
+        }
     }
 }
