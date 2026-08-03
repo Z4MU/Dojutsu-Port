@@ -264,6 +264,7 @@ public final class DojutsuLifecycle {
             ChakraVisionService.clear(); // olvida los resaltados (los equipos viven en el scoreboard del mundo)
             DropCraftingService.reset(); // el contador del barrido tampoco cruza partidas (F9/DJT-206)
             DropUseService.reset(); // los items vigilados son del mundo que se cierra (F10/DJT-225)
+            NinjaSfx.clear(); // la puerta de sonido guarda ticks del mundo que se cierra (F10/DJT-227)
         });
 
         LOGGER.info("[{}] Ciclo de vida inicializado.", DojutsuMod.MOD_NAME);
@@ -283,6 +284,7 @@ public final class DojutsuLifecycle {
         MenuActionHandler.forget(player.getUUID()); // libera el estado anti-spam del menu
         EyeMenuHandler.forget(player.getUUID()); // libera el estado anti-spam del menu ocular (DJT-117)
         EyeAbilityService.forget(player.getUUID()); // libera el estado anti-spam del uso de habilidad (DJT-118)
+        NinjaSfx.forget(player.getUUID()); // libera la puerta de sonido compartida (F10/DJT-227)
         com.zamu.dojutsu.dojutsu.ability.KamuiAbility.forget(player.getUUID()); // olvida el punto de Kamui (roster)
         SusanooService.forget(player.getUUID()); // el Susanoo no sobrevive a la sesion (DJT-120)
         TenseiganChakraModeService.forget(player); // retira el vuelo del chakra mode al desconectar (fleco F5)

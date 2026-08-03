@@ -159,6 +159,7 @@ public final class EyeAbilityService {
         int strain = data.eye().eternal() ? 0 : ability.strainCost(); // EMS exime de fatiga (sasuke/cost)
         EyeStrainService.addStrain(data, strain);
         ability.execute(context);
+        EyeAbilitySfx.play(player, abilityId); // el playsound del coste de cada tecnica (F10/DJT-227)
         if (ability.cooldownTicks() > 0) {
             READY_AT_TICK.put(key, now + ability.cooldownTicks());
         }

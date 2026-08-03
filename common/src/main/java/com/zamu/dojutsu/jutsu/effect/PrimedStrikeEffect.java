@@ -14,17 +14,22 @@ import net.minecraft.world.entity.LivingEntity;
  * chidori, lightning_cutter, drilling_hand_of_sage_lightning ("Attack something to use Jutsu!").
  *
  * <p>Parametros ({@code effectParams}): {@code damage} (daño del golpe, def. 6) · {@code primingTicks} (ventana
- * para conectar el golpe en ticks, def. 30).
+ * para conectar el golpe en ticks, def. 30) · los de {@link EffectSfx} (F10/DJT-227).
+ *
+ * <p><b>El sonido suena al armar</b>, no al conectar el golpe: el datapack lo pone en {@code ready.mcfunction}.
+ * Cinco de las once tecnicas de esta familia lo declaran; las otras seis iban mudas en el original y siguen
+ * igual.
  */
 public final class PrimedStrikeEffect implements JutsuEffect {
 
     /** Parametros de la familia (puro y testeable). */
-    public record Params(float damage, int primingTicks) {
+    public record Params(float damage, int primingTicks, EffectSfx sfx) {
 
         public static Params parse(JsonObject json) {
             return new Params(
                     GsonHelper.getAsFloat(json, "damage", 6.0F),
-                    GsonHelper.getAsInt(json, "primingTicks", 30));
+                    GsonHelper.getAsInt(json, "primingTicks", 30),
+                    EffectSfx.parse(json));
         }
     }
 
@@ -35,6 +40,7 @@ public final class PrimedStrikeEffect implements JutsuEffect {
         }
         Params params = Params.parse(jutsu.effectParams().getAsJsonObject());
         PrimedStrikeManager.arm(player, jutsu.id(), params.damage(), params.primingTicks());
+        params.sfx().play(level, player.getX(), player.getY(), player.getZ());
         player.displayClientMessage(Component.translatable("jutsu.dojutsu.primed"), true);
     }
 }

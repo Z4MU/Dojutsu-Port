@@ -1,6 +1,7 @@
 package com.zamu.dojutsu.jutsu.effect;
 
 import com.google.gson.JsonObject;
+import com.zamu.dojutsu.core.NinjaSfx;
 import com.zamu.dojutsu.jutsu.JutsuEntry;
 import com.zamu.dojutsu.registry.ModSounds;
 import java.util.Comparator;
@@ -56,15 +57,25 @@ public final class HealEffect implements JutsuEffect {
      * El {@code playsound medical_ninjutsu.healing} (F10/DJT-224). El datapack lo repite en los <b>seis</b>
      * {@code cast.mcfunction} medicos; aqui va una vez, en la familia que todos comparten.
      *
-     * <p><b>El volumen no se copia literal.</b> El datapack pone {@code 10}, pero en Minecraft un volumen
-     * mayor que 1 no suena mas fuerte: <b>solo amplia el alcance</b> (16 x volumen = 160 bloques). Lo que
-     * acotaba de verdad quien lo oia era el selector {@code @a[distance=0..5]}. Con {@code 1.0} se obtiene el
-     * mismo volumen percibido en la distancia que importa; copiar el 10 habria hecho que se oyera a 160
-     * bloques a un ninja curandose.
+     * <p><b>Ahora si se copia el volumen literal</b> (F10/DJT-227). DJT-224 lo bajo a {@code 1.0} razonando
+     * que un volumen mayor que 1 no suena mas fuerte sino que amplia el alcance, y que copiar el {@code 10}
+     * habria hecho que se oyera a 160 bloques. Lo primero es cierto a medias y lo segundo ya no aplica:
+     *
+     * <ul>
+     *   <li>El cliente <b>recorta la sonoridad a 1.0</b>, pero usa el volumen crudo para la
+     *       <b>atenuacion por distancia</b>. Con {@code 10} la curacion suena plana en todo el radio; con
+     *       {@code 1.0} se desvanece a los pocos bloques. No era el mismo sonido.</li>
+     *   <li>El alcance ya no lo decide el volumen: {@link NinjaSfx} respeta el selector, asi que el 10 no
+     *       puede escaparse a 160 bloques.</li>
+     * </ul>
+     *
+     * <p><b>5 bloques</b>, que es lo que ponen cinco de los siete sitios. Los otros dos —{@code wide_healing}
+     * y {@code creation_of_all_things}— usan 8; se unifica en 5 en vez de cablear una excepcion por jutsu en
+     * una familia compartida, y la diferencia es quien lo oye entre el bloque 5 y el 8.
      */
     private static void playHealSound(ServerLevel level, LivingEntity caster) {
-        level.playSound(null, caster.getX(), caster.getY(), caster.getZ(),
-                ModSounds.MEDICAL_HEALING.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
+        NinjaSfx.at(level, caster.getX(), caster.getY(), caster.getZ(),
+                ModSounds.MEDICAL_HEALING.get(), SoundSource.PLAYERS, 10.0F, 1.0F, 5.0D);
     }
 
     /** La entidad viva mas cercana al caster dentro del radio, excluyendo al propio caster. */

@@ -1,4 +1,4 @@
 { "id": "four_pillar_house", "chakraCost": 800, "cooldownTicks": 600,
   "affinity": [ { "nature": "earth", "amount": 400 }, { "nature": "water", "amount": 400 } ],
   "kekkeiGenkai": "wood", "category": "wood", "effect": "structure",
-  "effectParams": { "block": "minecraft:oak_log", "width": 7, "height": 5, "forward": 3 } }
+  "effectParams": { "block": "minecraft:oak_log", "width": 7, "height": 5, "forward": 3, "sound": "dojutsu:jutsu.wood", "soundVolume": 5.0, "soundRange": 15.0 } }

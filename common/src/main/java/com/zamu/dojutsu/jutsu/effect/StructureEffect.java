@@ -25,20 +25,24 @@ import net.minecraft.world.level.block.Blocks;
 public final class StructureEffect implements JutsuEffect {
 
     /** Parametros de la familia (puro y testeable). */
-    public record Params(String block, int width, int height, int forward) {
+    public record Params(String block, int width, int height, int forward, EffectSfx sfx) {
 
         public static Params parse(JsonObject json) {
             return new Params(
                     GsonHelper.getAsString(json, "block", "minecraft:dirt"),
                     GsonHelper.getAsInt(json, "width", 3),
                     GsonHelper.getAsInt(json, "height", 4),
-                    GsonHelper.getAsInt(json, "forward", 2));
+                    GsonHelper.getAsInt(json, "forward", 2),
+                    EffectSfx.parse(json));
         }
     }
 
     @Override
     public void apply(ServerLevel level, LivingEntity caster, JutsuEntry jutsu) {
         Params params = Params.parse(jutsu.effectParams().getAsJsonObject());
+        // El crujido de la madera al levantarse. Solo tres de las nueve estructuras de madera lo tocaban
+        // (four_pillar_house, four_pillar_prison, wood_dome), asi que va declarado por tecnica (F10/DJT-227).
+        params.sfx().play(level, caster.getX(), caster.getY(), caster.getZ());
         ResourceLocation id = ResourceLocation.tryParse(params.block());
         Block block = id == null ? Blocks.DIRT : BuiltInRegistries.BLOCK.getOptional(id).orElse(Blocks.DIRT);
 

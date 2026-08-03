@@ -1,6 +1,7 @@
 package com.zamu.dojutsu.dojutsu.tenseigan;
 
 import com.zamu.dojutsu.chakra.ChakraService;
+import com.zamu.dojutsu.core.NinjaSfx;
 import com.zamu.dojutsu.core.PlayerTickSystem;
 import com.zamu.dojutsu.core.TickPhase;
 import com.zamu.dojutsu.data.NinjaData;
@@ -12,7 +13,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -144,11 +144,11 @@ public final class TenseiganChakraModeService implements PlayerTickSystem {
         public void notifyToggled(boolean active) {
             player.sendSystemMessage(Component.translatable(
                     active ? "tenseigan.dojutsu.chakra_mode.on" : "tenseigan.dojutsu.chakra_mode.off"));
-            if (player.level() instanceof ServerLevel level) {
-                level.playSound(null, player.blockPosition(),
-                        active ? SoundEvents.BEACON_POWER_SELECT : SoundEvents.BEACON_DEACTIVATE,
-                        SoundSource.PLAYERS, 0.5f, active ? 1.0f : 2.0f);
-            }
+            // tenseigan/toggle: los dos a 0.5 y tono 2 en 5 bloques. El tono de encendido estaba en 1.0
+            // (F10/DJT-227) — el par sonaba desparejo. El modo usa sonidos de vanilla a proposito: el
+            // dojutsu.tenseigan.activate del pack es del OJO al despertar, y lo toca EyeSounds.
+            NinjaSfx.at(player, active ? SoundEvents.BEACON_POWER_SELECT : SoundEvents.BEACON_DEACTIVATE,
+                    SoundSource.PLAYERS, 0.5F, 2.0F, 5.0D);
         }
     }
 }

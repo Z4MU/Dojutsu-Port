@@ -1,3 +1,5 @@
 { "id": "wind_instantaneous_body", "chakraCost": 80, "cooldownTicks": 100,
   "affinity": { "nature": "wind", "amount": 60 }, "category": "wind", "effect": "teleport",
-  "effectParams": { "minRange": 4.0, "maxRange": 10.0 } }
+  "effectParams": { "minRange": 4.0, "maxRange": 10.0,
+    "sound": "minecraft:block.redstone_torch.burnout", "soundSource": "player",
+    "soundVolume": 0.8, "soundPitch": 2.0, "soundRange": 8.0 } }

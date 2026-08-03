@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import com.zamu.dojutsu.DojutsuMod;
 import com.zamu.dojutsu.chakra.ChakraService;
 import com.zamu.dojutsu.core.DomainEvents;
+import com.zamu.dojutsu.core.NinjaSfx;
 import com.zamu.dojutsu.core.PlayerTickSystem;
 import com.zamu.dojutsu.core.TickPhase;
 import com.zamu.dojutsu.data.NinjaData;
@@ -17,6 +18,7 @@ import com.zamu.dojutsu.domain.soah.SoahModeContext;
 import com.zamu.dojutsu.domain.soah.SoahTable;
 import com.zamu.dojutsu.empowerment.ToggleableModeService;
 import com.zamu.dojutsu.empowerment.cursedseal.CursedSealService;
+import com.zamu.dojutsu.registry.ModSounds;
 import com.zamu.dojutsu.progression.XpApi;
 import dev.architectury.utils.GameInstance;
 import java.util.Locale;
@@ -118,7 +120,9 @@ public final class SoahSealService implements PlayerTickSystem {
         data.setEmpowerment(state.withSoahCharge(state.soahCharge() + SoahTable.RECHARGE_AMOUNT));
         player.sendSystemMessage(Component.translatable("soah.dojutsu.recharged",
                 data.empowerment().soahCharge()).withStyle(ChatFormatting.AQUA));
-        player.playNotifySound(SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1f, 1f);
+        // soah_seal/recharge: el sello se recarga con el sonido de curacion, no con un tintineo inventado
+        // (F10/DJT-227). Es el septimo sitio donde suena medical_ninjutsu.healing y era el unico sin portar.
+        NinjaSfx.at(player, ModSounds.MEDICAL_HEALING.get(), SoundSource.PLAYERS, 10.0F, 1.0F, 5.0D);
         com.zamu.dojutsu.network.NinjaSync.sendDelta(player);
         return true;
     }

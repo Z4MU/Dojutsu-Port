@@ -5,5 +5,7 @@
   "affinity": { "nature": "water", "amount": 60 },
   "category": "water",
   "effect": "teleport",
-  "effectParams": { "minRange": 4.0, "maxRange": 10.0 }
+  "effectParams": { "minRange": 4.0, "maxRange": 10.0,
+    "sound": "minecraft:entity.player.splash.high_speed", "soundSource": "player",
+    "soundVolume": 0.8, "soundPitch": 2.0, "soundRange": 8.0 }
 }

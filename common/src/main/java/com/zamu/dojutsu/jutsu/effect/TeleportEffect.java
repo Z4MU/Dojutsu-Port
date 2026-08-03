@@ -18,28 +18,36 @@ import net.minecraft.world.level.levelgen.Heightmap;
  * porte de assets (anotado).
  *
  * <p>Parametros: {@code minRange} (def. 5) · {@code maxRange} (def. 10) ·
- * {@code invisibilitySeconds} (def. 0). El destino se busca sobre la superficie (heightmap,
- * como hace spreadplayers); si tras varios intentos no hay destino valido, no se teletransporta
+ * {@code invisibilitySeconds} (def. 0) · los de {@link EffectSfx}. El destino se busca sobre la superficie
+ * (heightmap, como hace spreadplayers); si tras varios intentos no hay destino valido, no se teletransporta
  * (pero el cast ya ocurrio, igual que spreadplayers podia dejarte cerca).
+ *
+ * <h2>Cada Cuerpo Parpadeante suena a su naturaleza</h2>
+ * {@code internal/rng_tp_particles} da a cada una su par sonido+particula, todos a 0.8 y <b>tono 2</b> en 8
+ * bloques: fuego {@code block.fire.extinguish}, viento {@code block.redstone_torch.burnout}, tierra
+ * {@code jutsu.earth}, agua {@code entity.player.splash.high_speed}. El de <b>rayo no tiene sonido</b> — invoca
+ * un rayo de verdad, que ya trae el suyo. Van declarados por tecnica (F10/DJT-227).
  */
 public final class TeleportEffect implements JutsuEffect {
 
     private static final int ATTEMPTS = 10;
 
     /** Parametros de la familia (puro y testeable). */
-    public record Params(double minRange, double maxRange, int invisibilitySeconds) {
+    public record Params(double minRange, double maxRange, int invisibilitySeconds, EffectSfx sfx) {
 
         public static Params parse(JsonObject json) {
             return new Params(
                     GsonHelper.getAsDouble(json, "minRange", 5.0D),
                     GsonHelper.getAsDouble(json, "maxRange", 10.0D),
-                    GsonHelper.getAsInt(json, "invisibilitySeconds", 0));
+                    GsonHelper.getAsInt(json, "invisibilitySeconds", 0),
+                    EffectSfx.parse(json));
         }
     }
 
     @Override
     public void apply(ServerLevel level, LivingEntity caster, JutsuEntry jutsu) {
         Params params = Params.parse(jutsu.effectParams().getAsJsonObject());
+        params.sfx().play(level, caster.getX(), caster.getY(), caster.getZ()); // en el ORIGEN, antes de irse
         // Poof en el origen (substitution/summon: particle poof).
         level.sendParticles(ParticleTypes.POOF,
                 caster.getX(), caster.getY() + 1.5D, caster.getZ(), 80, 0.8D, 1.0D, 0.8D, 0.0D);

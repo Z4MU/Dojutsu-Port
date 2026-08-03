@@ -109,6 +109,15 @@ checklist de DJT-223.
   datapack no vende el mercader. Reconciliarlo es trabajo de DJT-223. En la misma línea: `kubikiribocho`
   anuncia "Kenjutsu: 800" en el datapack y el mod lo registra con `kenjutsuReq` 0 (inofensivo hoy —sólo lo lee
   la Samehada— pero es una cifra perdida).
+- ~~**19 de los 28 sonidos no se reproducen nunca**~~ ✅ **RESUELTO (DJT-227)**: quedan **8 mudos**, y no por
+  deuda de sonido sino porque **su técnica no está portada** — `jutsu.wind` (entrenamiento de naturaleza),
+  `flute_song` (`phantom_sound_chains`), `frog_call` y `white_rage_technique` + `ear_ringing` (invocaciones de
+  sabio sapo y serpiente), `sharingan.blind` (Izanagi) y los dos de Isshiki. El **Jōgan** está en el enum de
+  familias pero sus dos técnicas tampoco existen. Todos registrados y listos para cuando se porte el sistema.
+- **La verificación del sonido es de partida** (DJT-227): que se dispare lo cubre el build; que **se oiga bien**
+  no lo ve ningún test. Sin comprobar: si la puerta compartida de 20 ticks corta de más al encadenar técnicas
+  del Mangekyō, si el alcance enviado a mano suena igual que el selector del datapack, y si el Susanoo con su
+  sonido propio resulta molesto a 8 bloques.
 - **Assets parciales** (DJT-224, pasada 1 hecha; +DJT-225 aportó los 19 PNG de sus ítems): ya están **ítems**
   (máscaras, arrojadizas, ADN, contrato, píldoras, huevos de bestia, pergaminos, ramen, bomba de humo, sello,
   tanto), **iconos de clan** y los **28 sonidos**. Siguen pendientes de la pasada 2: **ojos** (52 texturas),

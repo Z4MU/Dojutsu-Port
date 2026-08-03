@@ -32,7 +32,7 @@ public final class ProjectileEffect implements JutsuEffect {
 
     /** Parametros de la familia, parseados de {@code effectParams} (puro y testeable). */
     public record Params(double speed, double gravity, int lifetimeTicks, double radius,
-            int fireTicks, boolean igniteGround, float damage, String displayItem) {
+            int fireTicks, boolean igniteGround, float damage, String displayItem, EffectSfx sfx) {
 
         public static Params parse(JsonObject json) {
             return new Params(
@@ -43,13 +43,17 @@ public final class ProjectileEffect implements JutsuEffect {
                     GsonHelper.getAsInt(json, "fireTicks", 0),
                     GsonHelper.getAsBoolean(json, "igniteGround", false),
                     GsonHelper.getAsFloat(json, "damage", 0.0F),
-                    GsonHelper.getAsString(json, "displayItem", "minecraft:snowball"));
+                    GsonHelper.getAsString(json, "displayItem", "minecraft:snowball"),
+                    EffectSfx.parse(json));
         }
     }
 
     @Override
     public void apply(ServerLevel level, LivingEntity caster, JutsuEntry jutsu) {
         Params params = Params.parse(jutsu.effectParams().getAsJsonObject());
+        // Suena al lanzar, no al impactar: el playsound del Rasenshuriken esta en throw.mcfunction, la primera
+        // linea (F10/DJT-227). Es el unico proyectil con sonido propio en el datapack.
+        params.sfx().play(level, caster.getX(), caster.getY(), caster.getZ());
         NinjaProjectile projectile = NinjaProjectile.create(level, caster)
                 .withGravity(params.gravity())
                 .withLifetime(params.lifetimeTicks())

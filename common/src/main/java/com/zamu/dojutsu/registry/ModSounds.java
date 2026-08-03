@@ -21,12 +21,20 @@ import net.minecraft.sounds.SoundEvent;
  * 16— asi que mantenerlos deja la correspondencia 1:1 con las llamadas originales y con el {@code sounds.json}
  * del RP. Renombrar habria roto la unica pista que dice que sonido va donde.
  *
- * <h2>Ocho de los 28 no los llama el datapack</h2>
- * {@code isshiki.reappear}, {@code mangekyo.susanoo.activate_1}, {@code jutsu.chidori}, {@code jutsu.rasengan},
- * {@code jutsu.rasenshuriken}, {@code jutsu.frog_call}, {@code jutsu.white_rage_technique} y
- * {@code misc.ear_ringing} estan en el RP pero ningun {@code playsound} los usa: son <b>arte producido y nunca
- * cableado</b>. Se registran igual —el fichero existe y suena— y quedan disponibles para quien conecte la
- * tecnica que les corresponde.
+ * <h2>Correccion (F10/DJT-227): los 28 se usan, ninguno sobra</h2>
+ * Esta ficha afirmaba que ocho eran "arte producido y nunca cableado". <b>Era falso</b>, y el fallo estaba en
+ * como se busco: el datapack invoca buena parte de sus sonidos <b>con el namespace delante</b>
+ * ({@code playsound minecraft:dojutsu.isshiki.reappear}), asi que un grep de {@code playsound dojutsu.} los
+ * dejaba fuera. Contando bien salen <b>92 llamadas</b> y los <b>28</b> aparecen en alguna.
+ *
+ * <p>Los ocho tenian su sitio desde el principio: {@code susanoo.activate_1} en {@code susanoo/activate} y
+ * {@code deactivate}; {@code jutsu.chidori} y {@code jutsu.rasengan} en el {@code ready} de sus golpes
+ * cargados; {@code jutsu.rasenshuriken} en {@code rasenshuriken/throw}; {@code isshiki.reappear} en
+ * {@code sukunahikona_self/end}; y {@code frog_call}, {@code white_rage_technique} y {@code ear_ringing} en
+ * las invocaciones de sabio.
+ *
+ * <p>La leccion no es el grep: es que <b>un recuento equivocado se guarda como hecho</b> y deja de mirarse.
+ * El inventario completo, sonido a sonido y con su estado, esta en {@code docs/sonido.md}.
  */
 public final class ModSounds {
 

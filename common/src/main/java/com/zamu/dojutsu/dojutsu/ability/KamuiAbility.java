@@ -1,6 +1,7 @@
 package com.zamu.dojutsu.dojutsu.ability;
 
 import com.zamu.dojutsu.chakra.ChakraService;
+import com.zamu.dojutsu.core.NinjaSfx;
 import com.zamu.dojutsu.data.NinjaData;
 import com.zamu.dojutsu.data.PlayerNinjaData;
 import com.zamu.dojutsu.dojutsu.EyeStrainService;
@@ -60,9 +61,9 @@ public final class KamuiAbility implements EyeAbility {
     private static void markLocation(ServerPlayer caster, UUID id) {
         KamuiWaypoints.set(id, new KamuiWaypoints.Waypoint(caster.level().dimension(), caster.position(),
                 caster.getYRot(), caster.getXRot()));
+        // Marcar es SILENCIOSO (F10/DJT-227): kamui_set no tiene un solo playsound. El sonido que habia aqui
+        // era inventado — el aviso de que el punto quedo marcado es el mensaje, como en el original.
         caster.sendSystemMessage(Component.translatable("ability.dojutsu.kamui.marked"));
-        caster.level().playSound(null, caster.blockPosition(), SoundEvents.ENDERMAN_TELEPORT,
-                SoundSource.PLAYERS, 0.6f, 1.4f);
     }
 
     /** Segundo lanzamiento: teletransporta al punto marcado, cobrando chakra/fatiga y con cooldown. */
@@ -101,10 +102,16 @@ public final class KamuiAbility implements EyeAbility {
         private KamuiEffects() {
         }
 
+        /**
+         * {@code kamui_tp}: {@code entity.enderman.teleport master @a[distance=..5] ~ ~ ~ 0.8 0} — a
+         * <b>tono 0</b>, que es lo que le da el timbre grave y hueco, y por el canal <b>master</b>. Iba a tono
+         * 1 y por {@code players} (F10/DJT-227). El datapack lo toca dos veces, en el origen y en el destino;
+         * por eso {@code poof} se llama dos veces.
+         */
         static void poof(ServerPlayer at) {
             ServerLevel level = at.serverLevel();
             Vec3 pos = at.position();
-            level.playSound(null, at.blockPosition(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.8f, 1.0f);
+            NinjaSfx.at(at, SoundEvents.ENDERMAN_TELEPORT, SoundSource.MASTER, 0.8F, 0.0F, 5.0D);
             level.sendParticles(ParticleTypes.PORTAL, pos.x, pos.y + 1, pos.z, 40, 0.4, 0.8, 0.4, 0.3);
         }
     }

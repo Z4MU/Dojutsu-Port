@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import com.zamu.dojutsu.DojutsuMod;
 import com.zamu.dojutsu.chakra.ChakraService;
 import com.zamu.dojutsu.core.DomainEvents;
+import com.zamu.dojutsu.core.NinjaSfx;
 import com.zamu.dojutsu.core.PlayerTickSystem;
 import com.zamu.dojutsu.core.TickPhase;
 import com.zamu.dojutsu.data.NinjaData;
@@ -18,6 +19,7 @@ import com.zamu.dojutsu.dojutsu.EyeStrainService;
 import com.zamu.dojutsu.empowerment.ToggleableModeService;
 import com.zamu.dojutsu.entity.AbilityAnchor;
 import com.zamu.dojutsu.progression.LevelingService;
+import com.zamu.dojutsu.registry.ModSounds;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -289,10 +291,10 @@ public final class SusanooService implements PlayerTickSystem {
         public void notifyToggled(boolean active) {
             player.sendSystemMessage(Component.translatable(
                     active ? "susanoo.dojutsu.activated" : "susanoo.dojutsu.deactivated"));
-            if (player.level() instanceof ServerLevel level) {
-                level.playSound(null, player.blockPosition(), SoundEvents.ILLUSIONER_CAST_SPELL,
-                        SoundSource.PLAYERS, 1.0f, active ? 1.0f : 1.5f);
-            }
+            // El Susanoo tiene sonido propio en el resource pack y estaba sonando con uno de vanilla
+            // (F10/DJT-227). susanoo/activate: master, 8 bloques, volumen 1; deactivate: 0.6 y tono 1.5.
+            NinjaSfx.at(player, ModSounds.SUSANOO_ACTIVATE.get(), SoundSource.MASTER,
+                    active ? 1.0F : 0.6F, active ? 1.0F : 1.5F, 8.0D);
         }
     }
 }

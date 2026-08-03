@@ -6160,3 +6160,84 @@ cosas que nadie había ido a comprobar.
 Y la lección de F10 confirma la de DJT-205, ahora con datos: **el build verde no ve el juego**. 973 tests y dos
 loaders arrancando limpios convivieron con bestias sin caja de colisión y un Amaterasu naranja. La primera hora
 de alguien jugando encontró cinco fallos que nueve fases de tests no habían tocado.
+
+---
+
+## 2026-08-03 · DJT-227 — El sonido, y un recuento que estaba mal
+
+Primer ticket del corte hacia la v1. El mod tenía **19 de sus 28 sonidos sin reproducirse nunca**, y castear una
+bola de fuego era silencioso.
+
+### Lo primero que apareció fue un error de medición
+
+La ficha de `ModSounds`, escrita en DJT-224, decía que **ocho de los 28 eran «arte producido y nunca cableado»**.
+Es falso. El datapack invoca buena parte de sus sonidos **con el namespace delante** —`playsound
+minecraft:dojutsu.isshiki.reappear`— y el grep que se usó buscaba `playsound dojutsu.`. Contando las dos formas
+salen **92 llamadas** en 252 ficheros y **los 28 aparecen en alguna**.
+
+No es una anécdota de grep. Un recuento equivocado **se guarda como hecho y deja de mirarse**: durante dos
+tickets hubo ocho sonidos catalogados como imposibles de cablear que tenían su sitio desde el principio — el del
+Susanoo, sin ir más lejos, en `susanoo/activate` y `deactivate`, mientras el mod tocaba ahí un sonido de vanilla.
+
+### `Level.playSound` no servía, y esa es la razón de `NinjaSfx`
+
+El `playsound` del datapack tiene **dos mandos** para decidir quién oye algo: el volumen y el selector
+`@a[distance=0..N]`. Vanilla sólo tiene uno —el radio es `max(16, 16 × volumen)` y no se puede tocar—, así que
+copiar los valores literales habría mandado la curación a **160 bloques** donde el original la acotaba a **5**.
+Factor treinta y dos.
+
+Por eso se envía el `ClientboundSoundPacket` a mano a los jugadores dentro del radio. Y con el alcance ya
+separado, **el volumen literal vuelve a ser el correcto**: DJT-224 había bajado la curación de 10 a 1.0 razonando
+que un volumen mayor que 1 no suena más fuerte. Es cierto a medias — el cliente recorta la sonoridad a 1.0 pero
+usa el volumen crudo para la **atenuación por distancia**, así que a 10 el sonido es plano en todo su radio y a
+1.0 se desvanece a los pocos bloques. Eran sonidos distintos.
+
+### La puerta `d.sfx` es del sonido, no de la técnica
+
+Catorce llamadas van tras `unless predicate dojutsu:sfx_delay`. Es un contador **por jugador y compartido entre
+todos los sonidos**, para que castear en ráfaga no solape treinta copias del mismo audio; encadenar dos
+habilidades distintas dentro de la ventana deja muda a la segunda, y así era. Se porta guardando **el tick en que
+vuelve a estar permitido** en vez de un contador que baje solo: misma semántica, cero trabajo por tick.
+
+### La tentación era una regla por familia, y habría estado mal
+
+«Cada ojo tiene su sonido y suena al usar cualquiera de sus técnicas» es falso. El `cost.mcfunction` compartido
+del Mangekyō **no toca nada**; el `playsound` vive en el coste de **cada** técnica. Y se nota en quién se queda
+callado: **Amaterasu** no suena (la carpeta de Itachi no tiene un solo `playsound`), **las tres del Byakugan**
+tampoco, **las dos del Tenseigan** tampoco, y **Kamui** suena con un sonido **vanilla**.
+
+Haberlo puesto en el pipeline como regla de familia habría dado voz a cuatro técnicas que el original dejó mudas
+y habría pisado la de Obito. Es una **tabla por habilidad**, leída desde el único punto de casteo — y hay tests
+que fallan si alguien la convierte en regla, que es exactamente la clase de cambio que parece una mejora.
+
+### Los jutsus declaran su sonido en su JSON
+
+Ni el volumen, ni el tono, ni el alcance se derivan de la familia: el Chidori y el Corta-Relámpagos comparten
+sonido pero no tono (1 y **0.9**), la madera suena a **5 en 15 bloques** y el golpe cargado a **0.6 en 10**.
+Cablearlo por id habría dejado una lista de nombres dentro del código; declarado como parámetro (`EffectSfx`,
+compartido por cuatro familias), la técnica trae su sonido igual que trae su daño. **Sin `sound` el jutsu es mudo
+a propósito**: de las nueve estructuras de madera sólo tres sonaban.
+
+### Cinco que ya sonaban, y sonaban mal
+
+Susanoo con `illusioner.cast_spell` teniendo el suyo; el Tenseigan Chakra Mode con el par desparejo (tono 1.0 al
+encender, 2 al apagar); Kamui por `players` y tono 1 cuando el datapack usa **`master` y tono 0** —de ahí su
+timbre hueco—; **Kamui sonando al marcar**, que era inventado (`kamui_set` no tiene ningún `playsound`); y la
+recarga del sello SOAH con un tintineo de amatista en vez del sonido de curación.
+
+### Ocho siguen mudos, y no es deuda de sonido
+
+`jutsu.wind`, `flute_song`, `frog_call`, `white_rage_technique`, `ear_ringing`, `sharingan.blind` y los dos de
+Isshiki no tienen dónde sonar porque **su técnica no está portada** (entrenamiento de naturaleza, cadenas
+fantasma, sabio sapo y serpiente, Izanagi, Isshiki). El Jōgan igual: está en el enum de familias pero sus dos
+técnicas no existen. Quedan registrados y listos.
+
+### Validación
+
+`build` multiloader verde, **985 tests** (+12). Ambos loaders arrancan limpios y cargan los **128 jutsus** con
+los cinco parámetros nuevos sin romper el codec estricto. Sin JVMs colgadas. Inventario completo en
+`docs/sonido.md`.
+
+**Lo que no ve un test**: que el sonido se dispare se comprueba; que se oiga bien, no. Queda para partida si la
+puerta de 20 ticks corta de más al encadenar técnicas del Mangekyō, si el alcance manual suena como el original,
+y si el Susanoo con su sonido propio resulta molesto a 8 bloques.
