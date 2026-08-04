@@ -7,8 +7,8 @@ Es el porte a mod del datapack **Dojutsu v1.9.3** de Prof Technic. No es una rei
 —coste de chakra, umbral de habilidad, radio, enfriamiento— está contrastado contra los `.mcfunction` y los
 predicates del original, y donde el mod se aparta queda escrito por qué.
 
-> **Estado: pre-1.0.** Todo el gameplay está portado y validado en los dos loaders. Lo que falta es arte
-> (modelos de Susanoo y de Mangekyō por personaje) y traducciones. Ver [Qué falta](#qué-falta).
+> **Versión 1.0.0.** Las once fases del porte están cerradas y validadas en los dos loaders. Lo que queda es
+> arte —modelos de Susanoo y de Mangekyō por personaje— y traducciones. Ver [Qué falta](#qué-falta).
 
 ## Requisitos
 

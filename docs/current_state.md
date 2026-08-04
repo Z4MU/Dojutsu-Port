@@ -136,7 +136,7 @@ Fase 3 define al ninja (naturalezas, clanes, onboarding).
 
 - **Minecraft:** 1.21.1 · **Java:** 21 · **Gradle wrapper:** 8.10.2
 - **Loader:** Architectury (módulos `common` + `neoforge` + `fabric`)
-- **Namespace / mod id:** `com.zamu.dojutsu` / `dojutsu` · **Versión:** 0.1.0
+- **Namespace / mod id:** `com.zamu.dojutsu` / `dojutsu` · **Versión:** 1.0.0
 - **Repositorio:** https://github.com/Z4MU/Dojutsu-Port.git (rama `main`, CI en verde)
 
 ## 2. Fases

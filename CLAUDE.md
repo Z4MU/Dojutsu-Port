@@ -13,7 +13,7 @@ mantenible. Este repo es el **código del mod**.
 
 - **Minecraft:** 1.21.1 · **Java:** 21 · **Gradle wrapper:** 8.10.2
 - **Loader:** **Architectury multiloader** → subproyectos `common` + `neoforge` + `fabric`
-- **Mod id / namespace:** `dojutsu` / `com.zamu.dojutsu` · **Autor:** Zamu · **Versión:** 0.1.0
+- **Mod id / namespace:** `dojutsu` / `com.zamu.dojutsu` · **Autor:** Zamu · **Versión:** 1.0.0
 - **Repo:** https://github.com/Z4MU/Dojutsu-Port.git (rama `main`, CI en GitHub Actions)
 - **Matriz de versiones (NO cambiar a la ligera):** architectury-loom `1.7.435`,
   architectury-plugin `3.4.164`, architectury API `13.0.8`, fabric-loader `0.16.10`,
