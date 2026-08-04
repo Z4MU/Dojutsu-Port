@@ -6241,3 +6241,60 @@ los cinco parámetros nuevos sin romper el codec estricto. Sin JVMs colgadas. In
 **Lo que no ve un test**: que el sonido se dispare se comprueba; que se oiga bien, no. Queda para partida si la
 puerta de 20 ticks corta de más al encadenar técnicas del Mangekyō, si el alcance manual suena como el original,
 y si el Susanoo con su sonido propio resulta molesto a 8 bloques.
+
+---
+
+## 2026-08-03 · DJT-228 — El cuerpo de las bestias, y un supuesto que no se sostenía
+
+Segundo ticket del corte hacia la v1. La premisa era «las nueve Bestias con Cola se ven como un ravager, hay que
+darles su malla». La premisa era falsa por los dos lados.
+
+### El ravager es lo que hace el datapack
+
+`tailed_beasts/spawn/spawn_tb_entity` invoca un **ravager de verdad** —1024 de vida, 30 de armadura— y **la línea
+que lo haría invisible está comentada**. Encima le pone un `armor_stand` invisible sosteniendo un
+`knowledge_book` con `CustomModelData`. El mod llevaba nueve fases con una ficha que llamaba a eso «malla
+prestada, provisional».
+
+### Y de los diez modelos que su resource pack declara, sólo existen dos
+
+El pack mapea `14600..14609` a `tailed_beast/1_tail` … `10_tails`, pero **sólo trae `8_tails.json` y
+`9_tails.json`**. Los otros ocho apuntan a ficheros que no existen: en el juego original, **siete bestias y el
+Diez Colas se ven como un ravager con el cubo morado y negro de "modelo ausente" flotando encima**.
+
+Así que el ticket no era «portar nueve mallas» sino **portar las dos que existen**. Las siete restantes serían
+autoría de arte nuevo — otro trabajo y otra decisión, no un porte. Lo único que no se reproduce a propósito es
+el cubo de modelo ausente: copiar eso sería portar un fallo.
+
+### Un modelo de ítem no es una malla de entidad
+
+Gyūki y Kurama son modelos de **ítem** de 965 y 1243 cubos. Para dibujarlos sobre una entidad hacen falta o bien
+modelos *sueltos* registrados —que **Architectury 13.0.8 no cubre**, y habría costado un puerto de plataforma por
+loader— o bien el pipeline de ítems. Se usa el segundo, que además es literalmente la maniobra del datapack: un
+ítem-vehículo `beast_body` con `CustomModelData` = número de colas. La diferencia es que aquí el vehículo es
+propio y se llama por lo que hace, en vez de secuestrar un `knowledge_book`.
+
+### Dos cosas que sólo se ven arrancando el cliente
+
+**La primera**: las texturas puestas en `textures/tailed_beast/` no se cosían al atlas y el modelo salía sin
+texturar. El atlas de bloques de vanilla sólo escanea los directorios `block/` e `item/` —de todos los
+namespaces—, así que van en `textures/item/tailed_beast/`. Un servidor dedicado no habría dicho ni una palabra.
+
+**La segunda**, y es la interesante: las texturas vienen a **4096×4096** y **2048×2048** mientras sus modelos
+declaran un espacio UV de **512**. Al entrar en el atlas compartido lo hacían saltar de 1024² a **8192×4096** —
+de 4 MB a **128 MB** de VRAM, más mipmaps, en toda máquina que cargue el mod tenga bestias delante o no.
+
+Las dos cifras se **midieron arrancando el cliente**, no se estimaron. Con las texturas a 1024 el atlas queda en
+**2048×2048 (16 MB)**, y a esa resolución sigue habiendo el doble de píxeles que el espacio UV que el modelo
+direcciona. La decisión —fidelidad total del arte contra 8× de VRAM— es del usuario y se le presentó con los dos
+números medidos; eligió 1024. Los originales siguen en el resource pack de referencia.
+
+### Validación
+
+`build` multiloader verde, **988 tests** (+3). El servidor de NeoForge arranca limpio con el ítem nuevo. El
+**cliente** arranca con **0 modelos y 0 texturas sin resolver** y el atlas en 2048×2048. Sin JVMs colgadas.
+Detalle en `docs/bijuu_arte.md`.
+
+**Lo que no ve un test**: que resuelvan lo dice el arranque; que la bestia se vea bien, no. Quedan para partida la
+escala del cuerpo frente a su caja de colisión, si mira hacia donde camina, y si las dos quedan a la altura
+correcta sobre el suelo.

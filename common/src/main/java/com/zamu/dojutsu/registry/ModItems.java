@@ -126,6 +126,22 @@ public final class ModItems {
     /** Los <b>nueve</b> huevos de invocacion de Bestia con Cola (F10/DJT-225). Ver {@link #registerBeastEggs()}. */
     public static final Map<TailedBeast, RegistryEntry<BeastSpawnEggItem>> BEAST_EGGS = registerBeastEggs();
 
+    /**
+     * <b>Vehiculo de render</b> del cuerpo de las Bestias con Cola (F10/DJT-228). No se obtiene, no se usa y no
+     * sale en ninguna pestaña creativa: existe porque Minecraft <b>solo hornea modelos de item que pertenecen a
+     * un item registrado</b>, y el cuerpo de Gyuki y Kurama es un modelo de item de mil cubos, no una malla de
+     * entidad.
+     *
+     * <p>Es la misma maniobra del datapack, que cuelga sus modelos de un {@code knowledge_book} vanilla. La
+     * diferencia es que aqui el vehiculo es propio y se llama por lo que hace, en vez de secuestrar un item del
+     * juego: {@code beast_body} con {@code CustomModelData} = numero de colas.
+     *
+     * <p>La alternativa era registrar los modelos como <i>sueltos</i>, pero eso no lo cubre Architectury 13.0.8
+     * y habria costado un puerto de plataforma por loader para ahorrarse una entrada de registro.
+     */
+    public static final RegistryEntry<Item> BEAST_BODY =
+            ITEMS.register(DojutsuMod.id("beast_body"), () -> new Item(new Item.Properties().stacksTo(1)));
+
     private ModItems() {
     }
 

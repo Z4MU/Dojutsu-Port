@@ -4,10 +4,10 @@
 > que después sirva de guía al modelar en **Blockbench**.
 > **Qué se modela:** **el efecto que aparece al activar el jutsu** — la bola de fuego que vuela, el rayo que
 > envuelve la mano, la descarga que cubre el área. **No** el icono del ítem.
-> **Cobertura actual:** ✅ Fuego (7/7) · ✅ Rayo (8/8). Pendientes: viento, tierra, agua, yin-yang, taijutsu,
-> genjutsu, médico, fuinjutsu, kenjutsu, aburame, universales y los 16 Kekkei Genkai.
+> **Cobertura actual:** ✅ Fuego (7/7) · ✅ Rayo (8/8) · ✅ Viento (10/10). Pendientes: tierra, agua, yin-yang,
+> taijutsu, genjutsu, médico, fuinjutsu, kenjutsu, aburame, universales y los 16 Kekkei Genkai.
 > **Fuente de los datos mecánicos:** los JSON de `data/dojutsu/jutsu/`, verificados uno a uno.
-> **Fuente del criterio visual:** las 15 texturas 2D existentes, inspeccionadas una a una.
+> **Fuente del criterio visual:** las 25 texturas 2D existentes, inspeccionadas una a una.
 
 ---
 
@@ -30,9 +30,12 @@ antes**. Verificado en el código, no supuesto.
 - De los **7 jutsus de fuego**, **5 son proyectiles** → tienen entidad y el modelo entra casi directo.
 - De los **8 jutsus de rayo**, **ninguno es proyectil** (4 `primed_strike`, 3 `area`, 1 `teleport`) → **los ocho
   necesitan trabajo de programación** antes de que un modelo se pueda ver en partida.
+- De los **10 jutsus de viento**, **3 son proyectiles**; los otros 7 se reparten entre 2 `primed_strike`,
+  3 `buff` y 1 `area` + 1 `teleport`. Viento es el elemento con **más efectos sobre el propio jugador** del mod
+  (3 auras), y ninguna de las tres tiene hoy visual.
 
 No es un motivo para no diseñarlos: tener la referencia de arte primero es sensato. Pero conviene saber que
-rayo no es "modelar y listo" como fuego.
+rayo no es "modelar y listo" como fuego, y que viento pide resolver el problema de las auras.
 
 ---
 
@@ -476,7 +479,295 @@ elaborada de las cuatro de mano, como corresponde al techo de la rama.
 
 ---
 
-## 5. Coherencia entre piezas
+## 5. Viento (Fūton) — 10 jutsus
+
+El elemento **más largo del mod** y el más variado en familias: 3 proyectiles, 2 golpes cargados, 3 auras,
+1 área y 1 teleport. También es el **único cuya secuencia de learner está completa** — fuego, agua, tierra y
+rayo terminan en un `*_cloak` que no existe; aquí `wind_cloak` sí está implementado.
+
+| # | Jutsu | Familia | Coste | Datos | Daño |
+|---|---|---|---|---|---|
+| 1 | Propelling Winds | buff | 30 | jump_boost IV + slow_falling, 6 s | — |
+| 2 | Wind Torpedo | proyectil | 60 | vel. 1.6 | 7 |
+| 3 | Wind Instantaneous Body | teleport | 80 | 4–10 bl. | — |
+| 4 | Vacuum Wave | area | 70 | radio **10**, lanza 8 bl. hacia arriba | — (el daño es la caída) |
+| 5 | Drilling Air Bullet | proyectil | 100 | vel. **1.8** (el más rápido del mod) | 9 |
+| 6 | Wind Mode | buff | 100 | speed II + jump_boost II, 30 s | — |
+| 7 | Rasengan | primed_strike | 100 | carga 3 s | 10 |
+| 8 | Big Ball Rasengan | primed_strike | 200 | carga 3 s | 16 |
+| 9 | Wind Cloak | buff | 150 | speed III + resistance I, 30 s | — |
+| 10 | Rasenshuriken | proyectil | 300 | vel. 1.2, radio 6 | **18** (el mayor del mod) |
+
+> **Las tres paletas de viento — esto sí conviene conservarlo.** A diferencia del violeta suelto de Lightning
+> Cutter, el arte de viento está dividido en tres gamas y la división **tiene sentido**:
+>
+> | Gama | Jutsus | Lectura |
+> |---|---|---|
+> | **Blanco / gris pálido** | Propelling Winds, Wind Torpedo, Wind Instantaneous Body, Vacuum Wave, Drilling Air Bullet | Aire puro, corriente, presión. Casi incoloro |
+> | **Azul cian** | Rasengan, Big Ball Rasengan, Rasenshuriken | La familia Rasengan: chakra concentrado, no naturaleza |
+> | **Verde** | Wind Mode, Wind Cloak | La naturaleza viento aplicada al cuerpo |
+>
+> Es una distinción legible y fiel al material original (el Rasengan es manipulación de forma, azul; el Fūton
+> como naturaleza suele representarse verde). **Recomiendo mantener las tres.** Los prompts de abajo las
+> respetan.
+
+---
+
+### 1. Propelling Winds — *Fūton: Reppūshō* · buff
+
+**Qué hace.** El jutsu más barato del elemento (30). Da salto potenciado IV y caída lenta durante 6 segundos:
+es un impulso vertical, no un ataque.
+
+**Qué se ve hoy.** Nada.
+
+**Qué debe representar el modelo.** El único que va **bajo los pies**, y eso lo separa de las otras dos auras
+de golpe. Un **cojín de aire** de **2 × 0.4 × 2 bloques**: un disco achatado y aplanado justo debajo del
+jugador, formado por anillos concéntricos de borde dentado que giran. La textura actual es exactamente eso —
+un aro serrado comprimido en vertical, visto en escorzo. Casi incoloro: se ve por la distorsión, no por el
+color.
+
+**Paleta.** Blanco `#FFFFFF`, gris pálido `#D8E2E8`, sombra gris azulada `#9EB0BC`.
+
+> **Prompt:**
+> Un cojín de aire comprimido justo bajo los pies: un disco muy achatado de unos 2 bloques de Minecraft de
+> ancho y muy poca altura, formado por dos o tres anillos concéntricos de borde dentado, ligeramente
+> desalineados entre sí como si girasen. Casi incoloro: blanco y gris pálido con sombras gris azulado, se lee
+> por la forma y no por el color. Semitransparente. Estilo Minecraft voxel: caras planas, bordes duros, sin
+> degradados suaves ni antialiasing. Paleta de 3 tonos. Efecto único centrado sobre fondo gris neutro liso,
+> vista tres cuartos isométrica ligera, sin personajes ni escenario. Sin texto, sin marco.
+
+---
+
+### 2. Wind Torpedo — *Fūton: Shinkūgyoku* · proyectil
+
+**Qué hace.** El proyectil básico del elemento: rápido (1.6), 7 de daño, sin aura ni área. Vuela y pega.
+
+**Qué se ve hoy.** Una `phantom_membrane` vanilla volando.
+
+**Qué debe representar el modelo.** Una **espiral de aire alargada en vuelo**. Cuerpo de
+**0.4 × 0.4 × 1.1 bloques**: una hélice de arcos blancos apilados que se estrechan hacia la punta, como un
+sacacorchos de viento visto de lado. La textura actual es justo eso — una pila de arcos curvos blancos
+solapados. **Es hueco**: se ve entre las vueltas de la espiral, a diferencia de las masas macizas de fuego.
+
+**Paleta.** Blanco `#FFFFFF`, gris claro `#DCE6EC`, sombra `#A6B8C4`.
+
+> **Prompt:**
+> Un torpedo de aire en vuelo con forma de espiral alargada: una hélice de arcos blancos apilados que giran
+> alrededor de un eje horizontal y se estrechan progresivamente hasta una punta, de aproximadamente 1 bloque de
+> Minecraft de largo y muy estrecho. Estructura hueca y calada, se ve entre las vueltas de la espiral. Blanco
+> y gris pálido, casi incoloro, semitransparente. Estilo Minecraft voxel: caras planas, bordes duros, sin
+> degradados suaves ni antialiasing. Paleta de 3 tonos. Objeto único centrado sobre fondo gris neutro liso,
+> vista tres cuartos isométrica ligera, sin personajes ni escenario. Sin texto, sin marco.
+
+---
+
+### 3. Wind Instantaneous Body — *Fūton: Shunshin* · teleport
+
+**Qué hace.** Reubica al lanzador entre 4 y 10 bloques. Sin daño.
+
+**Qué se ve hoy.** Partículas `POOF`.
+
+**Qué debe representar el modelo.** El **anillo de aire desplazado** que queda al desaparecer. Aro de
+**2 × 2 bloques**, plano, con el **centro completamente vacío** y el borde erizado de púas cortas — la textura
+actual es un aro dentado pálido con hueco central. Esa es su diferencia clave con los otros dos "estallidos de
+salida" del documento: Fire Transport tiene núcleo macizo y Lightning Instantaneous Body tiene rayos que nacen
+de un centro brillante; **aquí no hay centro en absoluto**, porque el aire se aparta, no estalla.
+
+**Paleta.** Blanco `#FFFFFF`, gris pálido `#D0DDE4`, sombra `#98ACB8`.
+
+> **Prompt:**
+> Un anillo de aire desplazado, plano y de unos 2 bloques de Minecraft de diámetro, con el centro
+> completamente hueco y vacío. El borde del aro está erizado de púas cortas e irregulares apuntando hacia
+> fuera, como una onda de presión que aparta el aire. Blanco y gris pálido, casi incoloro, semitransparente,
+> sin ningún núcleo brillante en el centro. Estilo Minecraft voxel: caras planas, bordes duros, sin degradados
+> suaves ni antialiasing. Paleta de 3 tonos. Efecto único centrado sobre fondo gris neutro liso, vista tres
+> cuartos isométrica ligera, sin personajes ni escenario. Sin texto, sin marco.
+
+---
+
+### 4. Vacuum Wave — *Fūton: Shinkūha* · area
+
+**Qué hace.** El **área más amplia del mod** (radio 10). No hace daño directo: **lanza a todo lo que atrapa
+8 bloques hacia arriba** y les da caída lenta. El daño real es la caída — un detalle heredado del datapack.
+
+**Qué se ve hoy.** Nada.
+
+**Qué debe representar el modelo.** Una **onda expansiva horizontal**, la pieza más ancha de todo el documento.
+Anillos concéntricos planos de **20 bloques de diámetro** y muy poca altura, expandiéndose desde el centro —
+la textura actual son exactamente círculos concéntricos. Debe leerse como **desplazamiento de aire a ras de
+suelo**, no como explosión: sin púas, sin masa, solo ondas limpias que se abren. Conviene que los anillos
+exteriores sean más finos y tenues que los interiores.
+
+**Paleta.** Blanco `#FFFFFF`, gris pálido `#DAE4EA`, borde tenue `#B4C4CE`.
+
+> **Prompt:**
+> Una onda expansiva de aire a ras de suelo: tres o cuatro anillos concéntricos planos y muy finos
+> expandiéndose desde un centro común, cubriendo un área muy amplia y baja. Los anillos exteriores son más
+> delgados y tenues que los interiores, sugiriendo que se disipan al alejarse. Sin púas, sin masa, sin
+> explosión: solo desplazamiento limpio de aire. Blanco y gris pálido, casi incoloro, semitransparente. Estilo
+> Minecraft voxel: caras planas, bordes duros, sin degradados suaves ni antialiasing. Paleta de 3 tonos.
+> Efecto único centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera con la cámara
+> ligeramente elevada, sin personajes ni escenario. Sin texto, sin marco.
+
+---
+
+### 5. Drilling Air Bullet — *Fūton: Renkūdan* · proyectil
+
+**Qué hace.** El **proyectil más rápido de todo el mod** (velocidad 1.8), 9 de daño. Sin aura: es puntería pura.
+
+**Qué se ve hoy.** Una `phantom_membrane` vanilla volando.
+
+**Qué debe representar el modelo.** Un **taladro de aire comprimido**. Cuerpo de **0.5 × 0.5 × 1.3 bloques**
+formado por una **retícula de líneas cruzadas** que envuelven un núcleo hueco, estrechándose hacia una punta
+cónica. La textura actual es una malla romboidal de líneas blancas solapadas, y esa cualidad **de rejilla** es
+lo que lo distingue del nº 2: el Wind Torpedo es una espiral suelta; este es una estructura tensa y apretada.
+
+**Paleta.** Blanco `#FFFFFF`, gris claro `#DCE6EC`, sombra `#A0B4C0`.
+
+> **Prompt:**
+> Un proyectil de aire comprimido con forma de taladro alargado: un cuerpo cónico de aproximadamente 1,3
+> bloques de Minecraft de largo, envuelto por una retícula tensa de líneas blancas finas que se cruzan
+> formando rombos apretados alrededor de un núcleo hueco, convergiendo en una punta afilada. Estructura de
+> rejilla, no de espiral suelta. Blanco y gris pálido, casi incoloro, semitransparente. Aspecto de velocidad
+> extrema. Estilo Minecraft voxel: caras planas, bordes duros, sin degradados suaves ni antialiasing. Paleta
+> de 3 tonos. Objeto único centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera, sin
+> personajes ni escenario. Sin texto, sin marco.
+
+---
+
+### 6. Wind Mode — *Fūton Mōdo* · buff
+
+**Qué hace.** Aura de 30 segundos: velocidad II y salto II. La versión ligera del nº 9.
+
+**Qué se ve hoy.** Nada.
+
+**Qué debe representar el modelo.** La primera de las dos auras **verdes**, y la que debe leerse como
+**contenida y geométrica**. La textura actual es un octógono verde con orbes dentro, y esa cualidad ordenada
+es su identidad. En 3D: **placas planas y angulosas de viento verde orbitando cerca del cuerpo**, unas seis u
+ocho, separadas entre sí y dejando ver al jugador — una envoltura de facetas, no una masa. Volumen total
+aproximado **1.4 × 2.2 × 1.4 bloques**.
+
+**Paleta.** Verde `#3FBF6A`, brillo verde claro `#8AE8A8`, sombra verde oscuro `#1E7A42`.
+
+> **Prompt:**
+> Una envoltura de viento verde formada por seis u ocho placas planas y angulosas suspendidas alrededor de un
+> espacio vertical del tamaño de un personaje, claramente separadas entre sí y dejando grandes huecos por los
+> que se ve a través. Cada placa tiene borde definido y un brillo verde claro en el canto. Aspecto ordenado y
+> geométrico, contenido, nada caótico. Verde saturado con sombras verde oscuro. Semitransparente. Estilo
+> Minecraft voxel: caras planas, bordes duros, sin degradados suaves ni antialiasing. Paleta de 3 tonos.
+> Efecto solo, centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera, sin personaje
+> dentro. Sin texto, sin marco.
+
+---
+
+### 7. Rasengan — *Rasengan* · primed_strike
+
+**Qué hace.** El golpe cargado emblemático. Carga 3 segundos y descarga 10 de daño al siguiente golpe cuerpo a
+cuerpo. Afinidad de viento 150.
+
+**Qué se ve hoy.** Nada durante la carga.
+
+**Qué debe representar el modelo.** La **esfera girando en la palma**. Bola de **0.8 × 0.8 × 0.8 bloques**
+sostenida sobre la mano abierta —**no envolviéndola** como el Chidori, esa es la diferencia clave entre las dos
+técnicas de mano del mod—. Superficie con **estriaciones en espiral** que giran alrededor de un eje visible y
+un núcleo blanco brillante; borde erizado de púas cortas. La textura actual es una esfera cian de borde
+dentado y así debe quedarse.
+
+**Paleta.** Azul cian `#3FA8E8`, núcleo blanco `#FFFFFF`, azul profundo `#1B6FA8`.
+
+> **Prompt:**
+> Una esfera de chakra azul girando, del tamaño de un puño (unos 0,8 bloques de Minecraft), sostenida sobre una
+> palma abierta y sin tocarla ni envolverla. Superficie recorrida por estriaciones en espiral que giran
+> alrededor de un eje visible, núcleo blanco brillante en el centro y borde erizado de púas muy cortas y
+> regulares. Azul cian con sombras azul profundo. Sensación de rotación rápida y contenida. Puede incluirse
+> una mano cúbica estilizada de Minecraft abierta, en gris plano, solo como referencia de escala. Efecto
+> emisivo. Estilo Minecraft voxel: caras planas, bordes duros, sin degradados suaves ni antialiasing. Paleta de
+> 4 tonos. Centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera. Sin texto, sin marco.
+
+---
+
+### 8. Big Ball Rasengan — *Ōdama Rasengan* · primed_strike
+
+**Qué hace.** El Rasengan agrandado: mismo tiempo de carga (3 s), el doble de coste (200) y 16 de daño.
+
+**Qué se ve hoy.** Nada durante la carga.
+
+**Qué debe representar el modelo.** **Exactamente el nº 7 pero al doble de tamaño**, y ahí está la gracia: la
+diferencia debe ser de **escala pura**, no de forma. Bola de **1.6 × 1.6 × 1.6 bloques**, tan grande que ya no
+se sostiene sobre la palma sino que la envuelve. Su textura es la de mayor resolución del catálogo (128×128) y
+muestra las estriaciones en espiral con mucho más detalle: conviene aprovecharlas y hacerlas más marcadas que
+en el Rasengan pequeño.
+
+**Paleta.** La misma del nº 7 — azul cian `#3FA8E8`, núcleo blanco `#FFFFFF`, azul profundo `#1B6FA8`.
+
+> **Prompt:**
+> Una esfera de chakra azul girando, muy grande, de aproximadamente 1,6 bloques de Minecraft de diámetro,
+> sostenida desde abajo por un brazo que apenas la abarca. Superficie recorrida por estriaciones en espiral
+> muy marcadas y densas girando alrededor de un eje visible, con un núcleo blanco cegador en el centro que se
+> difumina hacia el azul cian del exterior. Borde ligeramente irregular por la velocidad de giro. Sensación de
+> masa y poder contenido. Puede incluirse un brazo cúbico estilizado de Minecraft, en gris plano, solo como
+> referencia de escala. Efecto emisivo. Estilo Minecraft voxel: caras planas, bordes duros, sin degradados
+> suaves ni antialiasing. Paleta de 4 tonos. Centrado sobre fondo gris neutro liso, vista tres cuartos
+> isométrica ligera. Sin texto, sin marco.
+
+---
+
+### 9. Wind Cloak — *Fūton no Yoroi* · buff
+
+**Qué hace.** El aura mayor: velocidad III y resistencia I durante 30 segundos, por 150 de chakra. Afinidad 250.
+Es el único de los tres buffs que **protege**, no solo acelera.
+
+**Qué se ve hoy.** Nada.
+
+**Qué debe representar el modelo.** La segunda aura **verde**, y la opuesta al nº 6: donde Wind Mode es
+geométrico y separado, **Wind Cloak es una envoltura continua**. Cáscara con forma de **gota o llama vertical**
+de **1.3 × 2.4 × 1.3 bloques** que rodea al jugador entero y se afina en punta por encima de la cabeza — la
+textura actual es exactamente esa silueta de llama verde. Superficie estriada con líneas verticales que suben,
+sugiriendo corriente ascendente. Debe ser **translúcida**, no puede tapar al jugador.
+
+**Paleta.** Verde `#35B562`, brillo `#7FE49B`, verde oscuro `#166B38`.
+
+> **Prompt:**
+> Un manto de viento verde envolviendo por completo un espacio vertical del tamaño de un personaje, con forma
+> de gota o llama que rodea el cuerpo y se afina en una punta por encima de la cabeza. Superficie continua y
+> translúcida, recorrida por estriaciones verticales que ascienden sugiriendo corriente de aire. A diferencia
+> de una envoltura de placas separadas, esta es una cáscara entera y cerrada, pero lo bastante transparente
+> para ver a través. Verde saturado con brillo verde claro en los bordes y sombras verde oscuro. Estilo
+> Minecraft voxel: caras planas, bordes duros, sin degradados suaves ni antialiasing. Paleta de 3 tonos.
+> Efecto solo, centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera, sin personaje
+> dentro. Sin texto, sin marco.
+
+---
+
+### 10. Rasenshuriken — *Fūton: Rasenshuriken* · proyectil
+
+**Qué hace.** El **jutsu más letal del mod entero**: 18 de daño, radio 6, coste 300 y enfriamiento de 60
+segundos. Exige afinidad de viento 500, el techo. Cierra la rama.
+
+**Qué se ve hoy.** Una `nether_star` vanilla volando — el único jutsu de viento que no usa `phantom_membrane`,
+señal de que ya se le quiso dar un aspecto distinto.
+
+**Qué debe representar el modelo.** La única pieza **con forma de arma reconocible** de los tres elementos
+documentados. Shuriken de **2 × 2 × 0.5 bloques**: **cuatro aspas curvas** que nacen de un núcleo esférico
+brillante y se abren en molinete, todas con el mismo sentido de giro. La textura actual es exactamente ese
+molinete cian de cuatro palas. En vuelo debe girar sobre su propio eje. El aro exterior de viento (radio 6) se
+puede sugerir con un **disco tenue y translúcido** que une las puntas de las aspas.
+
+**Paleta.** Cian `#4FC4F0`, núcleo blanco `#FFFFFF`, azul profundo `#1D6E9E`, disco tenue `#B8E8FA`.
+
+> **Prompt:**
+> Un shuriken gigante de viento y chakra, de unos 2 bloques de Minecraft de envergadura y muy plano: cuatro
+> aspas curvas idénticas que nacen de un núcleo esférico blanco cegador y se abren en molinete, todas
+> inclinadas en el mismo sentido de giro, con los bordes afilados. Un disco muy tenue y translúcido de aire
+> conecta las puntas de las cuatro aspas, sugiriendo el anillo de viento que genera al girar. Cian brillante
+> con sombras azul profundo. Sensación de rotación violenta y de arma peligrosa. Efecto emisivo. Estilo
+> Minecraft voxel: caras planas, bordes duros, sin degradados suaves ni antialiasing. Paleta de 4 tonos.
+> Objeto único centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera, sin personajes ni
+> escenario. Sin texto, sin marco.
+
+---
+
+## 6. Coherencia entre piezas
 
 Las formas están pensadas para no repetirse **dentro de cada elemento** y para que fuego y rayo no se confundan
 entre sí.
@@ -509,22 +800,70 @@ entre sí.
 **Las cuatro piezas de mano son la familia interna más delicada**, porque comparten sitio y escala. Se separan
 así: nº 1 **escaso**, nº 5 **compacto**, nº 6 **afilado y recto**, nº 8 **largo y en espiral**.
 
+**Viento — casi todo es hueco y calado; se ve por la forma, no por el color:**
+
+| # | Jutsu | Forma | Tamaño aprox. | Dónde aparece | Gama |
+|---|---|---|---|---|---|
+| 1 | Propelling Winds | Disco achatado | 2 bl. | Bajo los pies | Blanco |
+| 2 | Wind Torpedo | Espiral alargada | 1,1 bl. | En vuelo | Blanco |
+| 3 | Wind Instantaneous Body | Aro sin centro | 2 bl. | Punto de salida | Blanco |
+| 4 | Vacuum Wave | Anillos concéntricos | 20 bl. Ø | A ras de suelo | Blanco |
+| 5 | Drilling Air Bullet | Cono de rejilla | 1,3 bl. | En vuelo | Blanco |
+| 6 | Wind Mode | Placas separadas | 1,4 × 2,2 bl. | Envolviendo | Verde |
+| 7 | Rasengan | Esfera estriada | 0,8 bl. | Sobre la palma | Cian |
+| 8 | Big Ball Rasengan | Esfera estriada | 1,6 bl. | Sobre el brazo | Cian |
+| 9 | Wind Cloak | Cáscara continua | 1,3 × 2,4 bl. | Envolviendo | Verde |
+| 10 | Rasenshuriken | Molinete de 4 aspas | 2 bl. | En vuelo | Cian |
+
+### Cómo se separan los elementos entre sí
+
+Con tres elementos ya documentados conviene fijar la regla, porque a partir de aquí es fácil que empiecen a
+parecerse:
+
+| | Fuego | Rayo | Viento |
+|---|---|---|---|
+| **Materia** | Masa maciza | Estructura angulosa | Estructura hueca y calada |
+| **Contorno** | Orgánico, irregular | Zigzag duro | Curvas limpias, espirales |
+| **Color** | Naranja-rojo saturado | Cian, dorado, blanco | Casi incoloro (+ verde y cian) |
+| **Dónde vive** | Volando y envolviendo | Pegado al cuerpo | Repartido en las tres |
+| **Transparencia** | Opaco | Emisivo denso | **Semitransparente** |
+
+La transparencia es la baza más fuerte de viento: es el único elemento que debe verse **a través**.
+
+### Colisiones internas a vigilar
+
+Tres parejas comparten sitio y escala y pueden confundirse si el arte no las separa a propósito:
+
+| Pareja | Riesgo | Cómo se resuelve |
+|---|---|---|
+| Rasengan (viento 7) vs. Chidori (rayo 5) | Ambas son esferas de ~0,8 bl. en la mano | El Rasengan **se sostiene sobre la palma abierta**; el Chidori **envuelve el puño cerrado**. Además azul liso vs. cian erizado |
+| Fire Transport (fuego 3) vs. Wind Inst. Body (viento 3) vs. Lightning Inst. Body (rayo 2) | Los tres son el destello del teleport, todos de ~2 bl. | Fuego: **núcleo macizo** con púas gruesas. Rayo: **rayos finos desde un centro brillante**. Viento: **aro sin centro alguno** |
+| Drilling Air Bullet (viento 5) vs. Drilling Hand (rayo 8) | Ambos son "taladros" cónicos | Viento: **rejilla romboidal tensa**, en vuelo, incoloro. Rayo: **espiral helicoidal**, en el antebrazo, cian brillante |
+
 ---
 
-## 6. Pendiente de decidir
+## 7. Pendiente de decidir
 
 1. **El color de Lightning Cutter.** Hoy es violeta y rompe su parentesco con el Chidori (§4). He escrito el
    prompt en cian-blanco con la alternativa violeta anotada. Decide antes de generar.
-2. **`fire_cloak` y `lightning_cloak` no existen.** Ambos cierran su secuencia de learner en los datos, pero
-   **el jutsu no está implementado** (auditoría §1.6). Serían auras envolventes, como Fireproof. Si se van a
-   implementar, pídemelos y los añado.
-3. **`drilling_hand_of_sage_lightning` tiene una textura de 64×128**, la única no cuadrada del catálogo, cuando
-   todas las demás son 32×32. Con `item/generated` eso se renderiza raro. Conviene mirarlo al tocar esa pieza.
-4. **Programación previa.** Los 8 de rayo y 2 de fuego (Fireproof, Fire Transport) **no tienen hoy dónde
-   colgarse** (§1). Antes de que se vean en partida hacen falta:
-   - un renderer propio para `ninja_projectile` que dibuje modelos en vez del `displayItem` (desbloquea los 5
-     proyectiles de fuego de golpe, y todos los proyectiles del resto de elementos);
-   - un visual de **ventana de carga** para `primed_strike` (desbloquea 4 de los 8 de rayo);
-   - un visual de **estallido de área** para `area` (desbloquea 3 de los 8 de rayo, y buena parte de los KG).
-
-   Ese orden es también el de mejor retorno: el renderer de proyectil es una pieza y sirve a decenas de jutsus.
+2. **Las tres gamas de viento** (§5). A diferencia del punto anterior, aquí **recomiendo no tocar nada**: la
+   división blanco / cian / verde es coherente y fiel al material original. Lo anoto para que sea una decisión
+   consciente y no una inconsistencia heredada.
+3. **`fire_cloak` y `lightning_cloak` no existen.** Ambos cierran su secuencia de learner en los datos, pero
+   **el jutsu no está implementado** (auditoría §1.6). Serían auras envolventes; ahora que `wind_cloak` y
+   `wind_mode` dan la plantilla verde, replicarla para fuego y rayo es directo. Igual pasa con `earth_cloak` y
+   `water_cloak`. **Viento es el único elemento con la rama entera.**
+4. **Dos texturas se salen del formato.** Todas son 32×32 salvo
+   `drilling_hand_of_sage_lightning` (**64×128**, la única no cuadrada) y `big_ball_rasengan` (**128×128**).
+   Con `item/generated` la primera se renderiza raro. Conviene mirarlas al tocar esas piezas — aunque para el
+   Big Ball Rasengan el detalle extra es una ventaja al modelar.
+5. **Programación previa.** De los 25 jutsus documentados, **17 no tienen hoy dónde colgar un modelo** (§1).
+   Antes de que se vean en partida hacen falta, por orden de retorno:
+   - un **renderer propio para `ninja_projectile`** que dibuje modelos en vez del `displayItem` → desbloquea de
+     golpe **8 piezas** (5 de fuego + 3 de viento) y todos los proyectiles de los elementos restantes. Es una
+     sola pieza de código y la de mayor impacto con diferencia;
+   - un visual de **ventana de carga** para `primed_strike` → desbloquea **6** (4 de rayo + 2 de viento);
+   - un visual de **aura sobre el jugador** para `buff` → desbloquea **4** (1 de fuego + 3 de viento), y hará
+     falta igualmente para los seis modos activables (Susanoo, sabio, sello maldito, puertas, SOAH, Tenseigan);
+   - un visual de **estallido de área** para `area` → desbloquea **4** (3 de rayo + 1 de viento) y buena parte
+     de los 16 Kekkei Genkai, donde `area` es la familia dominante.

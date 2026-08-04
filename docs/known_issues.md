@@ -118,6 +118,16 @@ checklist de DJT-223.
   no lo ve ningún test. Sin comprobar: si la puerta compartida de 20 ticks corta de más al encadenar técnicas
   del Mangekyō, si el alcance enviado a mano suena igual que el selector del datapack, y si el Susanoo con su
   sonido propio resulta molesto a 8 bloques.
+- **Corrección: las Bestias con Cola no tenían «24 assets pendientes»** (DJT-228). El recuento anterior daba por
+  hecho que existían nueve modelos por portar. **El resource pack original sólo trae dos** —Gyūki (965 cubos) y
+  Kurama (1243)—; los otros ocho `CustomModelData` apuntan a ficheros que no existen, así que en el juego
+  original siete bestias y el Diez Colas se ven como un **ravager** con el cubo de "modelo ausente" encima. Y el
+  ravager tampoco era una improvisación del mod: el datapack invoca uno de verdad y **la línea que lo haría
+  invisible está comentada**. Portar las siete que faltan sería **autoría de arte nuevo**, no porte. Detalle en
+  `docs/bijuu_arte.md`.
+- **Las texturas de las dos bestias van a 1024px, no a su resolución original** (DJT-228, decisión del usuario
+  con las dos cifras medidas): a 4096/2048 el atlas de bloques compartido salta a 8192×4096 (**128 MB** de VRAM
+  + mipmaps) frente a 2048×2048 (**16 MB**). Los originales siguen en el resource pack de referencia.
 - **Assets parciales** (DJT-224, pasada 1 hecha; +DJT-225 aportó los 19 PNG de sus ítems): ya están **ítems**
   (máscaras, arrojadizas, ADN, contrato, píldoras, huevos de bestia, pergaminos, ramen, bomba de humo, sello,
   tanto), **iconos de clan** y los **28 sonidos**. Siguen pendientes de la pasada 2: **ojos** (52 texturas),
