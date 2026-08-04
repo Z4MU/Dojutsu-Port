@@ -118,6 +118,9 @@ checklist de DJT-223.
   no lo ve ningún test. Sin comprobar: si la puerta compartida de 20 ticks corta de más al encadenar técnicas
   del Mangekyō, si el alcance enviado a mano suena igual que el selector del datapack, y si el Susanoo con su
   sonido propio resulta molesto a 8 bloques.
+- **Sólo hay `en_us.json`.** No hay traducción al español pese a que el proyecto y su documentación están en
+  español. `LocalizationKeysTest` (DJT-229) garantiza que no falte ninguna clave literal en inglés, pero no
+  puede decir nada de un idioma que no existe.
 - **Corrección: las Bestias con Cola no tenían «24 assets pendientes»** (DJT-228). El recuento anterior daba por
   hecho que existían nueve modelos por portar. **El resource pack original sólo trae dos** —Gyūki (965 cubos) y
   Kurama (1243)—; los otros ocho `CustomModelData` apuntan a ficheros que no existen, así que en el juego
