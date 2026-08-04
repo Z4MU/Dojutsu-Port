@@ -6298,3 +6298,55 @@ Detalle en `docs/bijuu_arte.md`.
 **Lo que no ve un test**: que resuelvan lo dice el arranque; que la bestia se vea bien, no. Quedan para partida la
 escala del cuerpo frente a su caja de colisión, si mira hacia donde camina, y si las dos quedan a la altura
 correcta sobre el suelo.
+
+---
+
+## 2026-08-03 · DJT-229 — La clave del mercader, y un README
+
+Dos piezas del corte hacia la v1, pequeñas y de distinta naturaleza.
+
+### Una clave que no rompía nada, y por eso duró
+
+`ShinobiVillagerService` renombraba al aldeano convertido con
+`Component.translatable("entity.dojutsu.shinobi_villager")`, y esa clave **no estaba en `en_us.json`**. El
+resultado en partida: un mercader llamado literalmente `entity.dojutsu.shinobi_villager`, en dorado, sobre la
+cabeza.
+
+El valor sale del datapack (`trades/setup_shinobi`), que le pone `{"text":"Shinobi","color":"gold"}` — así que
+la traducción es **"Shinobi"** y el dorado ya lo aplicaba el mod.
+
+Lo interesante es por qué sobrevivió: **una clave sin entrada no rompe nada**. El juego pinta el identificador
+crudo y sigue. Ni el build, ni los 988 tests, ni el arranque de los dos loaders dicen una palabra. Es
+exactamente la clase de fallo que sólo ve un jugador mirando.
+
+### Así que se le pone un guardián
+
+`LocalizationKeysTest` recorre las fuentes de los tres módulos, saca toda clave **literal completa** —
+`translatable("x.y")`, descartando las que el código concatena, porque ésas no se pueden resolver sin ejecutar
+el mod— y comprueba que exista en `en_us.json`. También detecta claves duplicadas, que Gson resuelve en silencio
+quedándose con la última.
+
+Con un detalle que importa: **un escáner que no encuentra ficheros aprueba en vacío**, que es peor que fallar.
+Lleva un suelo de cordura (más de 80 claves) para que una ruta rota se note como fallo y no como éxito.
+
+### README
+
+No había. Es la portada del mod y lo primero que abre alguien que se lo descarga: requisitos, instalación,
+**las 12 teclas** —que hasta ahora no estaban escritas en ningún sitio de cara al jugador—, qué contiene, la
+configuración, cómo compilar, y qué falta.
+
+Todos los números están contados del repo, no de memoria, y **dos salieron mal al contrastarlos**:
+
+- Iba a decir «17 Kekkei Genkai» tomándolos de las categorías de jutsu. Son **18**, y no coinciden con las
+  categorías: el Shikotsumyaku de los Kaguya y la línea del clan Jūgo son KG sin categoría propia, y `yin_yang`
+  es categoría sin ser KG.
+- Iba a presentar `/dojutsu reset_ninja` como comando de jugador. **Exige nivel de operador 2**, igual que los
+  20 de depuración: el mod no tiene ni un comando de jugador, se juega con el menú y las teclas.
+
+La sección de licencia dice lo que hay que decir: el código es MIT, **el arte no**, y `ATTRIBUTION.md` es una
+lista de tareas para que sustituirlo sea posible.
+
+### Validación
+
+`build` multiloader verde, **991 tests** (+3). Fabric arranca limpio. Los enlaces del README se comprobaron uno
+a uno. Sin JVMs colgadas.
