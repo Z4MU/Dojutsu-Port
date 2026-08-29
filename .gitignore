@@ -31,3 +31,7 @@ bin/
 # OS
 .DS_Store
 Thumbs.db
+
+# Referencias de arte del usuario (11 MB de imagenes; material de consulta para
+# modelar los jutsus en Blockbench, no entra en el mod ni en la build)
+imagenes referencias jutsus/
