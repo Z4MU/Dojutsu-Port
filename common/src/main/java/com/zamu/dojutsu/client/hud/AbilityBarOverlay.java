@@ -1,30 +1,29 @@
 package com.zamu.dojutsu.client.hud;
 
 import com.zamu.dojutsu.client.ClientNinjaData;
-import com.zamu.dojutsu.items.JutsuComponent;
-import com.zamu.dojutsu.registry.ModDataComponents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.ItemStack;
 
 /**
- * Overlay del cooldown del jutsu equipado ({@code [ADD/10 client]}, {@code [S06]}, F4/DJT-081).
- * <b>Solo cliente.</b> Muestra el nombre del jutsu de la mano principal y una barra que decrece con
- * su cooldown restante.
+ * Overlay del cooldown del jutsu <b>seleccionado</b> ({@code [ADD/10 client]}, {@code [S06]}, F4/DJT-081).
+ * <b>Solo cliente.</b> Muestra su nombre y una barra que decrece con su cooldown restante.
  *
- * <p><b>El jutsu equipado se lee del componente del ItemStack</b> (sincronizado por vanilla), no del
- * sync del mod; el <b>cooldown</b> viene de {@link ClientNinjaData} (alimentado por el sync) y el
- * restante se calcula con el tick de mundo del cliente ({@code level.getGameTime}, sincronizado con
- * el servidor). El cliente nunca decide gameplay: solo pinta lo observado.
+ * <p><b>F11/DJT-232:</b> antes leia el componente del item de la mano principal, porque el jutsu que
+ * lanzabas era el que llevabas. Al retirarse el item como via de lanzamiento eso paso a ser una mentira:
+ * habria pintado el cooldown de algo que la tecla no lanza, y nada mientras tuvieras uno seleccionado. Ahora
+ * sigue a {@link ClientNinjaData#selectedJutsu()}, o sea a lo que la tecla lanza de verdad.
+ *
+ * <p>Tanto la seleccion como el <b>cooldown</b> vienen del sync ({@link ClientNinjaData}); el restante se
+ * calcula con el tick de mundo del cliente ({@code level.getGameTime}, sincronizado con el servidor). El
+ * cliente nunca decide gameplay: solo pinta lo observado.
  *
  * <p>Se dibuja con primitivas (sin texturas todavia): los assets reales llegan con {@code EP-ASSETS}.
  */
 public final class AbilityBarOverlay {
 
-    private static final int X = 10;
-    private static final int Y = 34;
+
     private static final int BAR_WIDTH = 80;
     private static final int BAR_HEIGHT = 4;
 
@@ -38,30 +37,40 @@ public final class AbilityBarOverlay {
 
     /** Dibuja el indicador si hay un jutsu equipado. Los guards comunes los aplica {@link HudOverlays}. */
     public static void render(GuiGraphics graphics, Font font) {
+        HudPlacement placement = HudLayout.get(HudElement.ABILITY_BAR);
+        if (!placement.visible()) {
+            return;
+        }
+        render(graphics, font,
+                placement.resolveX(graphics.guiWidth(), HudElement.ABILITY_BAR.width()),
+                placement.resolveY(graphics.guiHeight(), HudElement.ABILITY_BAR.height()));
+    }
+
+    /** Dibuja la barra en una posicion dada. Lo usa tambien el editor de HUD para la vista previa. */
+    public static void render(GuiGraphics graphics, Font font, int x, int y) {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.player == null || minecraft.level == null) {
             return;
         }
-        ItemStack held = minecraft.player.getMainHandItem();
-        JutsuComponent component = held.get(ModDataComponents.JUTSU.get());
-        if (component == null) {
-            return; // no hay jutsu equipado: el overlay no ocupa espacio
+        String jutsuId = ClientNinjaData.selectedJutsu().orElse(null);
+        if (jutsuId == null) {
+            return; // sin jutsu seleccionado: el overlay no ocupa espacio
         }
 
         long now = minecraft.level.getGameTime();
-        long remaining = ClientNinjaData.remainingCooldown(component.jutsuId(), now);
+        long remaining = ClientNinjaData.remainingCooldown(jutsuId, now);
         boolean ready = remaining <= 0;
 
         // Fondo + barra: llena cuando esta listo, decreciendo con el cooldown.
-        graphics.fill(X - 1, Y - 1, X + BAR_WIDTH + 1, Y + BAR_HEIGHT + 1, COLOR_BORDER);
-        graphics.fill(X, Y, X + BAR_WIDTH, Y + BAR_HEIGHT, COLOR_BACKGROUND);
+        graphics.fill(x - 1, y - 1, x + BAR_WIDTH + 1, y + BAR_HEIGHT + 1, COLOR_BORDER);
+        graphics.fill(x, y, x + BAR_WIDTH, y + BAR_HEIGHT, COLOR_BACKGROUND);
         int filled = ready ? BAR_WIDTH : BAR_WIDTH - emptyPixels(remaining);
-        graphics.fill(X, Y, X + filled, Y + BAR_HEIGHT, ready ? COLOR_READY : COLOR_COOLDOWN);
+        graphics.fill(x, y, x + filled, y + BAR_HEIGHT, ready ? COLOR_READY : COLOR_COOLDOWN);
 
         // Texto: nombre del jutsu + "Ready" o los segundos restantes.
-        Component label = Component.translatable("jutsu.dojutsu." + component.jutsuId());
+        Component label = Component.translatable("jutsu.dojutsu." + jutsuId);
         String status = ready ? " (Ready)" : " (" + tenths(remaining) + "s)";
-        graphics.drawString(font, label.getString() + status, X + BAR_WIDTH + 6, Y - 2,
+        graphics.drawString(font, label.getString() + status, x + BAR_WIDTH + 6, y - 2,
                 ready ? 0xFFFFFF : 0xFFBBBB);
     }
 

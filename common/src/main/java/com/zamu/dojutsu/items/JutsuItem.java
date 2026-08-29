@@ -1,10 +1,13 @@
 package com.zamu.dojutsu.items;
 
 import com.zamu.dojutsu.data.NinjaData;
-import com.zamu.dojutsu.jutsu.JutsuCastPipeline;
+import com.zamu.dojutsu.jutsu.JutsuSelectionService;
+import com.zamu.dojutsu.jutsu.JutsuSelectionService.SelectOutcome;
+import com.zamu.dojutsu.network.NinjaSync;
 import com.zamu.dojutsu.registry.ModDataComponents;
 import com.zamu.dojutsu.registry.ModItems;
 import java.util.List;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -21,11 +24,18 @@ import net.minecraft.world.level.Level;
  * {@link JutsuComponent}. Reemplaza el {@code carrot_on_a_stick{JutsuItem:1b, JutsuId:Nb}} del
  * datapack por un item real con componente tipado.
  *
- * <p>Se lanza de dos formas equivalentes, ambas <b>validadas en servidor</b>: la tecla CastJutsu
- * (DJT-080, {@code CastJutsuPayload}) y el click derecho ({@link #use}, corre server-side, lee su
- * propio componente y valida {@code known}). El cliente nunca decide el resultado; el
- * {@code JutsuCastPipeline} aplica las puertas de chakra/cd/afinidad. El datapack usaba click
- * derecho; la tecla es la modernizacion del ADD (RM-1).
+ * <p><b>Ya no es una via de lanzamiento (F11/DJT-232).</b> El item es el <b>pergamino</b> de la tecnica:
+ * prueba de que la aprendiste, botin, y objeto de intercambio. Quien lanza es el jugador, no lo que lleve en
+ * la mano: la tecla de cast lanza el jutsu <b>seleccionado</b> en su estado ({@code JutsuKnowledge}).
+ *
+ * <p><b>Que hace ahora el click derecho:</b> <b>selecciona</b> este jutsu, por la misma puerta de servidor
+ * que usa la rueda ({@code JutsuSelectionService}). Quitar el cast sin poner nada dejaria un pergamino que
+ * no responde al usarlo, y seleccionar es lo que un jugador espera de "usar" una tecnica que no lanza. No
+ * abre una segunda via de lanzamiento: si no conoces el jutsu, no se selecciona, y el cast sigue estando
+ * donde estaba.
+ *
+ * <p><b>Historico:</b> hasta F11 el click derecho casteaba (era el gesto del datapack) y la tecla leia el
+ * item de la mano (DJT-080). Las dos vias pasaban por el {@code JutsuCastPipeline}; ninguna existe ya.
  */
 public final class JutsuItem extends Item {
 
@@ -56,12 +66,31 @@ public final class JutsuItem extends Item {
         ItemStack stack = player.getItemInHand(hand);
         if (player instanceof ServerPlayer serverPlayer) {
             JutsuComponent component = stack.get(ModDataComponents.JUTSU.get());
-            // Solo casteable si se conoce (item por comando/residuo no cuenta); el pipeline aplica las puertas.
-            if (component != null && NinjaData.get(serverPlayer).jutsu().knows(component.jutsuId())) {
-                JutsuCastPipeline.cast(serverPlayer, component.jutsuId());
+            if (component != null) {
+                // Seleccionar, no lanzar (F11/DJT-232). El servicio rechaza lo no aprendido, asi que un
+                // pergamino dado por comando o residual sigue sin servir de nada.
+                select(serverPlayer, component.jutsuId());
             }
         }
         return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
+    }
+
+    /** Selecciona el jutsu del pergamino y avisa al jugador; el estado real manda (no el item). */
+    private static void select(ServerPlayer player, String jutsuId) {
+        SelectOutcome outcome = JutsuSelectionService.select(NinjaData.get(player), jutsuId);
+        Component name = Component.translatable("jutsu.dojutsu." + jutsuId);
+        switch (outcome) {
+            case SELECTED -> {
+                player.displayClientMessage(Component.translatable("jutsu.dojutsu.selected", name)
+                        .withStyle(ChatFormatting.AQUA), true);
+                NinjaSync.sendDelta(player); // la seleccion es observable
+            }
+            case NOT_KNOWN -> player.displayClientMessage(
+                    Component.translatable("jutsu.dojutsu.not_learned", name).withStyle(ChatFormatting.RED), true);
+            default -> {
+                // ya lo tenia seleccionado: sin mensaje ni trafico, igual que en la rueda
+            }
+        }
     }
 
     @Override

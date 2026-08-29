@@ -12,9 +12,9 @@ import net.minecraft.network.codec.StreamCodec;
  * multiplexado por NBT del datapack ({@code carrot_on_a_stick{JutsuItem:1b, JutsuId:55b}}) por un
  * componente tipado de 1.21, y el indice numerico por el <b>id data-driven</b> (regla 12).
  *
- * <p>Se guarda como texto (no se valida contra el {@code JutsuRegistry} aqui): un id que ya no
- * exista en el registry simplemente no se puede castear — el handler del cast (DJT-080) lo
- * rechaza contra el registro real, con autoridad de servidor.
+ * <p>Se guarda como texto (no se valida contra el {@code JutsuRegistry} aqui): un id que ya no exista
+ * simplemente no sirve de nada — desde F11/DJT-232 el item no castea, y al usarlo la seleccion se valida
+ * contra los jutsus <b>aprendidos</b>, con autoridad de servidor ({@code JutsuSelectionService}).
  *
  * @param jutsuId id data-driven de la tecnica ({@code "great_fireball"})
  */
