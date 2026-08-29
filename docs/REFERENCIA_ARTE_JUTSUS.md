@@ -4,10 +4,12 @@
 > que después sirva de guía al modelar en **Blockbench**.
 > **Qué se modela:** **el efecto que aparece al activar el jutsu** — la bola de fuego que vuela, el rayo que
 > envuelve la mano, la descarga que cubre el área. **No** el icono del ítem.
-> **Cobertura actual:** ✅ Fuego (7/7) · ✅ Rayo (8/8) · ✅ Viento (10/10). Pendientes: tierra, agua, yin-yang,
-> taijutsu, genjutsu, médico, fuinjutsu, kenjutsu, aburame, universales y los 16 Kekkei Genkai.
+> **Cobertura actual:** ✅ Fuego (7/7) · ✅ Rayo (8/8) · ✅ Viento (10/10) · ✅ Tierra (7/7) · ✅ Agua (7/7).
+> **Las cinco naturalezas básicas están completas.** Pendientes: yin-yang, taijutsu, genjutsu, médico,
+> fuinjutsu, kenjutsu, aburame, universales y los 16 Kekkei Genkai.
 > **Fuente de los datos mecánicos:** los JSON de `data/dojutsu/jutsu/`, verificados uno a uno.
-> **Fuente del criterio visual:** las 25 texturas 2D existentes, inspeccionadas una a una.
+> **Fuente del criterio visual:** las 39 texturas 2D existentes, inspeccionadas una a una.
+> **Última verificación contra el repo:** 2026-08-07.
 
 ---
 
@@ -23,7 +25,7 @@ antes**. Verificado en el código, no supuesto.
 | `area` | **Nada en absoluto.** Aplica daño y efectos de poción a las entidades del radio, sin una sola partícula | ❌ **No.** Hace falta programar el visual completo |
 | `teleport` | Partículas `POOF` en el punto de origen | ❌ **No** (sólo partículas) |
 | `buff` | **Nada.** Sólo el efecto de poción sobre el lanzador | ❌ **No** |
-| `structure` | Los bloques colocados (son bloques vanilla reales) | ➖ No aplica |
+| `structure` | **Bloques vanilla reales** colocados delante del lanzador (dirt, stone, ice, iron_block…). El efecto *es* el bloque | ➖ **No aplica.** Ver la nota de abajo |
 
 **Consecuencia práctica para tu plan:**
 
@@ -34,8 +36,28 @@ antes**. Verificado en el código, no supuesto.
   3 `buff` y 1 `area` + 1 `teleport`. Viento es el elemento con **más efectos sobre el propio jugador** del mod
   (3 auras), y ninguna de las tres tiene hoy visual.
 
+- De los **7 jutsus de tierra**, **2 son `structure`** — y esos dos son un caso aparte (ver abajo). Los otros 5
+  se reparten en 2 proyectiles, 2 teleports y 1 área.
+- De los **7 jutsus de agua**, sólo 2 son proyectiles. Es el elemento **menos ofensivo** del mod: cinco de sus
+  siete técnicas no hacen daño.
+
 No es un motivo para no diseñarlos: tener la referencia de arte primero es sensato. Pero conviene saber que
 rayo no es "modelar y listo" como fuego, y que viento pide resolver el problema de las auras.
+
+### Nota sobre `structure`: no hay nada que modelar (todavía)
+
+Los jutsus de esta familia **colocan bloques vanilla de verdad** — `earth_wall` levanta un muro de 3×4 de
+`minecraft:dirt` a dos bloques del lanzador, y ya está. No hay entidad, no hay modelo, no hay dónde colgar
+nada: el efecto son cubos de tierra normales y corrientes.
+
+Eso deja dos caminos, y **es una decisión de diseño, no de arte**:
+
+1. **Dejarlos como bloques vanilla.** Es lo fiel al datapack y no cuesta nada. Pierdes identidad visual.
+2. **Registrar bloques propios** (`dojutsu:earth_wall_block`…) con su textura, y que `structure` los coloque.
+   Ahí sí hay trabajo de arte, pero es **textura de bloque**, no modelo de Blockbench.
+
+Para las dos piezas de tierra afectadas he descrito abajo **qué textura de bloque tendría sentido** si eliges
+la opción 2, en vez de un modelo que no tendría dónde ir. Si prefieres la opción 1, sáltate esos dos prompts.
 
 ---
 
@@ -767,7 +789,442 @@ puede sugerir con un **disco tenue y translúcido** que une las puntas de las as
 
 ---
 
-## 6. Coherencia entre piezas
+## 6. Tierra (Doton) — 7 jutsus
+
+El elemento **más pesado y más terrestre**: es el único cuyos proyectiles tienen **gravedad** (arquean y caen),
+el único con dos técnicas `structure` y el que más se apoya en el suelo. La paleta del arte existente es
+uniforme —tierra y roca, sin excepciones— lo que lo hace el más coherente de los cuatro documentados.
+
+| # | Jutsu | Familia | Coste | Datos | Daño |
+|---|---|---|---|---|---|
+| 1 | Earth Prison | area | 30 | radio 5, slowness VI 5 s | — |
+| 2 | Rock Gun | proyectil | 60 | vel. 1.5, **gravedad 0.03** | 7 |
+| 3 | Earth Wall | structure | 60 | dirt 3×4 a 2 bl., **cd 0** | — |
+| 4 | Earth Instantaneous Body | teleport | 80 | 4–10 bl. · **suena** `jutsu.earth` | — |
+| 5 | Earth Golem | structure | 100 | stone 3×3 a 2 bl. | — |
+| 6 | Earth Dragon Blast | proyectil | 120 | vel. 1.0, **gravedad 0.02**, radio 4 | 11 |
+| 7 | Tunnelling | teleport | 160 | **8–16 bl.** (el mayor alcance del mod) | — |
+
+> **La gravedad es la seña de identidad del elemento.** Los proyectiles de fuego, rayo y viento vuelan rectos;
+> los dos de tierra **caen mientras avanzan**. El arte debe acompañarlo: nada de formas etéreas ni de estelas
+> ligeras — estas piezas deben **pesar**. Opacas, mates, sin emisión de luz. Son las únicas del documento que
+> **no brillan**.
+
+**Paleta común del elemento** (el arte existente ya es consistente, conviene respetarlo):
+tierra media `#8B6534`, tierra oscura `#5C3F1E`, roca gris-marrón `#A08256`, sombra profunda `#33220F`,
+luz de canto `#C4A574`.
+
+---
+
+### 1. Earth Prison — *Doton: Doryū Taiga* · area
+
+**Qué hace.** El jutsu más barato del elemento (30) con el enfriamiento más largo (30 s). Radio 5, sin daño:
+aplica **slowness VI durante 5 segundos** — inmoviliza, no mata. Es una trampa.
+
+**Qué se ve hoy.** Nada.
+
+**Qué debe representar el modelo.** La **tierra cerrándose alrededor de los atrapados**. La textura actual es
+un montículo redondeado con sombreado concéntrico, así que la lectura es "algo que emerge del suelo y envuelve".
+En 3D: un **anillo de losas de roca inclinadas** que brotan del suelo y se cierran hacia dentro, de
+**10 bloques de diámetro** y unos 2 de alto, dejando huecos entre placa y placa. Debe leerse como **cepo**, no
+como pinchos: bordes romos, nada afilado — la técnica no hace daño.
+
+> **Prompt:**
+> Una trampa de tierra emergiendo del suelo: un anillo amplio de losas de roca gruesas e inclinadas hacia
+> dentro, brotando del terreno y cerrándose sobre el centro, con huecos irregulares entre unas y otras. Bordes
+> romos y desgastados, nada afilado ni puntiagudo. Unos 10 bloques de Minecraft de diámetro y baja altura.
+> Marrón tierra y gris roca, superficie mate y opaca, sin brillo propio ni emisión de luz. Estilo Minecraft
+> voxel: caras planas, bordes duros, sin degradados suaves ni antialiasing. Paleta de 4 tonos terrosos. Efecto
+> único centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera con la cámara ligeramente
+> elevada, sin personajes ni escenario. Sin texto, sin marco.
+
+---
+
+### 2. Rock Gun — *Doton: Iwa Teppō* · proyectil
+
+**Qué hace.** El proyectil básico: velocidad 1.5 y **gravedad 0.03** (la mayor del mod, cae rápido), 7 de daño.
+Sin aura ni radio: impacto directo.
+
+**Qué se ve hoy.** Un `cobblestone` vanilla volando — que, siendo un cubo de piedra, no queda mal del todo.
+
+**Qué debe representar el modelo.** Una **piedra lanzada**, sin más pretensión. Canto rodado irregular de
+**0.5 × 0.35 × 0.55 bloques**, achatado, con facetas grandes y desiguales y un par de aristas marcadas. La
+textura actual es exactamente eso: un guijarro achatado marrón. **No debe tener efecto de chakra visible** —
+es el único jutsu del documento que puede pasar por un objeto natural, y esa humildad es su carácter.
+
+> **Prompt:**
+> Una piedra irregular lanzada por el aire, achatada y más ancha que alta, de aproximadamente medio bloque de
+> Minecraft. Superficie de facetas grandes y desiguales con dos o tres aristas marcadas y esquinas
+> desgastadas, como un canto rodado. Marrón tierra con zonas de gris roca y sombras profundas en las
+> hendiduras. Completamente mate y opaca, sin brillo, sin aura, sin energía visible: parece una piedra
+> corriente. Estilo Minecraft voxel: caras planas, bordes duros, sin degradados suaves ni antialiasing. Paleta
+> de 4 tonos terrosos. Objeto único centrado sobre fondo gris neutro liso, vista tres cuartos isométrica
+> ligera, sin personajes ni escenario. Sin texto, sin marco.
+
+---
+
+### 3. Earth Wall — *Doton: Doryūheki* · structure ⚠️
+
+**Qué hace.** Levanta un muro de **`minecraft:dirt` de 3 de ancho por 4 de alto**, dos bloques por delante,
+orientado a la mirada. **Enfriamiento 0**: se puede encadenar sin parar, la única técnica del mod sin espera.
+
+**Qué se ve hoy.** Bloques de tierra vanilla. Es literalmente lo que hace.
+
+**Qué debe representar.** ⚠️ **Aquí no hay modelo que hacer** (§1). Si eliges registrar un bloque propio, lo
+que hace falta es una **textura de bloque de 16×16 que tesele** — no una pieza de Blockbench. La textura de
+jutsu actual (una losa de roca rugosa vista de frente) ya da el tono: superficie de tierra prensada, más dura
+y más gris que el `dirt` vanilla, para que se note que es tierra **levantada por chakra** y no del terreno.
+
+> **Prompt (solo si registras bloque propio):**
+> Una textura de bloque de Minecraft para tierra compactada por chakra, cuadrada y que tesele sin costuras
+> visibles al repetirse. Superficie de tierra prensada con guijarros incrustados, más dura, más gris y más
+> compacta que la tierra normal de Minecraft, con grietas finas y algunas vetas de roca. Marrón tierra medio
+> con sombras profundas y motas de gris roca. Mate y opaca. Estilo Minecraft: píxeles definidos, sin degradados
+> suaves ni antialiasing, paleta de 4 tonos. Textura plana vista completamente de frente, ocupando todo el
+> encuadre. Sin objeto en perspectiva, sin texto, sin marco.
+
+---
+
+### 4. Earth Instantaneous Body — *Doton: Shunshin* · teleport
+
+**Qué hace.** Reubica al lanzador entre 4 y 10 bloques. **Es el único de los cuatro shunshin que ya tiene
+sonido**: `dojutsu:jutsu.earth`, a tono 2.0 y volumen 0.8.
+
+**Qué se ve hoy.** Partículas `POOF` y el sonido.
+
+**Qué debe representar el modelo.** El **reventón de tierra** en el punto de salida. Esfera erizada de
+**2 × 2 × 2 bloques** con púas cortas, gruesas y **desiguales** apuntando en todas direcciones — la textura
+actual es un disco marrón erizado de púas finas, y conviene engrosarlas al pasar a 3D para que no se confunda
+con el aro de viento. Terrones y guijarros sueltos, no una forma limpia.
+
+Es el tercer "destello de salida" del documento y debe separarse de los otros dos: **fuego arde, viento se
+aparta, tierra revienta**.
+
+> **Prompt:**
+> Un reventón de tierra y grava saliendo del suelo: una masa esférica de unos 2 bloques de Minecraft erizada de
+> púas cortas, gruesas y desiguales apuntando en todas direcciones, con terrones sueltos y guijarros
+> desprendiéndose por los bordes. Aspecto sucio e irregular, nada limpio ni simétrico. Marrón tierra con gris
+> roca y sombras profundas. Completamente mate y opaca, sin brillo ni emisión de luz. Estilo Minecraft voxel:
+> caras planas, bordes duros, sin degradados suaves ni antialiasing. Paleta de 4 tonos terrosos. Efecto único
+> centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera, sin personajes ni escenario. Sin
+> texto, sin marco.
+
+---
+
+### 5. Earth Golem — *Doton: Golemu no Jutsu* · structure ⚠️
+
+**Qué hace.** Coloca un bloque de **`minecraft:stone` de 3×3**, dos bloques por delante. Coste 100,
+enfriamiento 30 s.
+
+**Qué se ve hoy.** Un cubo de piedra de 3×3. Nada más.
+
+> ⚠️ **Aquí hay un desajuste real entre el arte y el código.** La textura del jutsu es **una figura humanoide
+> de tierra** —cabeza, brazos, piernas, claramente un gólem—, pero la implementación levanta un **muro de
+> piedra**. La técnica promete una criatura y entrega un cubo.
+>
+> Son tres caminos distintos, y **conviene decidirlo antes de encargar arte**:
+>
+> | Opción | Qué implica | Coste |
+> |---|---|---|
+> | **A. Dejarlo como está** | Sigue siendo un muro; la textura del ítem miente | Cero |
+> | **B. Bloque propio** | Textura de bloque de piedra tallada; sigue siendo un muro | Bajo (1 textura) |
+> | **C. Entidad gólem** | Una criatura invocada de verdad, con modelo, IA y caducidad | **Alto** — entidad nueva, como las bestias |
+>
+> La opción C es la que honra la textura y el nombre, y el mod **ya tiene la primitiva** para hacerlo sin
+> inventar nada: `AbilityAnchor` para la caducidad y el patrón de `SummonService`, que invoca criaturas con
+> vida limitada. Pero es un ticket de programación, no de arte.
+
+**Descripción para la opción C** (la única que necesita un modelo de Blockbench):
+
+Un **gólem de tierra tosco** de **1.4 × 2.6 × 0.9 bloques** — más alto que un jugador, ancho de hombros,
+brazos largos y desproporcionados que casi llegan al suelo, piernas cortas y macizas. Sin cuello, cabeza
+hundida entre los hombros. Construido con **cuatro o cinco cubos grandes por miembro**, nada de detalle fino:
+debe verse **montado a piedra bruta**, como si alguien hubiera apilado rocas con forma de persona. Grietas
+oscuras en las junturas.
+
+> **Prompt (opción C):**
+> Un gólem de tierra y roca tosco y macizo, más alto que un personaje de Minecraft, con hombros muy anchos,
+> brazos largos y desproporcionados que casi rozan el suelo, piernas cortas y gruesas y la cabeza hundida entre
+> los hombros sin cuello visible. Construido con pocos bloques grandes por miembro, sin detalle fino, como
+> rocas apiladas con forma humanoide. Grietas oscuras en las junturas entre bloques. Marrón tierra y gris roca,
+> superficie mate y opaca, sin brillo ni ojos luminosos. Estilo Minecraft voxel: caras planas, bordes duros,
+> sin degradados suaves ni antialiasing. Paleta de 4 tonos terrosos. Criatura sola centrada sobre fondo gris
+> neutro liso, de cuerpo entero, vista tres cuartos isométrica ligera, sin escenario. Sin texto, sin marco.
+
+---
+
+### 6. Earth Dragon Blast — *Doton: Doryūdan* · proyectil
+
+**Qué hace.** El más fuerte del elemento: 11 de daño, radio 4, **gravedad 0.02** (arquea) y enfriamiento de
+30 s. Afinidad 150.
+
+**Qué se ve hoy.** Un `cobblestone` vanilla volando.
+
+**Qué debe representar el modelo.** Igual que en fuego, el nombre pide **cabeza de dragón** — y conviene que la
+haya, porque es el par directo de `exploding_dragon_strike` y así los dos elementos riman. Cuerpo de
+**1.5 × 1.3 × 2.2 bloques**, direccional, con el hocico resuelto en **planos de roca angulosos** y una cavidad
+oscura entre las mandíbulas.
+
+La textura actual es una bola erizada de púas, no una cabeza; se puede conciliar haciendo que **las púas sean
+la melena de esquirlas** que rodea el cráneo, con terrones desprendiéndose por detrás. Si prefieres respetar la
+textura literalmente, el prompt alternativo está debajo.
+
+> **Prompt (cabeza de dragón, recomendado):**
+> Una cabeza de dragón hecha de roca surcando el aire en trayectoria descendente, de unos 2 bloques de
+> Minecraft de largo: cráneo construido con planos de piedra angulosos y grandes, fauces abiertas formadas por
+> dos mandíbulas rectas con una cavidad oscura y profunda entre ellas, y una melena de esquirlas de roca
+> puntiagudas rodeando la parte trasera del cráneo. Terrones y guijarros desprendiéndose detrás. Sin escamas ni
+> ojos. Marrón tierra y gris roca, mate y opaca, sin brillo. Aspecto pesado, se nota que cae. Estilo Minecraft
+> voxel: caras planas, bordes duros, sin degradados suaves ni antialiasing. Paleta de 5 tonos terrosos. Objeto
+> único centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera, sin personajes ni
+> escenario. Sin texto, sin marco.
+
+> **Prompt (alternativo, fiel a la textura):**
+> Un proyectil de roca en vuelo con forma de esfera erizada de casi 1,5 bloques de Minecraft: núcleo de piedra
+> compacto cubierto de esquirlas puntiagudas y desiguales apuntando hacia fuera, con terrones desprendiéndose
+> por detrás. Marrón tierra y gris roca, mate y opaca. Aspecto pesado y contundente. Estilo Minecraft voxel:
+> caras planas, bordes duros, sin degradados suaves ni antialiasing. Paleta de 4 tonos terrosos. Objeto único
+> centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera, sin personajes ni escenario. Sin
+> texto, sin marco.
+
+---
+
+### 7. Tunnelling — *Doton: Moguragakure* · teleport
+
+**Qué hace.** El **teleport de mayor alcance de todo el mod** (8–16 bloques). Coste 160, afinidad 180: la
+técnica más cara del elemento.
+
+**Qué se ve hoy.** Partículas `POOF`.
+
+**Qué debe representar el modelo.** El **agujero** que queda en el suelo. La textura actual es un disco marrón
+oscuro casi liso, de borde ligeramente festoneado: literalmente una boca de túnel vista desde arriba. En 3D:
+un **hueco circular de 1.5 bloques de diámetro** con el reborde de tierra levantada alrededor —un anillo bajo
+de terrones— y el interior **oscureciéndose hasta el negro**, sugiriendo profundidad.
+
+Es la pieza más sutil del documento y la única que representa una **ausencia** en vez de una presencia. Ese
+contraste conviene conservarlo: no debe tener partículas ni energía, solo el agujero y la tierra removida.
+
+> **Prompt:**
+> Una boca de túnel excavada en el suelo: un hueco circular de aproximadamente 1,5 bloques de Minecraft de
+> diámetro, rodeado por un reborde bajo de terrones de tierra levantada y desordenada. El interior se oscurece
+> progresivamente por bandas hasta el negro absoluto en el centro, sugiriendo profundidad. Sin partículas, sin
+> energía, sin brillo: solo tierra removida y oscuridad. Marrón tierra en el reborde, marrones cada vez más
+> oscuros hacia dentro. Mate y opaco. Estilo Minecraft voxel: caras planas, bordes duros, sin degradados suaves
+> ni antialiasing. Paleta de 5 tonos terrosos. Efecto único centrado sobre fondo gris neutro liso, vista tres
+> cuartos isométrica ligera con la cámara elevada mirando hacia el agujero, sin personajes ni escenario. Sin
+> texto, sin marco.
+
+---
+
+## 7. Agua (Suiton) — 7 jutsus
+
+El elemento **más translúcido y el más brillante**: donde viento es incoloro y mate, agua es **transparente con
+reflejo**. Es también el único que puede presentarse como **volumen de fluido** en vez de como forma sólida.
+Reparto: 2 áreas, 2 proyectiles, 1 aura, 1 teleport y 1 `structure`.
+
+| # | Jutsu | Familia | Coste | Datos | Daño |
+|---|---|---|---|---|---|
+| 1 | Water Prison | area | 30 | radio 5, slowness V 5 s | — |
+| 2 | Water Puddle | structure | 30 | `minecraft:water` 3×1 a 1 bl. | — |
+| 3 | Breathing Underwater | buff | 20 | water_breathing 60 s · **cd 20 t** | — |
+| 4 | Water Instantaneous Body | teleport | 80 | 4–10 bl. · **suena** (splash vanilla) | — |
+| 5 | Hidden Mist | area | 60 | radio 8, blindness 6 s | — |
+| 6 | Rising Water Slicer | proyectil | 100 | vel. 1.2 | 8 |
+| 7 | Water Severing Wave | proyectil | 140 | vel. 1.0, radio 4 | 12 |
+
+> **Agua es el elemento menos letal del mod.** Cinco de sus siete técnicas **no hacen daño**: aprisionan,
+> ciegan, dan aire o crean terreno. Es control, no ofensiva. El arte debe acompañarlo — nada de bordes
+> agresivos salvo en las dos técnicas de corte (nº 6 y nº 7), que son justo las únicas que hieren.
+
+**Paleta común del elemento:** azul cian `#2E9BD8`, azul claro `#7FD4F5`, blanco de espuma `#EAF8FF`, azul
+profundo `#14567E`. **Excepción deliberada:** Hidden Mist es blanco y gris, no azul (nº 5).
+
+---
+
+### 1. Water Prison — *Suiton: Suirō no Jutsu* · area
+
+**Qué hace.** Radio 5, sin daño: **slowness V durante 5 segundos**. Junto a Earth Prison forma la pareja de
+inmovilización del mod, y cuesta lo mismo (30) con algo menos de espera (25 s frente a 30).
+
+**Qué se ve hoy.** Nada.
+
+**Qué debe representar el modelo.** La **esfera de agua que encierra al objetivo**, el clásico de la técnica.
+Burbuja de **2.4 × 2.4 × 2.4 bloques** —lo justo para contener a un jugador— de superficie tensa y **muy
+translúcida**, con el borde erizado de ondulaciones cortas y romas (la textura actual es una esfera azul de
+canto serrado). Debe verse **el interior a través**: es una prisión, y se tiene que notar que hay algo dentro.
+
+> **Prompt:**
+> Una esfera de agua tensa y muy translúcida, de unos 2,4 bloques de Minecraft de diámetro, lo bastante grande
+> para encerrar a una persona dentro. Superficie recorrida por ondas concéntricas suaves y borde festoneado con
+> ondulaciones cortas y romas, nada afilado. Muy transparente: se ve claramente a través de ella hasta el otro
+> lado. Azul cian con reflejos blancos de espuma arriba y azul profundo en la base. Acabado brillante y húmedo,
+> con un reflejo especular marcado. Estilo Minecraft voxel: caras planas, bordes duros, sin degradados suaves
+> ni antialiasing. Paleta de 4 tonos azules. Efecto único centrado sobre fondo gris neutro liso, vista tres
+> cuartos isométrica ligera, sin personajes ni escenario. Sin texto, sin marco.
+
+---
+
+### 2. Water Puddle — *Suiton: Mizu Tamari* · structure
+
+**Qué hace.** Coloca **3 bloques de `minecraft:water`** justo delante, a ras de suelo. Técnica de utilidad:
+crear agua donde no la hay.
+
+**Qué se ve hoy.** Agua vanilla. Y a diferencia de `earth_wall`, **aquí eso está bien**: el agua de Minecraft
+ya es agua, con su animación y su transparencia.
+
+**Qué debe representar.** ⚠️ De las cuatro piezas `structure` documentadas, **esta es la que mejor argumento
+tiene para quedarse como está**. Un bloque propio de "agua de chakra" sería casi indistinguible del agua normal
+y encima perdería el comportamiento de fluido vanilla (fluir, empapar, apagar fuego), que es justo para lo que
+sirve la técnica.
+
+**Recomendación: no encargar arte para esta.** Si aun así quieres marcarla, el camino barato no es un bloque
+nuevo sino un **destello de aparición**: una salpicadura de metro y medio que dure medio segundo al colocarse
+el agua, hecha con partículas, no con modelo.
+
+---
+
+### 3. Breathing Underwater — *Suiton: Suichūkokyū* · buff
+
+**Qué hace.** Respiración acuática 60 segundos por sólo 20 de chakra. **Enfriamiento de 20 ticks (1 s)**, el
+más corto del mod después de Earth Wall: está pensado para reactivarse sin fricción.
+
+**Qué se ve hoy.** Nada.
+
+**Qué debe representar el modelo.** El **casco de burbujas alrededor de la cabeza**, no un aura de cuerpo
+entero — y eso lo separa limpiamente de las tres auras de viento y de Fireproof. La textura actual es un cúmulo
+de burbujas azul pálido, así que la lectura ya está dada. En 3D: esfera irregular de **1 × 1 × 1 bloque**
+formada por **burbujas de tamaños distintos** apiñadas, muy translúcida, con las grandes abajo y las pequeñas
+desprendiéndose por arriba.
+
+> **Prompt:**
+> Un casco de burbujas de agua flotando en el aire, del tamaño justo para rodear una cabeza, aproximadamente un
+> bloque de Minecraft. Formado por burbujas esféricas de tamaños muy distintos apiñadas entre sí, las grandes
+> agrupadas abajo y las pequeñas desprendiéndose y ascendiendo por arriba. Extremadamente translúcido, casi
+> todo transparente, con finos bordes blancos definiendo cada burbuja. Azul muy pálido con reflejos blancos.
+> Hueco por dentro. Estilo Minecraft voxel: caras planas, bordes duros, sin degradados suaves ni antialiasing.
+> Paleta de 3 tonos. Efecto solo, centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera,
+> sin personaje dentro. Sin texto, sin marco.
+
+---
+
+### 4. Water Instantaneous Body — *Suiton: Shunshin* · teleport
+
+**Qué hace.** Reubica al lanzador entre 4 y 10 bloques. **Ya tiene sonido**: el splash de vanilla
+(`entity.player.splash.high_speed`) a tono 2.0.
+
+**Qué se ve hoy.** Partículas `POOF` y el chapoteo.
+
+**Qué debe representar el modelo.** La **salpicadura** que queda al desaparecer — el cuarto y último shunshin
+del documento. Corona de **2 × 2 bloques** con gotas radiando desde el centro. La textura actual es un disco
+azul de púas finas y regulares, **muy parecido al de rayo**, así que en 3D conviene diferenciarlo **engordando
+las puntas en gotas redondeadas**, con la cabeza más ancha que la base.
+
+Con este se cierra la serie: **fuego arde, rayo destella, viento se aparta, tierra revienta, agua salpica.**
+
+> **Prompt:**
+> Una corona de salpicadura de agua vista desde arriba, de unos 2 bloques de Minecraft de diámetro: un anillo
+> de gotas alargadas irradiando desde un centro hundido, cada gota con la punta redondeada y más ancha que su
+> base, como en el instante de romperse una superficie de agua. Algunas gotas ya desprendidas flotando por
+> encima del anillo. Azul cian translúcido con espuma blanca en las crestas. Acabado brillante y húmedo. Estilo
+> Minecraft voxel: caras planas, bordes duros, sin degradados suaves ni antialiasing. Paleta de 4 tonos azules.
+> Efecto único centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera con la cámara
+> ligeramente elevada, sin personajes ni escenario. Sin texto, sin marco.
+
+---
+
+### 5. Hidden Mist — *Kirigakure no Jutsu* · area
+
+**Qué hace.** Radio 8, sin daño: **ceguera 6 segundos**. La técnica insignia de la Niebla, pensada para
+desaparecer, no para matar.
+
+**Qué se ve hoy.** Nada.
+
+**Qué debe representar el modelo.** ⚠️ **Es la excepción cromática del elemento y hay que respetarla:** su
+textura es **blanca y gris**, no azul, y además mide **64×64**, el doble que el resto del set. Recibió un trato
+aparte a propósito.
+
+Un **banco de niebla**: masa de **16 bloques de diámetro** y unos 3 de alto, formada por **cúmulos redondeados
+y blandos** apilados sin orden, de bordes mullidos, sin una sola arista. Debe ser **lo más opaco del
+elemento**, justo al revés que las otras seis piezas: la niebla no deja ver, y eso es literalmente su efecto.
+
+Es además la única pieza de los cinco elementos documentados que **debe leerse como suave**.
+
+> **Prompt:**
+> Un banco de niebla denso y bajo, muy ancho, formado por cúmulos redondeados y mullidos apilados sin orden
+> aparente, con los bordes blandos y esponjosos, sin ninguna arista ni punta. Blanco y gris claro, sin nada de
+> azul. Opaco en el interior y algo más deshilachado en los bordes exteriores. Aspecto algodonoso, lo contrario
+> de una forma cristalina o afilada. Estilo Minecraft voxel: caras planas, bordes duros, pero con la silueta
+> general redondeada. Sin degradados suaves ni antialiasing. Paleta de 3 tonos: blanco, gris claro, gris medio.
+> Efecto único centrado sobre fondo gris neutro **oscuro** para que contraste, vista tres cuartos isométrica
+> ligera, sin personajes ni escenario. Sin texto, sin marco.
+
+---
+
+### 6. Rising Water Slicer — *Suiton: Suiryūdan* · proyectil
+
+**Qué hace.** Primera de las dos técnicas de agua que hieren: 8 de daño, velocidad 1.2, sin radio de área.
+Impacto directo.
+
+**Qué se ve hoy.** Un `prismarine_shard` vanilla volando.
+
+**Qué debe representar el modelo.** Una **hoja de agua a presión**, y aquí sí caben los bordes afilados. La
+textura actual son **espigas cristalinas cian apuntando hacia arriba**. En 3D: tres o cuatro **láminas
+verticales** de agua comprimida de **0.6 × 1.4 × 0.4 bloques**, de alturas distintas, con el canto superior
+afilado y la base ancha, viajando de perfil para que el filo vaya por delante.
+
+⚠️ **Cuidado con el hielo.** Esta pieza y las del Kekkei Genkai de hielo pueden confundirse: la textura ya se
+parece bastante. Se separan porque aquí el material debe verse **líquido** —bordes con ondulación, superficie
+que fluye, algún goteo—. El hielo es opaco, rígido y facetado; esto no.
+
+> **Prompt:**
+> Una hoja de agua a presión viajando por el aire: tres o cuatro láminas verticales de agua comprimida de
+> alturas distintas, la mayor de aproximadamente 1,4 bloques de Minecraft, con el canto superior afilado como
+> una cuchilla y la base ancha, dispuestas en fila y avanzando de perfil con el filo por delante. El material
+> se ve claramente líquido: bordes ligeramente ondulados, superficie que fluye y alguna gota desprendiéndose.
+> Azul cian translúcido con espuma blanca en los filos. Brillante y húmedo, nunca rígido ni cristalino como el
+> hielo. Estilo Minecraft voxel: caras planas, bordes duros, sin degradados suaves ni antialiasing. Paleta de 4
+> tonos azules. Objeto único centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera, sin
+> personajes ni escenario. Sin texto, sin marco.
+
+---
+
+### 7. Water Severing Wave — *Suiton: Suidanha* · proyectil
+
+**Qué hace.** El más fuerte del elemento: **12 de daño**, radio 4, coste 140. Cierra la rama junto al
+`water_cloak` que no existe.
+
+**Qué se ve hoy.** Un `prismarine_shard` vanilla volando.
+
+**Qué debe representar el modelo.** La textura actual es una **esfera azul lisa y brillante** con un reflejo
+blanco marcado: el objeto más limpio de todo el elemento. Pero el nombre dice "ola cortante" y el radio 4 pide
+volumen, así que propongo conciliarlo con una **masa de agua en forma de ola que rompe**, de
+**2.2 × 1.6 × 1.4 bloques**, con la cresta enrollándose hacia delante y el frente afilado.
+
+El reflejo especular liso de la textura se conserva en el **cuerpo** de la ola, que debe ser la superficie más
+pulida y brillante de los cinco elementos documentados. Si prefieres respetar la textura al pie de la letra, el
+prompt alternativo está debajo.
+
+> **Prompt (ola que rompe, recomendado):**
+> Una ola de agua rompiendo, congelada a media rotura y avanzando por el aire, de unos 2,2 bloques de Minecraft
+> de ancho. La cresta se enrolla hacia delante formando un tubo, con el frente afilado como una hoja y espuma
+> blanca desprendiéndose del borde superior. El cuerpo de la ola es liso, pulido y muy brillante, con un
+> reflejo especular blanco marcado, y muy translúcido: se ve el otro lado a través. Azul cian con azul profundo
+> en el hueco del tubo. Estilo Minecraft voxel: caras planas, bordes duros, sin degradados suaves ni
+> antialiasing. Paleta de 4 tonos azules. Objeto único centrado sobre fondo gris neutro liso, vista tres
+> cuartos isométrica ligera, sin personajes ni escenario. Sin texto, sin marco.
+
+> **Prompt (alternativo, fiel a la textura):**
+> Una esfera de agua perfectamente lisa y pulida, de unos 1,8 bloques de Minecraft de diámetro, con la
+> superficie tensa como una gota gigante y un reflejo especular blanco marcado arriba a la izquierda. Muy
+> translúcida, se ve el otro lado a través. Azul cian con azul profundo en la base. Sin espuma, sin
+> ondulaciones, sin aristas: la contundencia viene de lo limpia que es. Estilo Minecraft voxel: caras planas,
+> bordes duros, sin degradados suaves ni antialiasing. Paleta de 4 tonos azules. Objeto único centrado sobre
+> fondo gris neutro liso, vista tres cuartos isométrica ligera, sin personajes ni escenario. Sin texto, sin
+> marco.
+
+---
+
+## 8. Coherencia entre piezas
 
 Las formas están pensadas para no repetirse **dentro de cada elemento** y para que fuego y rayo no se confundan
 entre sí.
@@ -815,55 +1272,121 @@ así: nº 1 **escaso**, nº 5 **compacto**, nº 6 **afilado y recto**, nº 8 **l
 | 9 | Wind Cloak | Cáscara continua | 1,3 × 2,4 bl. | Envolviendo | Verde |
 | 10 | Rasenshuriken | Molinete de 4 aspas | 2 bl. | En vuelo | Cian |
 
+**Tierra — pesado, opaco y pegado al suelo; el único elemento que no brilla:**
+
+| # | Jutsu | Forma | Tamaño aprox. | Dónde aparece |
+|---|---|---|---|---|
+| 1 | Earth Prison | Anillo de losas | 10 bl. Ø | Del suelo |
+| 2 | Rock Gun | Canto rodado | 0,5 bl. | En vuelo (arquea) |
+| 3 | Earth Wall | *(bloques vanilla)* | 3×4 bl. | Delante |
+| 4 | Earth Instantaneous Body | Esfera de púas gruesas | 2 bl. | Punto de salida |
+| 5 | Earth Golem | *(bloques vanilla, o entidad)* | 3×3 bl. | Delante |
+| 6 | Earth Dragon Blast | Cabeza direccional | 2,2 bl. | En vuelo (arquea) |
+| 7 | Tunnelling | Agujero | 1,5 bl. Ø | En el suelo |
+
+**Agua — translúcido, brillante y poco agresivo; el elemento de control:**
+
+| # | Jutsu | Forma | Tamaño aprox. | Dónde aparece |
+|---|---|---|---|---|
+| 1 | Water Prison | Burbuja envolvente | 2,4 bl. | Sobre el objetivo |
+| 2 | Water Puddle | *(agua vanilla)* | 3×1 bl. | Delante, en el suelo |
+| 3 | Breathing Underwater | Cúmulo de burbujas | 1 bl. | En la cabeza |
+| 4 | Water Instantaneous Body | Corona de gotas | 2 bl. | Punto de salida |
+| 5 | Hidden Mist | Banco de niebla | 16 bl. Ø | Alrededor |
+| 6 | Rising Water Slicer | Láminas afiladas | 1,4 bl. | En vuelo |
+| 7 | Water Severing Wave | Ola que rompe | 2,2 bl. | En vuelo |
+
 ### Cómo se separan los elementos entre sí
 
-Con tres elementos ya documentados conviene fijar la regla, porque a partir de aquí es fácil que empiecen a
+Con cuatro elementos documentados conviene fijar la regla, porque a partir de aquí es fácil que empiecen a
 parecerse:
 
-| | Fuego | Rayo | Viento |
-|---|---|---|---|
-| **Materia** | Masa maciza | Estructura angulosa | Estructura hueca y calada |
-| **Contorno** | Orgánico, irregular | Zigzag duro | Curvas limpias, espirales |
-| **Color** | Naranja-rojo saturado | Cian, dorado, blanco | Casi incoloro (+ verde y cian) |
-| **Dónde vive** | Volando y envolviendo | Pegado al cuerpo | Repartido en las tres |
-| **Transparencia** | Opaco | Emisivo denso | **Semitransparente** |
+| | Fuego | Rayo | Viento | Tierra | Agua |
+|---|---|---|---|---|---|
+| **Materia** | Masa maciza | Estructura angulosa | Estructura hueca y calada | Materia real, con peso | **Fluido con volumen** |
+| **Contorno** | Orgánico, irregular | Zigzag duro | Curvas limpias, espirales | Facetado, romo | Ondulado, tenso |
+| **Color** | Naranja-rojo saturado | Cian, dorado, blanco | Casi incoloro (+ verde y cian) | Marrones y grises | Azul cian (+ blanco) |
+| **Dónde vive** | Volando y envolviendo | Pegado al cuerpo | Repartido en las tres | Pegado al suelo | Envolviendo y volando |
+| **Luz** | Emisivo | Emisivo denso | Semitransparente | Mate y opaco | **Translúcido y con brillo especular** |
+| **Física** | Vuelo recto | Instantáneo | Vuelo recto | Gravedad: arquea y cae | Vuelo recto |
+| **Carácter** | Ofensivo | Ofensivo | Movilidad | Defensivo y de control | **Control: 5 de 7 sin daño** |
 
-La transparencia es la baza más fuerte de viento: es el único elemento que debe verse **a través**.
+Tres bazas que conviene explotar porque son exclusivas:
+
+- **Viento es el único incoloro.** Se ve por la deformación, no por el color.
+- **Tierra es el único que no brilla.** En una escena con los cinco, tierra debe leerse como lo único
+  material opaco.
+- **Agua es el único con reflejo especular.** Translúcido *y* pulido: es lo que lo separa de viento, que
+  también deja ver a través pero es mate y sin brillo.
 
 ### Colisiones internas a vigilar
 
-Tres parejas comparten sitio y escala y pueden confundirse si el arte no las separa a propósito:
+Estas parejas comparten sitio, escala o material, y pueden confundirse si el arte no las separa a propósito:
 
 | Pareja | Riesgo | Cómo se resuelve |
 |---|---|---|
 | Rasengan (viento 7) vs. Chidori (rayo 5) | Ambas son esferas de ~0,8 bl. en la mano | El Rasengan **se sostiene sobre la palma abierta**; el Chidori **envuelve el puño cerrado**. Además azul liso vs. cian erizado |
 | Fire Transport (fuego 3) vs. Wind Inst. Body (viento 3) vs. Lightning Inst. Body (rayo 2) | Los tres son el destello del teleport, todos de ~2 bl. | Fuego: **núcleo macizo** con púas gruesas. Rayo: **rayos finos desde un centro brillante**. Viento: **aro sin centro alguno** |
 | Drilling Air Bullet (viento 5) vs. Drilling Hand (rayo 8) | Ambos son "taladros" cónicos | Viento: **rejilla romboidal tensa**, en vuelo, incoloro. Rayo: **espiral helicoidal**, en el antebrazo, cian brillante |
+| Los **cuatro shunshin** (fuego 3, rayo 2, viento 3, tierra 4) | Los cuatro son el destello del teleport, todos de ~2 bl. | Fuego **arde** (núcleo macizo, púas gruesas). Rayo **destella** (rayos finos desde un centro). Viento **se aparta** (aro sin centro). Tierra **revienta** (púas gruesas, terrones sueltos) |
+| Earth Dragon Blast (tierra 6) vs. Exploding Dragon Strike (fuego 5) | Ambas son cabezas de dragón direccionales de ~2 bl. | Fuego: **llamas envolviendo** un núcleo oscuro, emisivo. Tierra: **planos de piedra** angulosos, mate, con melena de esquirlas y trayectoria descendente |
+| Water Prison (agua 1) vs. Earth Prison (tierra 1) | Las dos inmovilizan, mismo coste, radio parecido | Agua **encierra** (burbuja cerrada sobre el objetivo). Tierra **cerca** (anillo abierto de losas que brota del suelo) |
+| Rising Water Slicer (agua 6) vs. los jutsus de **hielo** (KG) | Mismo azul y forma de espiga; la textura ya se parece | Agua **fluye**: bordes ondulados, goteo, translúcida. Hielo: **opaco, rígido y facetado**. Pendiente de fijar al documentar el KG |
+| Water Instantaneous Body (agua 4) vs. Lightning Inst. Body (rayo 2) | Discos radiales, ambos azul-cian, mismo tamaño | Agua: **gotas de punta redondeada**, más anchas que su base. Rayo: **rayos rectos y finos** desde un centro brillante |
 
 ---
 
-## 7. Pendiente de decidir
+## 9. Pendiente de decidir
 
 1. **El color de Lightning Cutter.** Hoy es violeta y rompe su parentesco con el Chidori (§4). He escrito el
    prompt en cian-blanco con la alternativa violeta anotada. Decide antes de generar.
 2. **Las tres gamas de viento** (§5). A diferencia del punto anterior, aquí **recomiendo no tocar nada**: la
    división blanco / cian / verde es coherente y fiel al material original. Lo anoto para que sea una decisión
    consciente y no una inconsistencia heredada.
-3. **`fire_cloak` y `lightning_cloak` no existen.** Ambos cierran su secuencia de learner en los datos, pero
-   **el jutsu no está implementado** (auditoría §1.6). Serían auras envolventes; ahora que `wind_cloak` y
-   `wind_mode` dan la plantilla verde, replicarla para fuego y rayo es directo. Igual pasa con `earth_cloak` y
-   `water_cloak`. **Viento es el único elemento con la rama entera.**
-4. **Dos texturas se salen del formato.** Todas son 32×32 salvo
-   `drilling_hand_of_sage_lightning` (**64×128**, la única no cuadrada) y `big_ball_rasengan` (**128×128**).
-   Con `item/generated` la primera se renderiza raro. Conviene mirarlas al tocar esas piezas — aunque para el
-   Big Ball Rasengan el detalle extra es una ventaja al modelar.
-5. **Programación previa.** De los 25 jutsus documentados, **17 no tienen hoy dónde colgar un modelo** (§1).
+3. **Cuatro `*_cloak` no existen.** `fire_cloak`, `lightning_cloak`, `earth_cloak` y `water_cloak` cierran su
+   secuencia de learner en los datos, pero **el jutsu no está implementado** (auditoría §1.6). Los cuatro
+   serían auras envolventes; ahora que `wind_cloak` y `wind_mode` dan la plantilla, replicarla es directo.
+   **Con las cinco naturalezas básicas ya documentadas, viento sigue siendo el único con la rama entera.**
+4. **Tres texturas se salen del formato.** De las 39 revisadas, todas son 32×32 salvo
+   `drilling_hand_of_sage_lightning` (**64×128**, la única no cuadrada), `big_ball_rasengan` (**128×128**) y
+   `hidden_mist` (**64×64**). Con `item/generated` la primera se renderiza raro; conviene mirarla al tocar esa
+   pieza. Las otras dos no son un problema — el detalle extra es una ventaja al modelar, y en los tres casos
+   el tamaño mayor delata **qué piezas le importaban más al autor original**.
+5. **Earth Golem: la textura promete una criatura y el código da un muro** (§6.5). Tres opciones con costes muy
+   distintos; **decidir antes de encargar arte**, porque la opción C es un ticket de programación completo.
+6. **Los dos `structure` de tierra** (§1): bloques vanilla, bloque propio, o nada. Si eliges bloque propio, lo
+   que se encarga es **textura de 16×16 que tesele**, no modelo de Blockbench. Afecta también a los 16 KG:
+   `structure` aparece en madera, hielo, cristal, acero, magnetismo, lodo y fuinjutsu.
+7. **Programación previa.** De los 39 jutsus documentados, **26 no tienen hoy dónde colgar un modelo** (§1).
    Antes de que se vean en partida hacen falta, por orden de retorno:
    - un **renderer propio para `ninja_projectile`** que dibuje modelos en vez del `displayItem` → desbloquea de
-     golpe **8 piezas** (5 de fuego + 3 de viento) y todos los proyectiles de los elementos restantes. Es una
-     sola pieza de código y la de mayor impacto con diferencia;
+     golpe **12 piezas** (5 de fuego + 3 de viento + 2 de tierra + 2 de agua) y todos los proyectiles de los
+     elementos restantes. Es una sola pieza de código y la de mayor impacto con diferencia;
    - un visual de **ventana de carga** para `primed_strike` → desbloquea **6** (4 de rayo + 2 de viento);
-   - un visual de **aura sobre el jugador** para `buff` → desbloquea **4** (1 de fuego + 3 de viento), y hará
-     falta igualmente para los seis modos activables (Susanoo, sabio, sello maldito, puertas, SOAH, Tenseigan);
-   - un visual de **estallido de área** para `area` → desbloquea **4** (3 de rayo + 1 de viento) y buena parte
-     de los 16 Kekkei Genkai, donde `area` es la familia dominante.
+   - un visual de **estallido de área** para `area` → desbloquea **7** (3 de rayo + 1 de viento + 1 de tierra
+     + 2 de agua) y buena parte de los 16 Kekkei Genkai, donde `area` es la familia dominante;
+   - un visual de **aura sobre el jugador** para `buff` → desbloquea **5** (1 de fuego + 3 de viento + 1 de
+     agua), y hará falta igualmente para los seis modos activables (Susanoo, sabio, sello maldito, puertas,
+     SOAH, Tenseigan);
+   - un visual de **salida de teleport** para `teleport` → desbloquea **5** (uno por naturaleza básica, más
+     `tunnelling`, que son 6 en total), que hoy comparten las mismas partículas `POOF` y son indistinguibles
+     entre sí.
+
+---
+
+## 10. Nota de vigencia
+
+Este documento se escribió en cuatro tandas y **el repositorio avanzó entre medias**. Durante la sesión del
+2026-08-07 se comprobó que el árbol había crecido respecto al estado de `AUDITORIA_ESTADO_ACTUAL.md`: el mod
+llegó a la **versión 1.0.0**, apareció el paquete `api`, una segunda `BeastMove` y —lo relevante para este
+documento— **`EffectSfx`, el sistema de sonido por técnica** (F10/DJT-227), con 13 jutsus ya declarando `sound`
+en sus `effectParams`.
+
+Consecuencia para el arte: **los efectos ya no son mudos**. Al diseñar una pieza conviene mirar si su JSON
+declara `sound`, porque el sonido condiciona el ritmo del efecto (un `primed_strike` con sonido de carga pide
+un visual que dure lo mismo). De los 32 documentados, tienen sonido: `earth_instantaneous_body`, `chidori`,
+`lightning_cutter`, `drilling_hand_of_sage_lightning`, `rasengan`, `big_ball_rasengan`, `rasenshuriken` y
+`wind_instantaneous_body`.
+
+**Antes de una tanda grande de encargos de arte conviene revalidar §1 contra el código**, no fiarse de esta
+tabla: es lo que decide si hay dónde colgar cada modelo, y es justo lo que está cambiando.

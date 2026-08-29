@@ -1,0 +1,330 @@
+===============================================================================
+ CHECKLIST DE PRUEBAS EN PARTIDA — FASE 11 (UX)
+ Cubre: ETAPA A (DJT-230, toggle de dojutsu) + ETAPA C (DJT-233, HUD movible)
+ Rama: djt-230-toggle-dojutsu · Fecha: 2026-08-08
+ Estado automatico: build multiloader VERDE · 1023 tests · 0 fallos
+===============================================================================
+
+COMO USAR ESTO
+  Cada bloque es independiente. Marca [x] lo que pase y anota lo que falle.
+  Hay que pasarlo en LOS DOS LOADERS (NeoForge y Fabric) antes de dar los
+  tickets por cerrados — regla 2 del repo.
+
+  Loader probado:   [ ] NeoForge    [ ] Fabric
+  Version del juego: 1.21.1
+
+
+-------------------------------------------------------------------------------
+ 0. PREPARACION
+-------------------------------------------------------------------------------
+
+  [ ] 0.1  Arrancar el cliente. El juego llega al menu principal sin errores.
+  [ ] 0.2  Crear un mundo nuevo en creativo, con trampas activadas.
+  [ ] 0.3  Completar el onboarding (elegir clan/naturaleza) hasta que el HUD
+           de chakra aparezca.
+  [ ] 0.4  Comprobar el log: sin WARN ni ERROR del mod al arrancar.
+
+  COMANDOS QUE VAS A USAR
+      /dojutsudojutsu get                    -> estado del ojo (ahora incluye enabled=)
+      /dojutsudojutsu activate <ojo>         -> te da un ojo (p.ej. sharingan)
+      /dojutsudojutsu toggle                 -> enciende/apaga por el servicio real
+      /dojutsudojutsu deactivate             -> RETIRA el ojo (no es apagar)
+      /dojutsudojutsu strain <0-100>         -> fija la fatiga ocular
+      /dojutsudojutsu eternal <true|false>   -> marca la forma eterna
+      /dojutsuchakra ...                     -> chakra, para el HUD
+
+  Ojos utiles: sharingan · byakugan · rinnegan · mangekyo_itachi · rinne_sharingan
+
+
+===============================================================================
+ ETAPA A — ACTIVAR / DESACTIVAR EL DOJUTSU  (DJT-230)
+===============================================================================
+
+-------------------------------------------------------------------------------
+ A1. LA TECLA
+-------------------------------------------------------------------------------
+
+  [ ] A1.1  Opciones -> Controles -> categoria "Dojutsu": aparece la entrada
+            nueva "Toggle Dojutsu" asignada a la tecla **X**.
+  [ ] A1.2  Ninguna otra accion del mod comparte X (deberian estar en
+            M V N R G B H J K Y C U).
+  [ ] A1.3  Reasignar X a otra tecla y comprobar que la nueva funciona.
+            Volver a dejarla en X.
+
+-------------------------------------------------------------------------------
+ A2. SIN OJO NO PASA NADA
+-------------------------------------------------------------------------------
+
+  [ ] A2.1  Sin ningun dojutsu, pulsar X.
+            ESPERADO: mensaje gris en la barra de accion "You have no dojutsu
+            to activate." y nada mas. Sin crash, sin sonido.
+  [ ] A2.2  `/dojutsudojutsu get` -> `activeEye=(ninguno) enabled=true`.
+            (enabled=true sin ojo es correcto: es el valor de fabrica, y
+            poweredEye sigue vacio porque no hay ojo.)
+
+-------------------------------------------------------------------------------
+ A3. ENCENDER Y APAGAR
+-------------------------------------------------------------------------------
+
+  [ ] A3.1  `/dojutsudojutsu activate sharingan`
+            `/dojutsudojutsu get` -> `activeEye=sharingan enabled=true`.
+            UN OJO NUEVO NACE ENCENDIDO.
+  [ ] A3.2  Pulsar X.
+            ESPERADO: barra de accion en gris "Sharingan deactivated" +
+            un clic tenue. `get` -> `enabled=false`.
+  [ ] A3.3  Pulsar X otra vez.
+            ESPERADO: barra de accion en cian "Sharingan activated" + el
+            sonido propio del Sharingan (el mismo del despertar).
+            `get` -> `enabled=true`.
+  [ ] A3.4  El nombre del ojo sale traducido, NO como `eye.dojutsu.sharingan`.
+            Repetir con: byakugan, rinnegan, mangekyo_itachi, rinne_sharingan.
+            (Se anadieron 12 nombres que no existian; este paso los verifica.)
+
+-------------------------------------------------------------------------------
+ A4. APAGAR QUITA LOS PODERES  (la decision de diseno)
+-------------------------------------------------------------------------------
+
+  [ ] A4.1  Con el Sharingan ENCENDIDO, abrir el menu ocular (N), seleccionar
+            una habilidad y lanzarla con R. Funciona.
+  [ ] A4.2  Apagar con X. Pulsar R.
+            ESPERADO: NO se lanza nada. El ojo apagado no da poderes.
+  [ ] A4.3  Volver a encender con X. R vuelve a funcionar.
+            OJO: al apagar se suelta la habilidad seleccionada a proposito,
+            asi que puede hacer falta volver a elegirla en N. Es lo correcto:
+            si no, al encender se lanzaria sola la ultima elegida.
+
+  [ ] A4.4  CHAKRA VISION: con un ojo que la conceda (sharingan de 3 tomoe o
+            rinnegan) ENCENDIDO, activar la vision con C: las entidades se
+            resaltan.
+  [ ] A4.5  Apagar el ojo con X.
+            ESPERADO: el resaltado DESAPARECE. Sin ojo encendido no hay vision.
+  [ ] A4.6  Encender de nuevo: vuelve el resaltado.
+
+  [ ] A4.7  RINNEGAN Y FORMA JINCHURIKI: con Rinnegan apagado, lo que dependa
+            de "tener el Rinnegan activo" NO debe aplicarse.
+
+-------------------------------------------------------------------------------
+ A5. LA FATIGA MANDA SOBRE EL INTERRUPTOR
+-------------------------------------------------------------------------------
+
+  [ ] A5.1  Con el ojo ENCENDIDO: `/dojutsudojutsu strain 100`.
+            ESPERADO (en 1 tick): dos mensajes en rojo ("Your eyes are too
+            strained..." + el porcentaje) y el ojo se APAGA solo.
+  [ ] A5.2  *** EL ARREGLO IMPORTANTE ***  `/dojutsudojutsu get`
+            ESPERADO: `activeEye=sharingan enabled=false`
+            NO ESPERADO: `activeEye=(ninguno)`
+            ANTES DE ESTE CAMBIO el ojo se BORRABA aqui, y no habia forma de
+            recuperarlo en partida. Si ves `(ninguno)`, el arreglo no entro.
+  [ ] A5.3  Con la fatiga aun a 100, pulsar X para encender.
+            ESPERADO: se niega, con los mismos dos mensajes rojos. Sigue apagado.
+  [ ] A5.4  `/dojutsudojutsu strain 50`. Pulsar X.
+            ESPERADO: ahora SI enciende.
+  [ ] A5.5  `/dojutsudojutsu strain 99`. Pulsar X (estando apagado).
+            ESPERADO: enciende. El veto es solo el tope, no la fatiga alta.
+
+  [ ] A5.6  LA FORMA ETERNA NO SE PIERDE:
+            `/dojutsudojutsu activate mangekyo_itachi`
+            `/dojutsudojutsu eternal true`
+            `/dojutsudojutsu strain 100`   (fuerza el apagado)
+            `/dojutsudojutsu get` -> `eternal=true` SIGUE AHI.
+            Este era el segundo efecto del bug: se perdia tambien el EMS.
+
+  [ ] A5.7  RINNE SHARINGAN, EL EXENTO:
+            `/dojutsudojutsu activate rinne_sharingan`
+            `/dojutsudojutsu strain 100`
+            ESPERADO: NO se apaga solo (es el ojo exento) y X sigue pudiendo
+            encenderlo/apagarlo con normalidad.
+
+  [ ] A5.8  SIN PENALIZACION CON EL OJO APAGADO: con fatiga >= 95 y el ojo
+            APAGADO, no deben aplicarse weakness ni ceguera.
+            Con el ojo ENCENDIDO y esa misma fatiga, si.
+  [ ] A5.9  Con el ojo apagado, la fatiga sigue BAJANDO sola con el tiempo
+            (regen). Comprobar con `get` un par de veces separadas.
+
+-------------------------------------------------------------------------------
+ A6. RATE-LIMIT Y PERSISTENCIA
+-------------------------------------------------------------------------------
+
+  [ ] A6.1  MANTENER X pulsada varios segundos.
+            ESPERADO: el ojo NO parpadea; alterna como mucho 2 veces por
+            segundo (enfriamiento de 10 ticks). Sin spam de mensajes.
+  [ ] A6.2  Apagar el ojo, salir del mundo y volver a entrar.
+            ESPERADO: sigue APAGADO. `get` -> `enabled=false`.
+  [ ] A6.3  Encenderlo, salir y volver: sigue ENCENDIDO.
+  [ ] A6.4  Con el ojo apagado, MORIR y reaparecer.
+            ESPERADO: el estado del ojo se conserva; el rate-limit se olvida
+            (X funciona inmediatamente al reaparecer).
+
+  [ ] A6.5  COMPATIBILIDAD CON PARTIDAS VIEJAS: abrir un mundo guardado con
+            una version anterior del mod, con un ojo ya despertado.
+            ESPERADO: el ojo aparece ENCENDIDO (`enabled=true`), no apagado.
+            Nadie debe encontrarse su Sharingan muerto tras actualizar.
+
+-------------------------------------------------------------------------------
+ A7. EVOLUCION Y DESPERTAR
+-------------------------------------------------------------------------------
+
+  [ ] A7.1  Con el ojo APAGADO, forzar una evolucion
+            (`/dojutsudojutsu use sharingan <nivel alto>`).
+            ESPERADO: el ojo nuevo llega ENCENDIDO. Un ojo que acaba de
+            evolucionar no puede heredar el apagado del anterior.
+  [ ] A7.2  Despertar un ojo por clan tambien lo deja encendido.
+
+-------------------------------------------------------------------------------
+ A8. SERVIDOR DEDICADO
+-------------------------------------------------------------------------------
+
+  [ ] A8.1  Arrancar servidor dedicado con el mod. Carga limpia, sin errores.
+  [ ] A8.2  Conectarse y repetir A3 (encender/apagar). Funciona igual.
+  [ ] A8.3  Sin trampas y sin permisos de operador, un cliente normal solo
+            puede alternar SU ojo. (El payload no lleva a quien afecta: el
+            servidor usa siempre el emisor.)
+
+  NOTA — LO QUE TODAVIA NO SE PUEDE PROBAR:
+      "Al apagarlo desaparece la textura ocular" NO se puede verificar aun:
+      el mod NO tiene todavia ningun render de textura de ojo sobre el jugador,
+      ni texturas de ojo en assets. Por eso tampoco se construyo el canal de
+      sincronizacion cosmetica: no habria nada que dibujar con el.
+      Queda pendiente y depende de que existan esas texturas.
+
+
+===============================================================================
+ ETAPA C — HUD MOVIBLE  (DJT-233)
+===============================================================================
+
+-------------------------------------------------------------------------------
+ C1. NADA CAMBIA PARA QUIEN NO TOQUE NADA
+-------------------------------------------------------------------------------
+
+  [ ] C1.1  Con el mod recien instalado y SIN abrir el editor: el HUD (chakra,
+            rango, cd de jutsu) sale arriba a la izquierda, apilado, como antes.
+  [ ] C1.2  NO existe el archivo `config/dojutsu-hud.properties`.
+            Es deliberado: no se escribe hasta que el jugador toca algo.
+
+-------------------------------------------------------------------------------
+ C2. EL EDITOR
+-------------------------------------------------------------------------------
+
+  [ ] C2.1  Pulsar M (menu ninja). Abajo hay un boton "HUD Layout".
+  [ ] C2.2  Pulsarlo: se abre el editor. Se ven los tres elementos con su caja.
+  [ ] C2.3  Los elementos se dibujan DE VERDAD (barra de chakra con sus valores,
+            rango con su titulo), no rectangulos de mentira.
+  [ ] C2.4  El juego NO se pausa al abrir el editor (un solo jugador).
+  [ ] C2.5  Pasar el raton por encima de un elemento: su caja se resalta.
+  [ ] C2.6  *** RE-TEST tras el arreglo del 2026-08-08 ***
+            NADA de lo dibujado por el editor sale BORROSO: el titulo, el texto
+            de ayuda y los tres elementos del HUD se ven NITIDOS. Solo el mundo
+            de fondo esta desenfocado.
+            (Causa del fallo: se llamaba a super.render() al final, y ese
+            super.render aplica el desenfoque sobre todo lo ya dibujado. Los
+            botones salian nitidos porque los dibuja el propio super.render,
+            despues del desenfoque.)
+  [ ] C2.7  Nota menor conocida: si arrastras un elemento justo encima de los
+            botones Reset/Done, el elemento se dibuja por delante. Los clics
+            siguen yendo al boton. Avisa si molesta y lo cambio.
+
+-------------------------------------------------------------------------------
+ C3. ARRASTRAR
+-------------------------------------------------------------------------------
+
+  [ ] C3.1  Arrastrar la barra de chakra al centro de la pantalla. Sigue al raton.
+  [ ] C3.2  Mientras se arrastra aparecen las lineas guia (centro horizontal y
+            vertical).
+  [ ] C3.3  IMAN: acercarla a un borde -> se pega al margen. Acercarla al centro
+            -> se pega al centro exacto.
+  [ ] C3.4  Soltarla. Se queda donde la dejaste.
+  [ ] C3.5  Arrastrar un elemento a cada una de las cuatro esquinas. En todas
+            queda DENTRO de la pantalla, sin salirse por el borde.
+  [ ] C3.6  Los tres elementos se pueden mover por separado.
+  [ ] C3.7  Si dos elementos se solapan, al hacer clic se coge el de encima.
+
+-------------------------------------------------------------------------------
+ C4. OCULTAR Y RESETEAR
+-------------------------------------------------------------------------------
+
+  [ ] C4.1  CLIC DERECHO sobre un elemento: se marca en rojo y pone "(hidden)".
+  [ ] C4.2  Cerrar el editor: ese elemento YA NO se dibuja en el HUD.
+  [ ] C4.3  Volver al editor, clic derecho otra vez: vuelve a mostrarse.
+  [ ] C4.4  Boton "Reset": los tres vuelven a su sitio de fabrica y todos
+            visibles.
+
+-------------------------------------------------------------------------------
+ C5. LO QUE DE VERDAD IMPORTA: QUE AGUANTE
+-------------------------------------------------------------------------------
+
+  [ ] C5.1  Colocar el HUD a tu gusto y cerrar el editor con "Done".
+  [ ] C5.2  Aparece `config/dojutsu-hud.properties` con los tres elementos,
+            sus anclajes y offsets. Los offsets son numeros pequenos
+            (fracciones), NO coordenadas en pixeles como 640 o 320.
+  [ ] C5.3  *** EL CASO CLAVE *** Cambiar la ESCALA DE GUI (Opciones -> Video)
+            de 2 a 4 y volver.
+            ESPERADO: el HUD sigue donde lo dejaste, proporcionalmente.
+            NO ESPERADO: se descoloca o se sale de la pantalla.
+  [ ] C5.4  Igual cambiando la RESOLUCION: pantalla completa <-> ventana,
+            y redimensionar la ventana a la mitad.
+            ESPERADO: todo sigue en su sitio relativo y nada se sale.
+  [ ] C5.5  Salir del juego por completo y volver a entrar: la colocacion
+            se conserva.
+  [ ] C5.6  Un elemento anclado abajo a la derecha SIGUE abajo a la derecha
+            tras redimensionar (no se queda flotando en medio).
+
+-------------------------------------------------------------------------------
+ C6. ROBUSTEZ DEL ARCHIVO (la gente lo va a editar a mano)
+-------------------------------------------------------------------------------
+
+  [ ] C6.1  Editar `dojutsu-hud.properties` y poner `chakra.anchor=izquierda`
+            (invalido). Entrar al juego.
+            ESPERADO: la barra de chakra sale en su sitio de fabrica y el resto
+            del HUD conserva SU colocacion. Sin crash.
+  [ ] C6.2  Poner `chakra.x=mucho` (no es un numero): mismo resultado.
+  [ ] C6.3  Poner `chakra.x=50` (fuera de rango): el elemento sigue dentro
+            de la pantalla.
+  [ ] C6.4  Borrar el archivo entero: todo vuelve a los defaults, sin errores.
+
+-------------------------------------------------------------------------------
+ C7. CONVIVENCIA
+-------------------------------------------------------------------------------
+
+  [ ] C7.1  Pulsar F1 (ocultar interfaz): el HUD del mod desaparece tambien.
+  [ ] C7.2  En modo espectador no se dibuja.
+  [ ] C7.3  Antes del primer sync (justo al entrar) no se dibujan valores falsos.
+  [ ] C7.4  El editor NO manda nada al servidor: abrirlo y mover cosas en un
+            servidor dedicado no genera trafico ni toca la partida. Otro
+            jugador NO ve tu colocacion (es tuya).
+
+
+===============================================================================
+ RESUMEN DE FALLOS ENCONTRADOS
+===============================================================================
+
+  Nº | Bloque | Que pasa | Que esperabas
+  ---+--------+----------+---------------
+   1 |        |          |
+   2 |        |          |
+   3 |        |          |
+
+
+===============================================================================
+ FUERA DE ALCANCE DE ESTE CHECKLIST
+===============================================================================
+
+  ETAPA B (rueda de jutsus y casteo por tecla) — NO EMPEZADA.
+      Al analizarla aparecio un requisito que no estaba en el plan: el cliente
+      HOY NO CONOCE la lista de jutsus aprendidos (el sync manda onboarding,
+      chakra, progresion y cooldowns, pero no `known`). La rueda no tiene nada
+      que dibujar hasta que eso se sincronice, asi que la etapa B incluye
+      ademas ese trabajo de red.
+
+  ETAPA D (editor de posicion de la textura del dojutsu) — BLOQUEADA.
+      No existe render de overlay ocular sobre el jugador ni texturas de ojo en
+      assets. La etapa D presupone las dos cosas. Hay que crear el overlay (y
+      el arte) antes de poder colocar nada.
+
+  COSTE PASIVO DE CHAKRA POR LLEVAR EL OJO — NO IMPLEMENTADO AUN.
+      Es el port pendiente que declara el javadoc de EyeDefinition (deuda de
+      DJT-116). Los numeros ya estan extraidos del datapack en el plan
+      (tabla A3-BIS). Sugerido como ticket propio: DJT-235.
+
+===============================================================================
+ FIN
+===============================================================================

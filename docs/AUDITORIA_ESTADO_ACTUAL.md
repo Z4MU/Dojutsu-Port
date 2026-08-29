@@ -1,7 +1,11 @@
 # Auditoría técnica — Estado actual del mod Dojutsu Port
 
-> **Fecha de la auditoría:** 2026-07-30
+> **Fecha de la auditoría:** 2026-08-07
 > **Repositorio auditado:** `D:\Projectos programacion\Dojutsu Port` (rama `main`)
+>
+> ⚠️ **ESTADO: PARCIALMENTE DESFASADO.** El repositorio **avanzó el mismo día**, unas horas después de cerrar
+> esta auditoría. Lo detectado y las cifras corregidas están en **§0.1**. El resto sigue siendo válido, pero
+> **revalida antes de decidir sobre una cifra concreta**.
 > **Método:** lectura directa del código, los recursos y los datos. **No se ha tomado ningún dato de
 > `docs/current_state.md`, `docs/backlog.md` ni `CLAUDE.md`**: esos documentos están desactualizados en varios
 > puntos (se detallan en §14.1). Todo lo que aquí se afirma está verificado contra el archivo fuente y se cita
@@ -13,7 +17,7 @@
 
 ## Índice
 
-0. [Resumen ejecutivo](#0-resumen-ejecutivo)
+0. [Resumen ejecutivo](#0-resumen-ejecutivo) · [0.1 Qué ha cambiado desde entonces](#01-qué-ha-cambiado-desde-que-se-cerró-la-auditoría-verificado-2026-08-07)
 1. [Jutsus y técnicas](#1-jutsus-y-técnicas)
 2. [Kekkei Genkai, Dōjutsu y habilidades especiales](#2-kekkei-genkai-dōjutsu-y-habilidades-especiales)
 3. [Objetos](#3-objetos)
@@ -58,6 +62,62 @@ verdes, arquitectura consistente), pero tiene **tres agujeros reales que no son 
 las fases F1–F9 **no está commiteado en git**, (b) **26 de los 128 jutsus no tienen forma de obtenerse en
 partida** porque `UnlockService` y `ClanService` nunca entregan el ítem, y (c) **20 de los 28 sonidos y toda la
 capa de partículas propia están sin cablear**. Detalle en §13 y §14.
+
+> El punto (c) **ya está parcialmente resuelto**: ver §0.1.
+
+---
+
+## 0.1. Qué ha cambiado desde que se cerró la auditoría (verificado 2026-08-07)
+
+El repositorio avanzó el mismo día y **los tres hallazgos principales de esta auditoría están resueltos**. El
+mod está ahora etiquetado como **versión 1.0.0**. Verificado contra el árbol y el historial de git, no
+supuesto.
+
+### Los tres hallazgos críticos: resueltos ✅
+
+| Hallazgo de la auditoría | Estado | Evidencia |
+|---|---|---|
+| **F1–F9 sin commitear** (§14.2a) | ✅ **Resuelto** | **11 commits**; `40687a2 F1-F10: el port completo del datapack` + `5d28a2f release: version 1.0.0`. Working tree limpio |
+| **26 jutsus inobtenibles** (§1.5) | ✅ **Resuelto** | `8c21085 F10: cierra la deuda de fondo`. Nuevo `JutsuGrantService`; `UnlockService.announce` llama a `grantAll`; los hitos declaran `grantsJutsus` y `ninjaXp` en `unlocks/progression.json`. También cerrado el TODO de `ClanJutsuUnlockService` |
+| **20 comandos de QA sin permisos** (§14.2b) | ✅ **Resuelto** | Nuevo `DebugCommands.root(name)` que aplica `.requires(hasPermission(2))`; **los 20 comandos lo usan** |
+
+### Otros cambios verificados
+
+| Métrica | En la auditoría | Ahora |
+|---|---|---|
+| Clases Java (total) | 504 | **542** |
+| Clases en `common/src/main` | 384 | **408** |
+| Commits en git | 2 | **11** |
+| Jutsus (JSON) | 128 | 128 (sin cambio) |
+| Sonidos registrados | 28 | 28 (sin cambio) |
+
+1. **Existe el paquete `api`** — `DojutsuApi`, `NinjaView`, `DojutsuRegistryEvents` (`2f4ee4e F10/DJT-220: API
+   publica v1.0.0`). §10.3 y §13 lo daban por inexistente; era el último módulo pendiente.
+2. **`EffectSfx` — sonido por técnica** (`dcf78cb DJT-227: el sonido — 19 de 28 no sonaban, y cinco sonaban
+   mal`). **Deja desfasados §1.7, §12.3 y §13.5 punto 3.** Los efectos `projectile`, `primed_strike`,
+   `structure` y `teleport` aceptan `sound`, `soundSource`, `soundVolume`, `soundPitch` y `soundRange` en
+   `effectParams`, y 13 jutsus ya los declaran (chidori, lightning_cutter, drilling_hand, rasengan,
+   big_ball_rasengan, rasenshuriken, earth_instantaneous_body, los tres de madera, y tres con sonido vanilla).
+   El javadoc documenta un criterio que conviene respetar: **la ausencia de `sound` es deliberada**, replica
+   que en el datapack sólo 3 de las 9 estructuras de madera y 5 de las 11 técnicas de golpe cargado sonaban.
+3. **`entity.dojutsu.shinobi_villager`** — la traducción que faltaba (§12.5) ya existe
+   (`40715eb DJT-229: la clave del mercader`).
+4. **Segunda `BeastMove`: `SignatureBarrageMove`** (`5bed7d9 DJT-228`). §2.6 y §13.2 decían que sólo había una;
+   ahora son **2 de 10**.
+5. **Modelos de ítem nuevos**, entre ellos `explosive_tag.json` — que §3.4 listaba como declarado en el
+   comercio sin ítem.
+6. **`es_es.json` sigue sin existir** y está anotado como deuda consciente (`039e0fc`).
+
+### Lo que sigue abierto
+
+- **Los cuatro `*_cloak`** (§1.6): `fire_cloak`, `water_cloak`, `earth_cloak` y `lightning_cloak` continúan sin
+  JSON, y siguen siendo el último paso de sus secuencias de learner. **`wind_cloak` es el único implementado.**
+- **`ClanService`**: la entrega de **ítems** iniciales de clan sigue como `TODO F8+` (píldoras Akimichi, sable
+  Hatake, chakra blades Sarutobi). La de **jutsus** ya está resuelta.
+- **8 de 10 técnicas de bestia** siguen sin implementación propia.
+- **Sin traducción al español.**
+- **La checklist manual in-game** de `known_issues.md §1` sigue sin ejecutarse: build y tests verdes no
+  demuestran que el mod funcione en partida (§14.4).
 
 ---
 

@@ -1,0 +1,584 @@
+===============================================================================
+ ETAPA 2 — MODELOS 3D Y ANIMACIONES DE LOS JUTSUS
+ Guia de trabajo en Blockbench + contexto para retomarlo en un chat nuevo
+ Proyecto: Dojutsu Port · MC 1.21.1 · Architectury (common + neoforge + fabric)
+ Fecha: 2026-08-08
+===============================================================================
+
+COMO USAR ESTE ARCHIVO
+  Esta pensado para pegarse (o citarse) al abrir un chat nuevo dedicado solo al
+  arte 3D. Las secciones 1-3 son el contexto que ese chat necesita para no dar
+  consejos genericos de Blockbench que no encajen con este mod. De la 4 en
+  adelante es el paso a paso.
+
+
+===============================================================================
+ 1. CONTEXTO DEL PROYECTO (verificado en el repo, no supuesto)
+===============================================================================
+
+1.1 DONDE VIVEN LOS ASSETS
+
+    common/src/main/resources/assets/dojutsu/
+        models/item/            <- modelos de item (aqui van los jutsus)
+        models/tailed_beast/    <- PRECEDENTE: 8_tails.json y 9_tails.json
+        textures/item/          <- texturas
+        textures/gui/
+        sounds/
+
+    OJO (regla 8b del repo): `/reload` NO lee `common/src/main/resources`.
+    En desarrollo los recursos se sirven desde los COMPILADOS:
+        common/build/resources/main/...
+    Para probar un cambio: editar ahi directamente, o editar en `src/` y correr
+        ./gradlew :common:processResources
+    Si no, se prueba el archivo viejo sin darse cuenta. Ya paso una vez (DJT-054).
+
+1.2 EL PRECEDENTE QUE HAY QUE SEGUIR: LAS BESTIAS CON COLA
+
+    `models/tailed_beast/8_tails.json` es un modelo Blockbench de 965 cubos
+    (Kurama tiene 1243) que YA funciona en el mod. Su cabecera:
+
+        "credit": "Made with Blockbench",
+        "texture_size": [512, 512],
+        "textures": { "0": "dojutsu:item/tailed_beast/8/0", ... },
+        "elements": [ { "from":[...], "to":[...],
+                        "rotation": {"angle": 45, "axis":"x", "origin":[...]},
+                        "faces": {...} } ]
+
+    Es decir: **modelo de ITEM de Java vanilla (JSON), sin GeckoLib.**
+    Se dibuja montando el modelo sobre un item-vehiculo y seleccionandolo con
+    `minecraft:custom_model_data`. El tamano final NO esta en el modelo: sale de
+    `BeastStats.renderScale`, que comparten el dibujo y la caja de colision.
+
+    => El mod NO tiene GeckoLib como dependencia. Y no hace falta anadirla para
+       los jutsus (ver 3.1). La regla 4 del repo avisa: no tocar la matriz de
+       versiones a la ligera.
+
+1.3 EL SISTEMA DE MODELOS DE JUTSU YA EXISTE
+
+    `items/JutsuModelData.java` mapea jutsuId -> custom_model_data, con los
+    numeros AUTENTICOS del datapack:
+
+        great_fireball ............ 301
+        fire_bullet ............... 356
+        fireproof ................. 314
+        fire_transport ............ 315
+        fire_dragon_flame_bullet .. 338
+        exploding_dragon_strike ... 347
+        great_fire_annihilation ... 401
+        chidori ................... 452
+        rasengan / etc ............ (ver el fichero, esta completo)
+
+    Y su javadoc dice literalmente cual es el procedimiento:
+
+        "Anadir la textura de un jutsu nuevo = 1 entrada aqui + su modelo +
+         su textura + 1 override en el modelo base (models/item/jutsu.json)."
+
+    Esos numeros ya estan ocupados por los ICONOS 2D portados (F4/DJT-085b) y
+    NO se pueden reutilizar para los modelos 3D del mundo: el pergamino sigue en
+    el inventario. Los modelos 3D usan un rango aparte (3000+). Ver 6.1.
+
+1.4 COMO SE DIBUJA HOY UN PROYECTIL — EL ATAJO IMPORTANTE
+
+    `jutsu/effect/ProjectileEffect.java` lee del JSON de la tecnica un campo
+    `displayItem` (por defecto `minecraft:snowball`) y construye la pila con
+    `displayStack(...)`. La entidad `dojutsu:ninja_projectile` se dibuja con
+    `ThrownItemRenderer`, o sea: **como el item que diga displayItem**.
+
+    CONSECUENCIA, y es la mejor noticia de toda esta etapa:
+
+        Si `displayStack` puede devolver `dojutsu:jutsu` con el
+        custom_model_data del jutsu, el modelo 3D aparece en vuelo
+        SIN ESCRIBIR UN RENDERER NUEVO.
+
+    Es un cambio pequeno en ProjectileEffect (aceptar el item propio del mod con
+    su custom_model_data en vez de solo un id vanilla). Hacer eso ANTES de
+    modelar: asi la primera pieza se puede ver en partida el mismo dia.
+
+1.5 QUE JUTSUS TIENEN HOY DONDE COLGAR UN MODELO
+
+    De `docs/REFERENCIA_ARTE_JUTSUS.md` (verificado contra los JSON):
+
+        projectile ...... SI. Entidad real volando. Modelo casi directo.
+        primed_strike ... NO. Nada visible durante la carga. Hay que programarlo.
+        area ............ NO. Nada en absoluto, ni una particula.
+        teleport ........ NO (solo particulas POOF).
+        buff ............ NO. Solo el efecto de pocion.
+        structure ....... No aplica (coloca bloques vanilla reales).
+
+    Por elemento:
+        Fuego ... 5 de 7 son proyectiles  -> el mas facil, EMPEZAR AQUI.
+        Rayo .... 0 de 8 son proyectiles  -> los ocho necesitan programacion antes.
+        Viento .. 3 de 10 son proyectiles -> ademas tiene 3 auras sin visual.
+        Tierra .. 2 de 7 son proyectiles.
+
+1.6 EL DOCUMENTO DE ARTE YA EXISTE Y ES LA FUENTE DE VERDAD DEL DISENO
+
+    `docs/REFERENCIA_ARTE_JUTSUS.md` (1161 lineas, verificado 2026-08-07) tiene,
+    por cada jutsu: familia, coste, radio, dano, que se ve hoy, QUE DEBE
+    REPRESENTAR EL MODELO con dimensiones exactas en bloques, la paleta con
+    codigos hex, y el prompt de generacion. Cubre Fuego (7/7), Rayo (8/8),
+    Viento (10/10) y Tierra (7/7).
+
+    Al modelar, ese documento manda sobre las capturas PNG (ver seccion 2).
+
+
+1.7 EL ALCANCE REAL DE "MODELOS CUSTOM PARA TODOS LOS JUTSUS"
+    [MEDIDO 2026-08-08 sobre common/src/main/resources/data/dojutsu/jutsu/]
+
+    El objetivo declarado es hacer modelo propio para TODOS los jutsus. Conviene
+    saber de que tamano es "todos" antes de empezar, porque no son 5 ni 30.
+
+    TOTAL: 128 jutsus, repartidos en 29 categorias.
+      wind 10 · wood 8 · lightning 8 · water 7 · fire 7 · explosion 7 · earth 7
+      magnet 6 · genjutsu 6 · kenjutsu 5 · ice 5 · yin_yang 4 · taijutsu 4
+      steel 4 · medical 4 · crystal 4 · boil 4 · storm 3 · scorch 3 · mud 3
+      lava 3 · fuinjutsu 3 · universal 2 · typhoon 2 · swift 2 · dark 2
+      blaze 2 · aburame 2 · dust 1
+
+    REPARTO POR FAMILIA DE EFECTO — ESTO ES LO QUE MANDA:
+
+      FAMILIA          Nº    ¿Hay donde colgar un modelo HOY?
+      -----------------------------------------------------------------------
+      area             54    NO. No dibujan nada, ni una particula.
+      projectile       23    SI. Entidad real volando.
+      structure        19    NO APLICA. Colocan bloques vanilla reales.
+      primed_strike    11    NO. Nada visible durante la carga.
+      teleport          8    NO. Solo particulas POOF.
+      buff              7    NO. Solo el efecto de pocion.
+      heal              6    NO.
+      -----------------------------------------------------------------------
+
+    LAS TRES CIFRAS QUE IMPORTAN:
+
+      23 de 128 (18%)  se pueden ver HOY con solo modelar. Son los proyectiles.
+      86 de 128 (67%)  necesitan que alguien PROGRAME antes un sitio donde
+                       colgar el efecto. Sin eso, el modelo no se ve en partida.
+      19 de 128 (15%)  son `structure`: colocan dirt, stone, ice... El efecto ES
+                       el bloque. Ahi no hay modelo de Blockbench que hacer; si
+                       acaso, TEXTURA DE BLOQUE, que es otro trabajo distinto.
+
+    CONSECUENCIA PRACTICA, y conviene asumirla ahora:
+      El cuello de botella de "modelos para todos los jutsus" NO es Blockbench.
+      Son los 86 anclajes que hay que programar. Modelar 128 piezas es mucho
+      trabajo pero es trabajo conocido; programar 5 familias de visual nuevas
+      (area, primed_strike, teleport, buff, heal) es trabajo de diseno tecnico y
+      hay que hacerlo UNA VEZ POR FAMILIA, no una vez por jutsu.
+
+      => El orden eficiente es: por cada familia, resolver el ANCLAJE una vez
+         (una plantilla reutilizable) y despues producir sus modelos en serie.
+         Es exactamente el orden del bloque 3 y 4 de la seccion 5.
+
+    ADEMAS: la referencia de arte solo cubre 32 de los 128.
+      `docs/REFERENCIA_ARTE_JUTSUS.md` tiene Fuego (7), Rayo (8), Viento (10) y
+      Tierra (7). Faltan 96 sin descripcion ni paleta escritas: agua, yin-yang,
+      taijutsu, genjutsu, medico, fuinjutsu, kenjutsu, aburame, universales y los
+      16 Kekkei Genkai. Ese documento hay que ampliarlo en paralelo, porque es
+      el que evita que cada pieza se invente su propio estilo.
+
+    NO ES UN ARGUMENTO PARA RECORTAR EL OBJETIVO. Es para ordenarlo: si se
+    empieza modelando piezas sueltas de categorias distintas, se acumulan
+    modelos que no se pueden ver y el trabajo no se nota en partida.
+
+
+===============================================================================
+ 2. DISCREPANCIAS ENTRE LAS CAPTURAS PNG Y EL REPO — RESOLVER ANTES DE MODELAR
+===============================================================================
+
+Las fichas de `imagenes referencias jutsus/Fuego/*.png` son un brief excelente
+(paleta nombrada, ortograficas, escala junto al jugador, fases de animacion),
+pero NO coinciden con el repo en varios puntos. El repo gana, porque sus
+numeros salen de los JSON de las tecnicas.
+
+  2.1 RESOLUCION DE TEXTURA
+      Las fichas dicen "TEXTURA 16x16". El repo dice que las texturas 2D
+      existentes son 32x32 (y una es 64x128).
+      -> Para un MODELO 3D esto es otra cosa: la textura es un atlas UV propio
+         del modelo y su tamano lo decide el modelo (las bestias usan 512x512).
+         Recomendacion: 64x64 para las piezas pequenas, 128x128 para las grandes.
+         El 16x16 de las fichas es demasiado poco y no es lo que se usa aqui.
+
+  2.2 ESCALAS QUE NO CUADRAN
+                             ficha PNG        docs/REFERENCIA_ARTE
+      Bala de fuego          0.8 ~ 1 bloque   0.5 x 0.4 x 0.6
+      Transporte de fuego    1.5 ~ 2          2 x 2 x 2
+      Golpe explosivo drag.  2 ~ 3            1.2 x 1.2 x 2.0
+      Gran aniquilacion      4 ~ 6            3.5 x 2.5 x 3.0
+      -> Usar las de docs/REFERENCIA_ARTE_JUTSUS.md. Estan derivadas del radio de
+         aura y la velocidad reales de cada tecnica.
+
+  2.3 "TRANSPORTE DE FUEGO" NO ES UN DASH
+      La ficha lo describe como impulso a alta velocidad en linea recta que
+      embiste. En el codigo es un `teleport` de 3 a 8 bloques, sin dano.
+      -> El modelo es EL ESTALLIDO QUE QUEDA ATRAS al desaparecer, no un
+         proyectil que viaja. Modelar la ficha tal cual seria modelar algo que el
+         mod no hace.
+
+  2.4 FALTAN DOS PIEZAS DE FUEGO
+      Las capturas cubren 5 de los 7 jutsus de fuego. No estan:
+        - Fireproof (buff, aura sobre el jugador)
+        - Great Fireball (custom_model_data 301, el primero del catalogo entero
+          y la tecnica emblematica de los Uchiha)
+      Los dos estan descritos en docs/REFERENCIA_ARTE_JUTSUS.md.
+
+  2.5 RAYO Y VIENTO ESTAN VACIAS
+      Las carpetas existen pero no tienen imagenes. Los 18 prompts si estan
+      escritos en el documento de arte.
+
+  2.6 EL PANEL "EJEMPLO DE USO" CON CRAFTEO YA NO DESCRIBE EL CASTEO
+      [ACTUALIZADO 2026-08-08] Decision tomada: los jutsus se lanzan SOLO con la
+      tecla; el objeto DEJA DE CASTEAR. El pergamino sobrevive como objeto de
+      aprendizaje, loot y comercio.
+      => El panel de crafteo de las fichas sigue siendo cierto como "asi se
+         obtiene el pergamino", pero YA NO como "asi se usa el jutsu".
+         Si se reeditan las fichas, cambiar el rotulo.
+      => Lo importante para el arte: el pergamino SIGUE EN EL INVENTARIO, luego
+         sigue necesitando su icono 2D. Ver 6.1.
+
+  2.7 EL GLOW DE LAS CAPTURAS NO EXISTE EN MINECRAFT
+      Las tres "REFERENCIA EN JUEGO" de cada ficha son mockups, no capturas
+      reales. El halo suave y el bloom NO se pueden reproducir sin shaders. Con
+      render emisivo se consigue que el color no se apague en la sombra, pero el
+      resplandor que sale de la silueta no. Conviene saberlo antes de modelar y
+      no despues, al comparar el resultado con la imagen.
+
+
+===============================================================================
+ 3. DECISIONES TECNICAS PREVIAS (tomarlas antes de abrir Blockbench)
+===============================================================================
+
+3.1 QUE TIPO DE PROYECTO DE BLOCKBENCH
+
+    Tres caminos posibles. Para este mod:
+
+    (A) "Modelo de Bloque/Item de Java"  -> JSON  ** RECOMENDADO POR DEFECTO **
+        + Es lo que YA usa el mod (tailed_beast, 965 cubos, funcionando).
+        + Cero dependencias nuevas. No toca la matriz de versiones.
+        + Se enchufa al sistema de custom_model_data que ya existe.
+        + Con el atajo de 1.4, se ve en partida sin escribir renderer.
+        - LIMITACION REAL: cada cubo solo admite rotacion en UN eje y solo con
+          angulos de -45, -22.5, 0, 22.5 o 45 grados. Nada de angulos libres.
+        - LIMITACION REAL: las coordenadas de un elemento deben caer entre -16 y
+          32 (es decir, 48 px = 3 bloques como maximo).
+          -> Se resuelve igual que las bestias: modelar pequeno y AMPLIAR en el
+             renderer con un factor de escala. Gran Aniquilacion (3.5 bloques)
+             necesita esto obligatoriamente.
+
+    (B) "Modelo de Entidad de Java" -> clase Java con ModelPart
+        + Rotacion libre en los tres ejes.
+        + Sigue siendo vanilla, sin dependencias.
+        - Exige renderer propio por pieza y animar a mano en codigo.
+        - No aprovecha el custom_model_data ni el ThrownItemRenderer existente.
+        -> Solo si una pieza concreta se vuelve imposible con (A) por el limite
+           de angulos.
+
+    (C) GeckoLib -> animacion por keyframes dentro de Blockbench
+        + Lo mejor para animacion esqueletica de verdad.
+        - Dependencia nueva en los DOS loaders, contra la regla 4 del repo.
+        -> Reservarlo, si acaso, para los modelos del Susanoo (F5, unico pendiente
+           de esa fase). NO para los jutsus.
+
+    DECISION: (A) para todos los jutsus. Reevaluar solo si una pieza falla.
+
+3.2 EL LIMITE DE ANGULOS ES LA RESTRICCION QUE MAS VA A DOLER
+
+    Varias piezas del documento de arte piden formas radiales:
+      - Transporte de fuego: puntas conicas "en todas direcciones"
+      - Bala de llama dragon: lengüetas de longitudes desiguales
+      - Rasengan: estriaciones en espiral
+    Con 22.5 y 45 grados no se puede hacer una estrella de N puntas arbitraria.
+
+    Como se resuelve, en orden:
+      1. Aceptar la reticula. La estetica Minecraft ES eso. Una explosion de
+         puntas alineadas a los ejes + diagonales de 45 se lee perfectamente
+         como explosion y encaja mejor con el juego que una forma libre.
+      2. Las chispas, jirones y puntas finas NO se modelan: van con PARTICULAS.
+         Sale mas barato, se mueve solo y se ve mejor.
+      3. Si una pieza de verdad necesita angulos libres, esa pieza sube al
+         camino (B).
+
+3.3 QUE SE MODELA Y QUE NO
+
+    MODELAR (cubos):     la masa principal, la silueta, el volumen que identifica
+                         la tecnica.
+    NO MODELAR:          chispas, estelas, humo, brasas sueltas, halos.
+                         Todo eso son particulas.
+
+    Caso especial — Gran Aniquilacion de Fuego: el documento la describe como
+    "masa informe, sin centro geometrico, un frente de fuego que avanza".
+    Un modelo de cientos de cubos irregulares es mucho coste de render para algo
+    que por definicion no tiene forma reconocible.
+    -> Recomendacion: modelo simple y grande + sistema de particulas denso.
+       Es la unica de las cinco donde el modelo NO es la solucion principal.
+
+3.4 EMISIVO Y TRANSLUCIDO
+
+    Estos efectos son luz: si se renderizan como un item normal, de noche o en
+    sombra se apagan y parecen plastico.
+    -> Hace falta un render type emisivo y translucido. En 1.21.1 Mojmap existe
+       la familia `RenderType.entityTranslucentEmissive(...)`; confirmar el nombre
+       exacto al implementarlo.
+    -> Si se va por el atajo de 1.4 (ThrownItemRenderer), comprobar primero si
+       respeta el emisivo o si hay que hacer un renderer minimo solo para eso.
+       Esta es la unica parte del atajo que puede no salir gratis.
+
+3.5 ANIMACION SIN GECKOLIB — LAS TRES TECNICAS
+
+    Las fichas PNG traen un panel "ANIMACION IDEAL" con fases de crecimiento.
+    Con el camino (A) eso se consigue asi:
+
+    (1) TRANSFORMACION EN EL RENDERER  <- para casi todo
+        Girar el modelo sobre su eje, pulsar la escala, inclinarlo segun la
+        velocidad. Cuesta 3 lineas y no necesita ningun asset extra.
+        Cubre: rotacion del Rasengan, balanceo de la bala en vuelo, el "giro" del
+        taladro de aire.
+
+    (2) CAMBIO DE FOTOGRAMA POR TICK   <- para el crecimiento
+        Varios modelos (fase 1, 2, 3, 4) con custom_model_data consecutivos, y el
+        renderer elige uno segun los ticks de vida de la entidad.
+        Cubre exactamente los paneles "ANIMACION IDEAL" de las fichas: el
+        proyectil que nace pequeno y crece. Es barato y muy efectivo.
+
+    (3) PARTICULAS                     <- para el caos
+        Chispas, estela, humo al impactar. Nada de esto va en el modelo.
+
+    Con estas tres no hace falta GeckoLib para ninguna pieza de jutsu.
+
+
+===============================================================================
+ 4. PASO A PASO EN BLOCKBENCH — PRIMERA PIEZA (Fire Bullet)
+===============================================================================
+
+Se empieza por Fire Bullet porque es proyectil (tiene donde colgarse), es el mas
+pequeno y simple, y sirve para validar la cadena entera de una punta a otra.
+
+  PASO 0 — Preparar el camino ANTES de modelar
+    a) Aplicar el cambio de 1.4 en ProjectileEffect (que displayItem pueda ser
+       el item del mod con su custom_model_data).
+    b) Comprobar con el modelo 2D que ya existe que el proyectil se dibuja con
+       el item de `dojutsu:jutsu`. Si esto funciona, todo lo demas es arte.
+    Esto evita el escenario clasico: modelar cinco piezas y descubrir al final
+    que no hay forma de verlas.
+
+  PASO 1 — Nuevo proyecto
+    Blockbench -> Nuevo -> "Modelo de Bloque/Item de Java".
+    Ajustes del proyecto:
+       - Tamano de textura: 64 x 64
+       - Nombre del modelo: fire_bullet
+
+  PASO 2 — Fijar la escala de trabajo
+    1 bloque = 16 px. Fire Bullet mide 0.5 x 0.4 x 0.6 bloques, o sea
+    8 x 6.4 x 9.6 px. Es DIMINUTO en la reticula del editor.
+    -> Modelarlo mas grande y compensar con escala en el renderer complica el
+       ajuste fino. Para las piezas pequenas conviene modelar al tamano real y
+       trabajar con zoom.
+    -> Activar la rejilla y el "pixel grid". No trabajar con coordenadas
+       decimales salvo que haga falta: los cubos alineados a la reticula se ven
+       mas "Minecraft" y las UV salen limpias.
+
+  PASO 3 — Bloquear la silueta antes que el detalle
+    Empezar con 3-5 cubos grandes que den la forma general (cuerpo ovoide
+    aplastado y alargado en la direccion de vuelo). Mirarlo desde lejos.
+    Si la silueta no se reconoce a 10 bloques de distancia, ningun detalle la va
+    a salvar: en partida esto se ve medio segundo y en movimiento.
+
+  PASO 4 — Volumen por capas de color, no por cubos sueltos
+    El documento pide nucleo mas claro que la superficie:
+       nucleo amarillo   #F5A03C
+       cuerpo naranja    #E05A10
+       borde rojo oscuro #8C2A06
+    Construir de dentro afuera: un cubo pequeno de nucleo, envuelto por cubos de
+    cuerpo, con los cubos de borde en las esquinas. Que el nucleo asome por las
+    juntas es lo que da la sensacion de brasa.
+
+  PASO 5 — La estela, corta y pegada
+    "Dos o tres jirones de llama pegados al cuerpo, nunca sueltos."
+    Si se quiere mas estela, va con particulas (3.3), no con cubos.
+
+  PASO 6 — Texturizar
+    - Blockbench -> "Crear textura" -> 64x64, y pintar sobre el modelo
+      directamente (modo Paint).
+    - SIN antialiasing, SIN degradados suaves, SIN sombra difusa. Bordes duros.
+      Si se usa un pincel con suavizado, el resultado desentona con el juego.
+    - Paleta de 4 tonos como maximo por pieza, los del documento de arte.
+    - Truco util: pintar las caras internas mas claras que las externas. Da
+      profundidad sin necesidad de mas geometria.
+
+  PASO 7 — Revisar contra las ortograficas
+    La ficha PNG trae vistas FRONTAL / LATERAL / SUPERIOR. Comparar las tres en
+    Blockbench con las de la ficha. Si la superior no coincide, normalmente es
+    que la pieza esta "plana": tiene forma vista de frente pero no de arriba.
+
+  PASO 8 — Contar cubos
+    Anotar el numero. Presupuesto orientativo para que no se dispare:
+        proyectil pequeno .......  10 -  25 cubos
+        proyectil medio .........  25 -  60
+        proyectil grande ........  60 - 120
+        aura sobre el jugador ...  20 -  50 (tiene que ser calada, se ve al
+                                   jugador a traves)
+    (Las bestias tienen 965 y 1243, pero son una por mundo. Los jutsus pueden
+     estar diez a la vez en pantalla en una pelea.)
+
+  PASO 9 — Exportar
+    Archivo -> Exportar -> "Modelo de Bloque/Item".
+    Guardar en:
+        common/src/main/resources/assets/dojutsu/models/item/jutsu/fire_bullet.json
+    La textura en:
+        common/src/main/resources/assets/dojutsu/textures/item/jutsu/fire_bullet.png
+    Comprobar en el JSON exportado que la ruta de "textures" apunta a
+        "dojutsu:item/jutsu/fire_bullet"
+    Blockbench a veces exporta una ruta absoluta del disco: hay que corregirla.
+
+  PASO 10 — Enchufarlo (segun el javadoc de JutsuModelData)
+    1. Entrada en JutsuModelData (o el rango nuevo, ver 6.1).
+    2. Override en models/item/jutsu.json apuntando al modelo nuevo.
+    3. La textura en su sitio.
+    4. ./gradlew :common:processResources   (regla 8b, si no se prueba el viejo)
+    5. En partida: lanzar el jutsu y mirarlo.
+
+  PASO 11 — Ajustar en partida, no en el editor
+    En Blockbench todo se ve enorme y quieto. En partida se ve pequeno, lejos, en
+    movimiento y medio segundo. Casi siempre hay que:
+       - subir el contraste (los tonos medios se funden a distancia),
+       - simplificar (el detalle fino desaparece),
+       - reajustar la escala (lo que parece bien en el editor suele quedarse corto).
+    Este paso 11 no es opcional. Es donde se decide si la pieza funciona.
+
+
+===============================================================================
+ 5. ORDEN DE TRABAJO RECOMENDADO
+===============================================================================
+
+  BLOQUE 1 — Cadena completa con una sola pieza
+    Fire Bullet, de principio a fin, incluido el paso 0 y el paso 11.
+    No modelar nada mas hasta que esta se vea bien en partida.
+    Es la que valida: export -> custom_model_data -> renderer -> emisivo -> escala.
+
+  BLOQUE 2 — El resto de proyectiles de fuego (los faciles, ya hay entidad)
+    2. Fire Dragon Flame Bullet ... esfera erizada, 0.9 x 0.9 x 1.2
+    3. Great Fireball ............. esfera limpia, 2 x 2 x 2  (la emblematica)
+    4. Exploding Dragon Strike .... cabeza de dragon, 1.2 x 1.2 x 2.0
+    5. Great Fire Annihilation .... masa informe, 3.5 x 2.5 x 3 (+ particulas)
+    Al terminar el bloque, el elemento fuego tiene identidad visual completa en
+    todo lo que hoy se ve.
+
+  BLOQUE 3 — Fire Transport (teleport)
+    Necesita programar el visual: no hay entidad, solo particulas POOF. Es el
+    primer caso de "efecto sin donde colgarse" y sirve de plantilla para los 20+
+    que vienen despues en rayo y viento.
+
+  BLOQUE 4 — Fireproof (aura sobre el jugador)
+    Primer aura. Resuelve el problema de "modelo anclado al jugador, translucido
+    y calado para que no lo tape". Plantilla para Wind Mode, Wind Cloak y las
+    demas.
+
+  DESPUES: viento (3 proyectiles directos), y rayo el ultimo, porque sus 8
+  tecnicas necesitan programacion previa antes de que un modelo se pueda ver.
+
+  REGLA GENERAL: cada bloque nuevo debe resolver UN problema tecnico nuevo. Si
+  dos piezas seguidas no aportan nada tecnico, se estan haciendo en el orden
+  equivocado.
+
+  Y LA REGLA QUE GOBIERNA LAS 128 (ver 1.7): UNA PLANTILLA POR FAMILIA.
+  Solo hay 5 familias que necesiten anclaje nuevo (area, primed_strike,
+  teleport, buff, heal). En cuanto una de ellas tenga su visual resuelto, TODOS
+  sus jutsus pasan de "no se puede ver" a "solo falta modelarlo":
+
+      resolver `teleport`      ->  desbloquea  8 jutsus
+      resolver `buff`          ->  desbloquea  7
+      resolver `heal`          ->  desbloquea  6
+      resolver `primed_strike` ->  desbloquea 11
+      resolver `area`          ->  desbloquea 54   <- el premio gordo
+
+  `area` son 54 de 128: casi la mitad del catalogo depende de una sola pieza de
+  programacion. Merece resolverse pronto y bien, aunque su primer jutsu no sea
+  el mas vistoso. Y `structure` (19) no entra: ahi no hay modelo que hacer.
+
+
+===============================================================================
+ 6. DECISIONES ABIERTAS PARA EL CHAT DE MODELADO
+===============================================================================
+
+  6.1 NUMEROS DE custom_model_data  [DECIDIDO 2026-08-08 — RANGO NUEVO]
+      Los numeros actuales (301, 356, 314...) son los AUTENTICOS del datapack y
+      apuntan a los ICONOS 2D del item de jutsu.
+
+      El objeto DEJA DE CASTEAR (decision de la etapa 1), pero NO desaparece:
+      sigue existiendo como pergamino de aprendizaje, loot y mercancia, y por
+      tanto sigue viendose en el inventario, en cofres y en el comercio.
+      => Reutilizar esos numeros para los modelos 3D NO ES UNA OPCION: el
+         pergamino pasaria a verse como una bola de fuego de 2 bloques.
+
+      => OBLIGATORIO: rango nuevo, separado, solo para modelos de mundo.
+         Propuesta: 3000 + el numero original.
+             great_fireball  icono 301  ->  modelo 3D 3301
+             fire_bullet     icono 356  ->  modelo 3D 3356
+         La correspondencia queda evidente de un vistazo, no hay que mantener
+         una segunda tabla mental, y no colisiona con nada del datapack.
+
+      Implicacion en codigo: `JutsuModelData` pasa a tener DOS mapas (icono y
+      modelo de mundo), o un unico mapa con dos campos por jutsu. Segunda opcion
+      recomendada: un jutsu, una entrada.
+
+  6.2 UNA TEXTURA POR PIEZA O UN ATLAS COMPARTIDO POR ELEMENTO
+      Las cinco piezas de fuego comparten la misma rampa de color (nucleo
+      brillante -> fuego claro -> medio -> oscuro).
+      -> Un atlas 64x64 compartido por elemento ahorra archivos y garantiza
+         coherencia. Merece la pena decidirlo ANTES de texturizar la primera.
+
+  6.3 EL FUEGO EN EL SUELO
+      Tres de las cinco piezas de fuego dejan bloques de fuego reales. Eso es
+      griefing en servidores. No es problema de arte, pero hay que registrarlo:
+      necesita un flag de configuracion o muchos servidores no instalaran el mod.
+
+  6.4 QUE HACER CON LAS FICHAS PNG
+      Actualizarlas con los datos del repo (escalas, resolucion de textura,
+      quitar el panel de crafteo, corregir Transporte de fuego) o dejarlas como
+      referencia de estilo unicamente y modelar mirando
+      docs/REFERENCIA_ARTE_JUTSUS.md.
+      -> Recomendacion: lo segundo. Mantener dos fuentes sincronizadas cuesta mas
+         de lo que aporta.
+
+
+===============================================================================
+ 7. CHECKLIST POR PIEZA (copiar y marcar)
+===============================================================================
+
+  [ ] Leida la entrada del jutsu en docs/REFERENCIA_ARTE_JUTSUS.md
+  [ ] Confirmado que la familia del jutsu tiene donde colgar el modelo (1.5)
+  [ ] Dimensiones en bloques tomadas del documento, no de la ficha PNG
+  [ ] Paleta: maximo 4-5 tonos, los hex del documento
+  [ ] Silueta reconocible a distancia
+  [ ] Nucleo mas claro que la superficie
+  [ ] Chispas/estelas dejadas para particulas, no modeladas
+  [ ] Cubos dentro del presupuesto (paso 8)
+  [ ] Textura sin antialiasing ni degradados suaves
+  [ ] Ruta de textura del JSON corregida a "dojutsu:..."
+  [ ] Exportado a assets/dojutsu/models/item/jutsu/
+  [ ] Entrada de custom_model_data + override en jutsu.json
+  [ ] ./gradlew :common:processResources ejecutado
+  [ ] VISTO EN PARTIDA y ajustado (paso 11)
+  [ ] Probado de noche / en cueva (comprobar el emisivo)
+  [ ] Probado con 5 instancias a la vez (rendimiento)
+
+
+===============================================================================
+ 8. PARA ARRANCAR EL CHAT NUEVO — PREGUNTAS QUE CONVIENE HACER PRIMERO
+===============================================================================
+
+  1. Confirmar el camino (A) modelo de item JSON, sin GeckoLib.
+  2. 6.1 YA ESTA RESUELTO (rango 3000+, obligatorio porque el pergamino sigue
+     en el inventario aunque ya no castee).
+     Queda 6.2 (atlas compartido por elemento o textura por pieza).
+  3. Hacer el PASO 0 (que displayItem acepte el item del mod) antes de modelar.
+  4. Verificar si ThrownItemRenderer respeta el render emisivo o hay que
+     escribir un renderer minimo (3.4). Es el unico riesgo tecnico real del plan.
+  5. Empezar por Fire Bullet y no tocar nada mas hasta verla en partida.
+  6. Tener presente el alcance de 1.7: son 128 jutsus, de los que solo 23 se
+     pueden ver hoy. Planificar por FAMILIA (una plantilla de anclaje cada vez),
+     no jutsu a jutsu.
+  7. Ampliar `docs/REFERENCIA_ARTE_JUTSUS.md` en paralelo: cubre 32 de 128, y es
+     lo que mantiene el estilo coherente entre piezas.
+
+===============================================================================
+ FIN
+===============================================================================

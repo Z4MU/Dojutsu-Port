@@ -1,0 +1,429 @@
+===============================================================================
+ CHECKLIST DE PRUEBAS EN PARTIDA - FASE 11, ETAPA B (tareas 1-7 + fusion)
+ Cubre: DJT-231 - sync de jutsus aprendidos, jutsu seleccionado, y la tecla de
+        cast reapuntada al selector.
+        DJT-232 - el item deja de castear; pasa a seleccionar.
+        DJT-233 - rueda radial de 8 huecos y el reparto que dibuja.
+        DJT-234 - teclas ALT+1..8 para lanzar desde los huecos.
+        DJT-235 - libro de jutsus: comparar tecnicas y repartir los huecos.
+        DJT-236 - las tres pantallas de preparacion, en pestañas bajo M.
+ Rama: djt-230-toggle-dojutsu . Fecha: 2026-08-28
+ Estado automatico: build multiloader VERDE . 1080 tests . 0 fallos
+===============================================================================
+
+QUE ESTAS PROBANDO EXACTAMENTE
+  Antes: la tecla de cast lanzaba "lo que llevabas en la mano principal".
+  Ahora: la tecla lanza "el jutsu que tienes SELECCIONADO en tu estado".
+  Y ya hay rueda: Z mantenida la abre y al soltar elige. Los comandos siguen
+  estando para preparar escenarios sin depender de la interfaz.
+
+  Hay que pasarlo en LOS DOS LOADERS antes de cerrar el ticket (regla 2).
+  Loader probado:   [ ] NeoForge    [ ] Fabric
+
+
+-------------------------------------------------------------------------------
+ 0. PREPARACION
+-------------------------------------------------------------------------------
+
+  [ ] 0.1  Mundo nuevo en creativo con trampas. Onboarding completado hasta que
+           el HUD de chakra aparezca.
+  [ ] 0.2  /dojutsujutsu list responde con jutsus cargados. Si sale 0, el
+           datapack no cargo y el resto del checklist no vale.
+  [ ] 0.3  Log sin WARN ni ERROR del mod al arrancar.
+
+  COMANDOS NUEVOS (anadidos en esta tarea, justo para poder probarla)
+      /dojutsujutsu learn <id>     -> aprende un jutsu sin pergamino
+      /dojutsujutsu select <id>    -> elige el de la tecla; "none" lo retira
+      /dojutsujutsu known          -> que conoces, que llevas y como esta la rueda
+      /dojutsujutsu slot <1-8> <id> -> coloca en un hueco; "none" lo vacia
+      /dojutsujutsu cast <id>      -> (ya existia) lanza saltandose el selector
+
+  Ojo con el autocompletado de select: sugiere SOLO lo aprendido, mas "none".
+  Si un id que sabes que existe no aparece ahi, es que no lo has aprendido.
+
+
+-------------------------------------------------------------------------------
+ B1. LA LISTA DE APRENDIDOS LLEGA AL CLIENTE  (tarea 1)
+-------------------------------------------------------------------------------
+
+  [ ] B1.1  /dojutsujutsu known con partida nueva -> "aprendidos (0)".
+  [ ] B1.2  /dojutsujutsu learn fire_bullet -> "aprendido: fire_bullet".
+  [ ] B1.3  Repetir el mismo learn -> "ya lo conocias" (idempotente, sin error).
+  [ ] B1.4  Aprender 3 o 4 jutsus mas. known los lista todos, EN ORDEN
+            ALFABETICO estable, no en el orden en que los aprendiste.
+  [ ] B1.5  Salir al menu y volver a entrar al mundo. known los conserva.
+
+  ---- EL CASO QUE MAS IMPORTA DE ESTA TAREA --------------------------------
+  La lista viaja solo cuando cambia; los demas sync, que los dispara la
+  regeneracion de chakra, van sin ella. Si el cliente interpretara "sin lista"
+  como "lista vacia", se le vaciaria sola cada pocos segundos.
+
+  [ ] B1.6  Aprende un jutsu, seleccionalo, y QUEDATE QUIETO 60 SEGUNDOS
+            mientras el chakra regenera. Gasta algo antes con
+            /dojutsuchakra consume 50 para que haya regeneracion real.
+            Luego /dojutsujutsu known: la lista y la seleccion SIGUEN AHI.
+            Si algo se vaciara solo, es aqui donde se ve.
+
+
+-------------------------------------------------------------------------------
+ B2. SELECCIONAR JUTSU  (tareas 2 y 3)
+-------------------------------------------------------------------------------
+
+  [ ] B2.1  /dojutsujutsu select fire_bullet (aprendido) -> "-> SELECTED",
+            y aparece en la actionbar "Jutsu selected: ...".
+  [ ] B2.2  /dojutsujutsu known confirma "seleccionado: fire_bullet".
+  [ ] B2.3  Repetir el MISMO select -> "-> UNCHANGED", SIN mensaje en la
+            actionbar. No genera trafico ni ruido; es intencionado.
+  [ ] B2.4  /dojutsujutsu select none -> "-> CLEARED" y actionbar
+            "No jutsu selected."
+  [ ] B2.5  Selecciona un jutsu QUE NO HAYAS APRENDIDO. Escribe el id a mano,
+            el autocompletado no te lo va a ofrecer; por ejemplo
+            /dojutsujutsu select great_fireball sin haberlo aprendido.
+            Esperado: "-> NOT_KNOWN". No cambia nada.
+
+  ---- LA PRUEBA DE SEGURIDAD (no te la saltes) -----------------------------
+  Un intento invalido NO debe borrar lo que ya tenias. Si lo borrara, cualquiera
+  podria dejarte sin jutsu en mitad de un combate mandando basura.
+
+  [ ] B2.6  Selecciona uno valido. Luego intenta seleccionar uno no aprendido.
+            /dojutsujutsu known -> SIGUE seleccionado el valido de antes.
+
+  [ ] B2.7  Persistencia: con un jutsu seleccionado, sal del mundo y vuelve.
+            known conserva la seleccion.
+  [ ] B2.8  Muerte y respawn: la seleccion sobrevive.
+
+
+-------------------------------------------------------------------------------
+ B3. LA TECLA DE CAST  (tarea 3) - el cambio de verdad
+-------------------------------------------------------------------------------
+
+  La tecla por defecto sigue siendo la misma de siempre. Miralas en Opciones >
+  Controles > categoria "Dojutsu" > "Cast Selected Jutsu". Antes se llamaba
+  "Cast Jutsu (main hand)": que el nombre haya cambiado ya es senal de que la
+  build nueva esta cargada.
+
+  [ ] B3.1  Sin nada seleccionado (select none), pulsa la tecla.
+            Esperado: actionbar roja "You have no jutsu selected."
+            No debe pasar nada mas, ni con la mano vacia ni llena.
+  [ ] B3.2  Selecciona un jutsu y pulsa la tecla CON LA MANO VACIA.
+            Esperado: se lanza. Este es EL punto de la tarea: antes, con la
+            mano vacia, no pasaba nada.
+  [ ] B3.3  Con chakra a cero (/dojutsuchakra consume 9999), pulsar la tecla:
+            sale el fallo normal de siempre, mensaje mas sonido de yunque, no
+            un error distinto. Las puertas de chakra/cd/afinidad no cambiaron.
+  [ ] B3.4  Pulsar la tecla en cooldown: mismo fallo normal.
+  [ ] B3.5  Machacar la tecla: no se dispara una rafaga. Hay un limite de 50 ms;
+            el cooldown real lo pone el pipeline.
+
+  ---- QUE LA MANO YA NO PINTE NADA -----------------------------------------
+  [ ] B3.6  Selecciona el jutsu A. Coge en la mano el ITEM del jutsu B, o
+            cualquier otra cosa. Pulsa la tecla.
+            Esperado: se lanza A. Lo que lleves en la mano es irrelevante.
+  [ ] B3.7  Cambia de slot de la hotbar con A seleccionado y vuelve a pulsar:
+            sigue lanzando A.
+
+  [ ] B3.8  (Ver el bloque B5: el click derecho ya no castea.)
+
+
+-------------------------------------------------------------------------------
+ B5. EL ITEM DEJA DE CASTEAR  (tarea 4)
+-------------------------------------------------------------------------------
+
+  El pergamino ya no lanza nada. Al usarlo, SELECCIONA su jutsu; lanzarlo sigue
+  siendo cosa de la tecla. Consigue un pergamino con /dojutsujutsu learn <id>
+  (el learn te lo da) o con el Skill Learner normal.
+
+  [ ] B5.1  Con el pergamino en la mano, CLICK DERECHO.
+            Esperado: actionbar "Jutsu selected: ...". NO se lanza nada: sin
+            particulas, sin gasto de chakra, sin cooldown.
+  [ ] B5.2  Comprueba el chakra antes y despues del click derecho: IDENTICO.
+            Esta es la prueba de que ya no castea, no la ausencia de efectos.
+  [ ] B5.3  /dojutsujutsu known confirma que el click derecho cambio la
+            seleccion al jutsu del pergamino.
+  [ ] B5.4  Click derecho repetido con el mismo pergamino: sin mensaje la
+            segunda vez (ya estaba seleccionado).
+  [ ] B5.5  Pergamino de un jutsu NO aprendido. Datelo a mano:
+              /give @s dojutsu:jutsu[dojutsu:jutsu="great_fireball"]
+            (cualquier id de /dojutsujutsu list que no hayas aprendido).
+            Click derecho -> actionbar roja "You have not learned X yet."
+            y la seleccion NO cambia.
+            No intentes conseguirlo reseteando el ninja: el reset BORRA los
+            pergaminos de lo que dejas de conocer, que es justo lo contrario.
+  [ ] B5.6  El tooltip del pergamino ahora dice "[Right-Click to select this
+            jutsu]". Si sigue diciendo "[Right-Click or Cast Jutsu key]", la
+            build vieja sigue cargada.
+
+  ---- EL HUD SIGUE AHORA A LA SELECCION ------------------------------------
+  La barra de cooldown leia el item de la mano. Eso habria quedado mintiendo:
+  cooldown de algo que la tecla no lanza. Ahora sigue al jutsu seleccionado.
+
+  [ ] B5.7  Con un jutsu seleccionado y LA MANO VACIA: la barra de cooldown
+            aparece y muestra ESE jutsu.
+  [ ] B5.8  Lanzalo con la tecla: la barra se vacia y se rellena con su
+            cooldown, sin tener nada en la mano.
+  [ ] B5.9  Coge en la mano el pergamino de OTRO jutsu sin hacer click: la
+            barra NO cambia, sigue mostrando el seleccionado.
+  [ ] B5.10 Sin seleccion (select none): la barra desaparece del todo.
+
+  [ ] B5.11 El editor de HUD (etapa C) sigue mostrando la vista previa de esta
+            barra sin romperse.
+
+
+-------------------------------------------------------------------------------
+ B6. LA RUEDA  (tarea 5)
+-------------------------------------------------------------------------------
+
+  Tecla Z por defecto (Opciones > Controles > "Dojutsu" > "Jutsu Wheel (hold)").
+  Muestra SOLO tus ocho huecos rapidos, no tu catalogo entero: es la decision de
+  diseno. Que va en cada hueco se elegira en la pantalla completa (tarea 7); por
+  ahora, con /dojutsujutsu slot.
+
+  ---- EL REPARTO ------------------------------------------------------------
+  [ ] B6.1  Partida nueva: /dojutsujutsu known muestra los 8 huecos "(libre)".
+  [ ] B6.2  Aprende un jutsu. Se coloca SOLO en el hueco 1. Aprende otro: al 2.
+            La rueda no debe nacer vacia.
+  [ ] B6.3  Aprende nueve jutsus. El noveno SE APRENDE igual (sale en la lista)
+            pero NO entra en la rueda: no quedan huecos. Aprender y tener sitio
+            en la rueda son cosas distintas.
+  [ ] B6.4  /dojutsujutsu slot 5 <id de uno ya colocado en el 1>.
+            El hueco 1 queda LIBRE: el mismo jutsu no puede salir dos veces.
+  [ ] B6.5  /dojutsujutsu slot 3 none -> el hueco 3 queda libre, los demas no se
+            mueven.
+  [ ] B6.6  Sal del mundo y vuelve: el reparto se conserva tal cual.
+
+  ---- LA RUEDA EN PANTALLA --------------------------------------------------
+  [ ] B6.7  MANTEN Z: se abre la rueda. El mundo NO se pausa detras (mira si
+            los mobs siguen moviendose; en un mundo en pausa seria un desastre
+            en combate).
+  [ ] B6.8  Sin soltar Z, mueve el raton: el sector apuntado se resalta y el
+            NOMBRE del jutsu aparece en el centro.
+  [ ] B6.9  Suelta Z sobre un sector con jutsu: se selecciona (actionbar
+            "Jutsu selected: ...") y la rueda se cierra.
+  [ ] B6.10 Repite apuntando al CENTRO (la zona muerta) y suelta: se cierra SIN
+            cambiar la seleccion. El centro dice "Release to cancel".
+  [ ] B6.11 Suelta sobre un hueco libre: se cierra sin cambiar nada.
+  [ ] B6.12 TOQUE CORTO de Z (pulsar y soltar rapido): la rueda se queda
+            ABIERTA. Elige con click izquierdo, o cierra con Esc.
+            Esto es a proposito: si se cerrara al instante no habria forma de
+            usarla sin mantener la tecla.
+  [ ] B6.13 El sector del jutsu que ya llevas seleccionado se ve con un fondo
+            distinto (verdoso) al resto.
+
+  ---- COOLDOWN (presentacion, no una puerta) --------------------------------
+  [ ] B6.14 Lanza un jutsu y abre la rueda enseguida: su sector sale oscurecido
+            con los segundos restantes.
+  [ ] B6.15 Puedes SELECCIONARLO igual estando en cooldown. Es correcto:
+            seleccionar no es lanzar. Al pulsar la tecla de cast saldra el
+            fallo normal de cooldown.
+  [ ] B6.16 Los iconos son los pergaminos reales, no cuadros de color.
+
+  ---- REMAPEO ---------------------------------------------------------------
+  [ ] B6.17 Cambia la tecla de la rueda a otra en Controles (por ejemplo J...
+            no, esa esta cogida; usa una libre). Mantenerla sigue funcionando
+            igual, incluido el cierre al soltar.
+
+  [ ] B6.18 Cambia el GUI scale y la resolucion con la rueda abierta y vuelve a
+            abrirla: sigue centrada y los sectores responden donde se ven.
+
+
+-------------------------------------------------------------------------------
+ B7. TECLAS DE HUECO RAPIDO  (tarea 6)
+-------------------------------------------------------------------------------
+
+  ALT izquierdo mantenido + 1..8 lanza el jutsu de ese hueco, sin abrir nada.
+  El modificador es remapeable ("Quick Slot Modifier (hold + 1-8)").
+  Prepara antes la rueda con /dojutsujutsu slot para saber que hay en cada uno.
+
+  ---- LO BASICO -------------------------------------------------------------
+  [ ] B7.1  ALT+1 con el hueco 1 ocupado: se lanza ESE jutsu.
+  [ ] B7.2  ALT+8 lanza el del hueco 8. Comprueba el extremo, no solo el 1:
+            un desfase de uno solo se ve en los bordes.
+  [ ] B7.3  ALT sobre un hueco VACIO: no pasa nada, y sin mensaje de error.
+            Pulsar un hueco que sabes que esta libre no merece ruido en
+            pantalla en mitad de un combate.
+  [ ] B7.4  Tras lanzar con ALT+3, /dojutsujutsu known dice que el jutsu del
+            hueco 3 quedo SELECCIONADO. Es a proposito: acabas de decir cual es
+            tu tecnica activa, y el HUD y la tecla de cast deben seguirte.
+
+  ---- LA PRUEBA QUE DE VERDAD IMPORTA ---------------------------------------
+  Estas teclas son la hotbar de vanilla. Con ALT no deben cambiarla.
+
+  [ ] B7.5  Ponte objetos distintos en los slots 1 y 3 de la hotbar. Selecciona
+            el slot 1. Ahora ALT+3.
+            Esperado: se lanza el jutsu del hueco 3 y SIGUES con el slot 1 de la
+            hotbar seleccionado. Si el objeto en la mano cambia, esto esta mal.
+  [ ] B7.6  SIN ALT, pulsa 1..9 normalmente: la hotbar cambia como siempre y no
+            se lanza ningun jutsu.
+  [ ] B7.7  ALT+9: la hotbar SI cambia al slot 9. La rueda tiene ocho huecos y
+            la hotbar nueve slots; el 9 no es un hueco de jutsu.
+  [ ] B7.8  ALT+1 con el inventario o cualquier pantalla abierta: NO lanza nada
+            (y ALT+numero sigue haciendo lo que haga vanilla ahi).
+
+  ---- PUERTAS Y ANTI-SPAM ---------------------------------------------------
+  [ ] B7.9  Sin chakra: sale el fallo normal de siempre, igual que con la tecla
+            de cast. Las puertas no cambian por venir de un atajo.
+  [ ] B7.10 En cooldown: mismo fallo normal.
+  [ ] B7.11 Machaca ALT+1 y la tecla de cast ALTERNANDOLAS muy rapido.
+            No debe salir una rafaga: las dos comparten el mismo limitador
+            precisamente para que alternarlas no lo esquive.
+
+  ---- REMAPEO ---------------------------------------------------------------
+  [ ] B7.12 Cambia el modificador a otra tecla libre en Controles y repite B7.1
+            y B7.5. Con ALT ya NO debe lanzar nada.
+
+
+-------------------------------------------------------------------------------
+ B8. LIBRO DE JUTSUS  (tarea 7)
+-------------------------------------------------------------------------------
+
+  Pestaña "Jutsus" del menu ninja (tecla M). Es la parte de PREPARACION: aqui
+  se compara y se reparten los huecos, no se castea nada.
+  Se asigna con DOS CLICS: clic en la ficha, clic en el hueco. Clic DERECHO
+  sobre un hueco lo vacia.
+
+  ---- LO QUE SE VE ----------------------------------------------------------
+  [ ] B8.1  Con varios jutsus aprendidos, abre el libro: salen TODOS los que
+            conoces, cada uno con su icono de pergamino.
+  [ ] B8.2  Cada ficha muestra "Chakra N" y "CD Ns". Contrastalo con
+            /dojutsujutsu get <id>: deben coincidir. Los numeros vienen del
+            servidor, no del cliente.
+  [ ] B8.3  Los jutsus con afinidad la muestran (elemento + cantidad); los
+            universales no muestran nada de afinidad.
+  [ ] B8.4  Algunos muestran "DMG N" y otros no. Es correcto: 49 de las 128
+            tecnicas del datapack no declaran dano (buffs, teleports,
+            estructuras). No es un fallo de la pantalla.
+  [ ] B8.5  Partida nueva sin jutsus: sale "Nothing here yet." y ningun error.
+
+  ---- FILTRAR Y BUSCAR ------------------------------------------------------
+  [ ] B8.6  El boton de arriba a la derecha cicla por categorias. Solo ofrece
+            las que TIENES; no hay filtros que no den resultados.
+  [ ] B8.7  Al final del ciclo vuelve a "All".
+  [ ] B8.8  Escribe en el buscador parte del NOMBRE en pantalla (por ejemplo
+            "fire"), no del id. Debe encontrarlo: se busca por nombre traducido
+            ademas de por id.
+  [ ] B8.9  Con muchos jutsus, la rueda del raton desplaza la lista y el
+            contador de la derecha (N/total) cuadra.
+  [ ] B8.10 Al filtrar estando desplazado hacia abajo, la lista vuelve arriba.
+            Si no, pareceria vacia.
+
+  ---- ASIGNAR ---------------------------------------------------------------
+  [ ] B8.11 Clic en una ficha: se resalta, y el pie dice "Placing X - click a
+            slot."
+  [ ] B8.12 Clic en un hueco: el jutsu aparece ahi y la ficha se DESELECCIONA
+            (para no colocarla sin querer en el siguiente clic).
+  [ ] B8.13 Clic en la ficha ya elegida: se suelta sin colocar nada.
+  [ ] B8.14 Coloca un jutsu que YA estaba en otro hueco: el hueco anterior
+            queda libre. Mismo comportamiento que por comando.
+  [ ] B8.15 Clic DERECHO sobre un hueco ocupado: se vacia.
+  [ ] B8.16 Cierra el menu y abre la rueda (Z): refleja exactamente el reparto
+            que dejaste.
+  [ ] B8.17 ALT+<numero del hueco que acabas de asignar> lanza ese jutsu.
+  [ ] B8.18 /dojutsujutsu known coincide con lo que muestra el libro.
+
+  ---- LA PARTE QUE MAS ME PREOCUPA ------------------------------------------
+  La pantalla NO pinta el cambio hasta que el servidor contesta. Es a proposito:
+  si se dibujara antes, un rechazo dejaria la pantalla mintiendo.
+
+  [ ] B8.19 Asigna varios huecos seguidos rapido. Todos acaban donde los
+            pusiste, sin huecos que "se deshacen" solos ni parpadeos raros.
+  [ ] B8.20 En LAN con lag, asigna y observa: el cambio tarda un instante en
+            aparecer, pero aparece. Lo que NO debe pasar es que se pinte y
+            luego se revierta.
+
+  ---- MULTIJUGADOR ----------------------------------------------------------
+  [ ] B8.21 Dos jugadores con libros abiertos a la vez: cada uno ve SUS jutsus
+            y SU reparto. Asignar en uno no toca al otro.
+
+
+-------------------------------------------------------------------------------
+ B9. LAS TRES PANTALLAS BAJO UNA TECLA  (fusion)
+-------------------------------------------------------------------------------
+
+  Antes: menu ninja (M), habilidades oculares (N) y libro de jutsus (P).
+  Ahora: todo bajo M, en tres pestañas -- Ninja / Jutsus / Eye.
+  N y P quedan LIBRES. El editor de HUD sigue siendo un boton, como antes.
+
+  ---- NAVEGACION ------------------------------------------------------------
+  [ ] B9.1  M abre el menu en la pestaña "Ninja".
+  [ ] B9.2  Las tres pestañas cambian al pulsarlas. La pestaña ABIERTA se ve
+            desactivada (asi se sabe en cual estas).
+  [ ] B9.3  N ya no abre nada. P tampoco. En Opciones > Controles > "Dojutsu"
+            NO deben aparecer ya "Open Eye Ability Menu" ni "Open Jutsu Book".
+            Si siguen ahi, la build vieja esta cargada.
+  [ ] B9.4  El boton "Done" cierra el menu desde cualquier pestaña.
+  [ ] B9.5  Esc cierra el menu desde cualquier pestaña.
+
+  ---- QUE NADA SE PERDIO EN LA MUDANZA --------------------------------------
+  [ ] B9.6  Pestaña Ninja: chakra, rango, puntos y niveles se ven igual que
+            antes, y el "+" gasta un punto igual que antes.
+  [ ] B9.7  El "+" sigue desactivado si no tienes puntos.
+  [ ] B9.8  El boton del editor de HUD sigue ahi y sigue funcionando; al salir
+            del editor vuelves al menu.
+  [ ] B9.9  Pestaña Eye con un dojutsu activo: salen sus habilidades y la
+            seleccionada lleva su asterisco.
+  [ ] B9.10 Sin dojutsu activo, la pestaña Eye dice "No active dojutsu." y no
+            pinta botones.
+  [ ] B9.11 EL BOTON DEL MANGEKYO ETERNO: es lo mas delicado de la mudanza.
+            - Con Rinnegan o Rinne Sharingan: NO debe aparecer.
+            - Con Mangekyo sin cumplir requisitos: aparece DESACTIVADO y
+              diciendo que falta.
+            - Cumpliendo requisitos: aparece activo y funciona (y al pulsarlo
+              se cierra el menu para que veas el aviso en el chat).
+  [ ] B9.12 Pestaña Jutsus: repite en corto el bloque B8 (buscar, filtrar,
+            asignar). Todo debe seguir igual.
+
+  ---- LO QUE MAS PUEDE ROMPERSE AL METER TODO EN UNA PANTALLA ---------------
+  Las pestañas se reconstruyen cuando llega una vista nueva del servidor. Ahi
+  es donde se pierden cosas si algo esta mal cableado.
+
+  [ ] B9.13 En la pestaña Jutsus, escribe algo en el buscador y ASIGNA un hueco.
+            El texto del buscador NO debe borrarse al llegar la respuesta del
+            servidor.
+  [ ] B9.14 En la pestaña Eye, selecciona una habilidad: la pantalla se
+            reconstruye sola y el asterisco se mueve a la nueva.
+  [ ] B9.15 Cambia de pestaña ida y vuelta varias veces: no se acumulan botones
+            fantasma ni se descoloca nada.
+  [ ] B9.16 Redimensiona la ventana y cambia el GUI scale con el menu abierto,
+            en cada pestaña: todo se recoloca y sigue respondiendo donde se ve.
+  [ ] B9.17 Abre el menu ANTES de que llegue el primer sync (justo al entrar al
+            mundo): no debe petar; muestra "--" y se rellena solo.
+
+
+-------------------------------------------------------------------------------
+ B4. SANIDAD GENERAL
+-------------------------------------------------------------------------------
+
+  [ ] B4.1  Log del servidor sin excepciones tras toda la sesion.
+  [ ] B4.2  El log NO se llena de lineas de sync por cada pulso de chakra.
+            Quite ese log en la tarea 1; si reaparece, se colo algo.
+  [ ] B4.3  El HUD de chakra y el de rango siguen funcionando igual que antes.
+  [ ] B4.4  Multijugador si puedes (LAN vale): dos jugadores con selecciones
+            DISTINTAS. Cada uno lanza la suya; el select de uno no toca al otro.
+  [ ] B4.5  Con la rueda abierta, quedate quieto mientras regenera chakra: el
+            reparto NO se vacia solo. Es el mismo riesgo que B1.6, y la rueda
+            es donde se veria peor.
+
+
+===============================================================================
+ LO QUE NO SE PUEDE PROBAR TODAVIA
+===============================================================================
+
+  NO HAY INTERFAZ para elegir jutsu. Es la tarea 5, la rueda radial. Por eso
+  existen los comandos learn/select: sin ellos esta etapa no seria testeable en
+  partida hasta dentro de dos tareas. Se retiran junto con el resto del comando
+  de depuracion cuando la interfaz cubra el catalogo.
+
+  NO HAY HUD del jutsu seleccionado; es la tarea 8. Por ahora se consulta con
+  /dojutsujutsu known.
+
+  ARRASTRAR para asignar: no esta. Se asigna con dos clics (ficha, luego
+  hueco). Es una desviacion consciente del plan; ver el javadoc de
+  JutsuBookScreen para el porque.
+
+  EL COMANDO /dojutsujutsu slot sigue existiendo y sigue valiendo; ahora es
+  redundante con el libro, y se retirara con el resto del comando de
+  depuracion.
+
+===============================================================================
+ FIN
+===============================================================================

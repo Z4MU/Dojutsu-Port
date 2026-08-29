@@ -982,12 +982,144 @@ tanto como lo que sí.
 
 ---
 
+## Fase 11 — UX e interfaces (DJT-230…237) — 🔄 CÓDIGO TERMINADO, FALTA PARTIDA
+
+Nace de cinco ideas de UX del usuario (2026-08-08). Plan y desviaciones:
+[`PLAN_UI_ETAPAS_5-1-4-3.txt`](../PLAN_UI_ETAPAS_5-1-4-3.txt). La idea 2 —modelos 3D de los jutsus— va aparte,
+en `GUIA_BLOCKBENCH_MODELOS_JUTSUS.txt`, porque es arte y se hace en otra sesión.
+
+**El plan preveía 5 tickets (230-234) y salieron 7.** No por descuido: al implementarlo aparecieron dos
+requisitos que el plan no veía —el cliente no conocía la lista de jutsus aprendidos, y el reparto de huecos no
+podía vivir en el cliente sin romper R12— y una petición del usuario a mitad de etapa (no acaparar atajos).
+
+| Ticket | Historia | Estado |
+|--------|----------|--------|
+| **DJT-230** | **Toggle de dōjutsu**: `EyeState.enabled` separa "qué ojo tienes" de "está encendido"; tecla **X**, drena bonos al apagar | ✅ (build multiloader verde + **1023 tests**; **corrige un bug real**: a 100 % de fatiga el ojo se **borraba** sin vía de recuperación) |
+| **DJT-231** | **Selector de jutsu**: sync de aprendidos, `selectedJutsu` en estado de servidor, `SelectJutsuPayload`, y la tecla de cast reapuntada al selector | ✅ (**1052 tests**; `CastJutsuPayload` se queda sin datos) |
+| **DJT-232** | **El ítem deja de castear**: `JutsuItem` pasa a pergamino; el clic derecho **selecciona** | ✅ (**1052 tests**; incluye repuntar la barra de cooldown del HUD, que leía el ítem de la mano y habría quedado mintiendo) |
+| **DJT-233** | **HUD movible**: `HudAnchor`/`HudPlacement`/`HudLayout` + `HudEditorScreen`; offsets en fracción de pantalla, no en píxeles | ✅ (**1039 tests**; auditoría de coste **por frame** en `docs/perf.md §7`) |
+| **DJT-234** | **Rueda radial + 8 huecos rápidos** (`quickSlots` en `JutsuKnowledge`) + teclas **ALT+1..8** | ✅ (**1073 tests**) |
+| **DJT-235** | **Libro de jutsus**: fichas del `JutsuRegistry` por red y asignación de huecos | ✅ (**1080 tests**) |
+| **DJT-236** | **Fusión de pantallas**: menú ninja, habilidades oculares y libro pasan a **pestañas bajo M**; **N y P quedan libres** | ✅ (**1080 tests**) |
+| DJT-237 | **Editor de posición de la textura del ojo** (etapa D del plan) | ⬜ **BLOQUEADA** — no existe render de overlay ocular ni texturas de ojo en assets; la etapa las da por hechas |
+
+**Pendiente para cerrar la fase:** la validación **en partida en los dos loaders** (regla 2). Checklists:
+[`CHECKLIST_PRUEBAS_F11.txt`](../CHECKLIST_PRUEBAS_F11.txt) (A y C) y
+[`CHECKLIST_PRUEBAS_F11_ETAPA_B.txt`](../CHECKLIST_PRUEBAS_F11_ETAPA_B.txt) (B, bloques B1…B9).
+
+### DJT-230 — Toggle de dōjutsu ✅
+
+`EyeState` gana `enabled`, que separa **qué ojo posees** de **si está encendido**. El codec lo lee con
+`optionalFieldOf("enabled", true)`, así que las partidas anteriores cargan con el ojo encendido.
+
+**El bug que apareció al leer el código:** `EyeStrainService.applyEffects`, al llegar al 100 % de fatiga,
+llamaba a `withoutActiveEye()` — que borraba `activeEye`, `eternal` y `selectedAbility`. No había **ninguna**
+vía de recuperación en partida: `AwakeningService` no re-despierta una familia ya despertada y
+`EvolutionService` exige un ojo activo. Un jugador que llegara al 100 % perdía su dōjutsu y su Mangekyō Eterno
+para siempre. El datapack no hacía eso: su `force_deactivate` devolvía el ítem al inventario. Ahora se apaga
+(`withEnabled(false)`) y se conserva todo.
+
+`EyeToggleService` es deliberadamente **ajeno** a `ToggleableModeService`: el arnés es para modos de sesión, y
+esto es estado **persistido**.
+
+### DJT-231 — Selector de jutsu ✅
+
+Dos problemas de tamaño resueltos en el mismo sitio:
+
+1. **La lista de aprendidos puede llegar a 128 ids** y los deltas los dispara la **regeneración de chakra**.
+   Mandarla en cada delta serían kilobytes por pulso para repetir siempre lo mismo. Solución: delta propio para
+   ese campo (`Optional` = "sin cambios"), con su marca en el `DirtyTracker`. Es el **único** campo observable
+   con delta propio y está justificado en el javadoc de `JutsuSnapshot`.
+2. **`StreamCodec.composite` admite 6 componentes** y el payload los tenía todos. Solución: el sub-record
+   `JutsuSnapshot`, siguiendo el precedente de `ProgressionSnapshot` que ya estaba en ese mismo payload.
+
+**Invariante en el constructor, no en las puertas de escritura:** no se puede tener seleccionado lo que no se
+conoce. Si dependiera de que cada llamante lo recuerde, bastaría un reset para dejar seleccionado algo que el
+servidor jamás lanzaría — y el selector mostraría un jutsu que al pulsar la tecla no hace nada.
+
+### DJT-232 — El ítem deja de castear ✅
+
+El único camino de cast de un jugador pasa a ser `CastJutsuHandler`. El clic derecho del pergamino
+**selecciona** su jutsu (por la misma puerta de servidor que la rueda): quitarle el cast sin poner nada dejaba
+un objeto que no responde al usarlo.
+
+**No hizo falta migración.** El componente del ítem no cambió: los pergaminos de partidas existentes siguen
+siendo válidos y sólo hacen otra cosa.
+
+**Efecto colateral que no estaba en el plan:** `AbilityBarOverlay` leía el `JutsuComponent` del ítem de la mano
+principal. Al retirar el ítem como referencia, ese HUD habría pintado el cooldown de algo que la tecla no lanza
+—y nada mientras tuvieras un jutsu seleccionado—. Se repuntó a `ClientNinjaData.selectedJutsu()` en este mismo
+ticket, porque dejarlo era enviar un HUD que miente.
+
+### DJT-234 — Rueda radial y huecos rápidos ✅
+
+**La rueda muestra sólo los 8 huecos, no el catálogo** (decisión del usuario): 128 sectores son ilegibles justo
+cuando se usan. Se resuelve por **ángulo**, no por la caja del icono, y con zona muerta central para salir sin
+elegir.
+
+**Dos trampas encontradas:**
+
+- El cierre al soltar **no puede** usar `KeyMapping.isDown()`: con una pantalla abierta vanilla deja de
+  alimentar ese estado y contestaría `false` nada más abrirse la rueda. Hay que sondear GLFW resolviendo el
+  código de tecla desde el propio keybind, para respetar el remapeo.
+- Las teclas **1..8 son la hotbar de vanilla**. Robarlas deja al jugador sin cambiar de objeto; no robarlas hace
+  que al lanzar también cambies de objeto en plena pelea. Solución: `ClientRawInputEvent.KEY_PRESSED` de
+  Architectury, que corre **antes** que vanilla, devolviendo `interruptFalse()`. Descartados los modificadores
+  de `KeyMapping` (sólo NeoForge) y ocho keybinds sin asignar (función invisible). **ALT+9 sigue siendo hotbar**:
+  la hotbar tiene 9 slots y la rueda 8.
+
+El cast por hueco **comparte el limitador** de la tecla de cast: con uno propio, alternar las dos teclas
+doblaría el ritmo aceptado.
+
+**Autorelleno:** aprender un jutsu lo coloca en el primer hueco libre. Vive en `JutsuKnowledge.withKnown` y no
+en los servicios que lo llaman porque hay **tres** caminos para aprender (learner, comando/clan, copia del
+Sharingan) y basta que uno se olvide para que a ese jugador la rueda le salga vacía sin motivo aparente.
+
+### DJT-235 — Libro de jutsus ✅
+
+**El obstáculo:** el `JutsuRegistry` es data-driven y vive **sólo en el servidor**; en dedicado el cliente no
+tiene coste, cooldown ni afinidad. Se resolvió con el patrón petición/respuesta que ya usaba el menú ocular
+(`OpenJutsuBookPayload` → `JutsuBookPayload`), mandando **sólo las fichas de lo aprendido**: así lo que viaja
+crece con lo que el jugador tiene, no con lo que el datapack define.
+
+**El daño se lee de `effectParams`, no del contrato:** 49 de las 128 técnicas no tienen daño (buffs, teleports,
+estructuras) y subirlo a `JutsuDefinition` obligaría a inventarles un valor. Lectura tolerante: un parámetro
+malformado da 0, no rompe la pantalla.
+
+**Desviación del plan:** se asigna con **dos clics** (ficha, luego hueco), no arrastrando — sobrevive a que se
+escape el ratón y no exige acertar un objetivo pequeño manteniendo el botón.
+
+La pantalla **no pinta el cambio hasta que el servidor contesta**. Se nota latencia en LAN; la alternativa deja
+la pantalla mintiendo cuando el servidor rechaza.
+
+### DJT-236 — Las tres pantallas bajo una tecla ✅
+
+Petición del usuario a mitad de etapa: no seguir acaparando atajos. Es lo que la **sección 5.1 del propio plan**
+ya proponía desde el principio.
+
+Menú ninja (M), habilidades oculares (N) y libro de jutsus (P) pasan a ser **pestañas** de una sola pantalla
+bajo **M**. Estructura: interfaz `MenuTab` + `NinjaMenuScreen` como contenedor; cada pestaña sigue en su fichero
+(`NinjaStatsTab`, `JutsuBookTab`, `EyeAbilitiesTab`), así que añadir una cuarta es un fichero nuevo y una línea.
+
+Cada pestaña **declara qué caché observa** y el contenedor la reconstruye cuando cambia la versión: las de ojo y
+jutsus se dibujan con widgets a partir de una vista del servidor y no se enteran solas; la de estadísticas
+repinta sus números cada frame y no lo necesita.
+
+**La rueda se queda fuera**: es la única de combate.
+
+**Saldo de teclas:** el mod usaba 15 al empezar F11 y usa **13** al terminarla, con más funcionalidad.
+La auditoría de teclas del plan estaba **mal**: daba K y B por libres y las dos estaban cogidas (jinchūriki y
+sello maldito). El toggle fue a **X** y la rueda a **Z**. Lección: mirar `KeyBindings.java`, no `CLAUDE.md`.
+
+---
+
 ## Fases posteriores — ⬜ PENDIENTES
 
 | Fase | Tema | Estado |
 |------|------|--------|
 | F9 | Mundo, narrativa, Seis Caminos, Diez Colas, Árbol Divino | ✅ cerrada en código (`sixpaths`, `story`, `world`); esta sección del backlog nunca se escribió |
 | F10 | Pulido, balance, API pública, paridad, assets | ✅ cerrada en código (6 de 7 tickets ✅; queda **DJT-224 pasada 2**, que es arte, y la mitad interactiva de DJT-223, que sólo se cierra jugando) |
+| F11 | UX e interfaces (toggle de ojo, selector y rueda de jutsus, HUD movible, libro, fusión en pestañas) | 🔄 **código terminado** (DJT-230…236 ✅, **1080 tests**); falta la pasada en partida en ambos loaders. **DJT-237** (editor de posición del ojo) bloqueado por falta de overlay y arte |
 
 Camino crítico del ADD: F0 → F1 → F2 → F4 → F5/F7 → F9. Vertical slice en F2.
 

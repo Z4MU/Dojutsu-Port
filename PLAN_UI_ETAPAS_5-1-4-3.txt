@@ -1,0 +1,804 @@
+===============================================================================
+ PLAN DE IMPLEMENTACION — UX / INTERFACES DEL MOD
+ Etapas en orden de ejecucion: 5 -> 1 -> 4 -> 3
+ (La etapa 2 —modelos 3D y animaciones— va en GUIA_BLOCKBENCH_MODELOS_JUTSUS.txt)
+ Proyecto: Dojutsu Port · MC 1.21.1 · Architectury (common + neoforge + fabric)
+ Fecha: 2026-08-08 · ACTUALIZADO 2026-08-28 con lo realmente implementado
+===============================================================================
+
+-------------------------------------------------------------------------------
+ESTADO (2026-08-28) — LEER ESTO ANTES QUE NADA
+-------------------------------------------------------------------------------
+
+Este fichero se escribio ANTES de picar codigo. Varias cosas cambiaron al
+implementarlas. Lo que sigue es el estado real; donde el plan original decia
+otra cosa, lo he marcado en su sitio con [CAMBIO] y el porque.
+
+  ETAPA A  Toggle de dojutsu ................. DJT-230 ... HECHO (falta partida)
+  ETAPA B  Interfaz de jutsus y cast por tecla  DJT-231..236  HECHO (falta partida)
+  ETAPA C  HUD movible ....................... DJT-233 ... HECHO (falta partida)
+  ETAPA D  Editor de posicion del ojo ........ DJT-237 ... NO EMPEZADA (bloqueada)
+
+  Build multiloader verde, 1080 tests, 0 fallos.
+  Validacion EN PARTIDA pendiente en los dos loaders (regla 2):
+      CHECKLIST_PRUEBAS_F11.txt          -> etapas A y C
+      CHECKLIST_PRUEBAS_F11_ETAPA_B.txt  -> etapa B completa
+
+REPARTO REAL DE TICKETS (el plan proponia 230-234; hicieron falta siete)
+
+  DJT-230  Toggle de dojutsu (etapa A).
+  DJT-231  Selector de jutsu: sync de aprendidos, jutsu seleccionado en estado
+           de servidor, SelectJutsuPayload, y la tecla de cast reapuntada.
+  DJT-232  El objeto deja de castear; pasa a seleccionar. Incluye repuntar la
+           barra de cooldown del HUD, que leia el objeto de la mano.
+  DJT-233  HUD movible (etapa C). NO tocar este numero: docs/perf.md §7 lo cita.
+  DJT-234  Rueda radial + ocho huecos rapidos + teclas ALT+1..8.
+  DJT-235  Libro de jutsus (fichas del registro y asignacion de huecos).
+  DJT-236  Fusion: las tres pantallas de preparacion en pestañas bajo M.
+  DJT-237  Etapa D (era DJT-234 en el plan; se desplaza porque 234 se uso).
+
+  AVISO: durante el desarrollo DJT-233 llego a estar puesto en dos sitios (HUD
+  movible y rueda). Corregido el 2026-08-28: la rueda es DJT-234. Si aparece un
+  DJT-233 fuera de client/hud, client/screen/HudEditorScreen o el boton del
+  editor en NinjaStatsTab, es residuo de esa colision.
+
+
+-------------------------------------------------------------------------------
+0. CONTEXTO VERIFICADO DEL REPO (leido de CLAUDE.md, no supuesto)
+-------------------------------------------------------------------------------
+
+Lo que YA existe y que estas cuatro etapas deben reutilizar en vez de reinventar:
+
+  * `client.keybind` — teclas ocupadas.
+    [CAMBIO 2026-08-28] La lista de abajo era la del plan y estaba INCOMPLETA:
+    al mirar el codigo habia el doble de teclas ocupadas. Estado real de hoy:
+
+        M     menu ninja (3 pestañas: Ninja / Jutsus / Eye)
+        Z     rueda de jutsus (mantener)
+        V     lanzar el jutsu seleccionado
+        ALT   modificador; ALT+1..8 lanza desde los huecos rapidos
+        R     habilidad ocular seleccionada
+        X     encender/apagar el dojutsu
+        C     chakra vision      G  modo sabio        B  sello maldito
+        H     ocho puertas       J  SOAH              K  jinchuriki
+        Y     Vuelo del Dios del Trueno               U  caminar sobre agua
+
+    LIBRES tras DJT-236: N y P (eran el menu ocular y el libro de jutsus, hoy
+    pestañas). El plan original daba por libres K y B: las dos estaban cogidas.
+
+  * `client.hud` — ya hay HUD de chakra, rango y cooldown de jutsu.
+    La etapa 4 NO crea el HUD: le anade posicionamiento.
+
+  * `jutsu.JutsuCastPipeline` + `network.CastJutsuPayload` — el UNICO camino de
+    cast, ya validado en servidor. La etapa 1 NO toca el pipeline: solo cambia
+    QUIEN elige el jutsu que se le pasa.
+
+  * `data.state.EyeState` + `dojutsu.*` (AwakeningService, EvolutionService,
+    EyeStrainService, EyeMenuService, ability/*). La etapa 5 se apoya aqui.
+
+  * `empowerment.ToggleableModeService` — arnes compartido de modos con
+    hospedaje por jugador, tick, caida y evento+sync. Ya lo consumen
+    SusanooService, TenseiganChakraModeService y SageService.
+
+  * `network.SyncNinjaDataPayload` + `NinjaSync` + `ObservableField`/`DirtyTracker`.
+
+Reglas del proyecto que condicionan TODO lo de abajo (de CLAUDE.md):
+
+  R5  Toda EntityType registrada necesita renderer en cliente.
+  R6  Sub-estado nuevo en PlayerNinjaData = patron enchufable (value object con
+      DEFAULT + CODEC + 1 linea de codec + puerta de escritura). No reescribir
+      el contrato central.
+  R10b El estado del ninja es INMUTABLE hasta el fondo. Se reemplaza, no se muta.
+  R11 Reactivo, nunca polling. Suscribirse a DomainEvents, no anadir ticks de sondeo.
+  R12 EL CLIENTE NUNCA DECIDE GAMEPLAY. Toda accion de cliente es un payload
+      validado en servidor (emisor, ids POR NOMBRE nunca por indice, rangos,
+      rate-limit). La UI se refresca DESPUES del sync.
+  R13 Solo lo observable cruza la red. Lo derivable se calcula en cliente.
+  R3  NO usar el NetworkManager de Architectury. Usar el puerto NetworkService.
+
+IDs de ticket [VERIFICADO 2026-08-08]:
+  Barrido de DJT-### sobre todo docs/*.md: los numeros usados llegan hasta
+  DJT-229. F10 ocupa 220-229 y esta CERRADA (`backlog.md:726`; quedan solo la
+  pasada 2 de DJT-224, que es arte, y la mitad interactiva de DJT-223).
+  El rango DJT-230..DJT-239 NO aparece en ninguna parte de docs/.
+
+  => Se usa DJT-230..DJT-234 para este bloque, como FASE 11 (UX y presentacion).
+     F10 esta cerrada, asi que esto no cabe dentro de ella.
+
+  [CAMBIO 2026-08-28] Hicieron falta SIETE numeros, no cinco: DJT-230..236, y la
+  etapa D se desplaza a DJT-237. Ver el reparto real en la cabecera. El bloque
+  sigue siendo Fase 11 y sigue sin pisar nada de docs/.
+
+
+-------------------------------------------------------------------------------
+0-BIS. LA PIEZA TRANSVERSAL QUE HAY QUE CONSTRUIR PRIMERO
+-------------------------------------------------------------------------------
+
+Las etapas 5 y 3 comparten un problema que hoy el repo NO resuelve:
+
+    El sync actual (SyncNinjaDataPayload) manda el estado del ninja A SU PROPIO
+    DUENO. Pero tanto el ojo encendido/apagado (etapa 5) como la posicion de la
+    textura del dojutsu (etapa 3) tienen que verlos LOS DEMAS jugadores.
+
+Si no se resuelve esto, el resultado es: tu te ves el Sharingan encendido y bien
+colocado, y el resto del servidor te ve la cara normal (o el ojo en la frente).
+
+  => Construir en la etapa 5 un canal nuevo, pequeno y separado:
+
+     `network.CosmeticStatePayload` (S2C, broadcast a los jugadores que rastrean
+     a la entidad + al propio dueno):
+         - uuid del jugador
+         - id del ojo activo (String, por NOMBRE — R12) o vacio si esta apagado
+         - offsetX, offsetY, scale del overlay ocular (etapa 3)
+
+     Se envia:
+         - al entrar el jugador al mundo / al empezar a rastrearlo otro cliente
+         - cuando cambia el toggle (etapa 5)
+         - cuando el dueno confirma un cambio en el editor (etapa 3)
+
+     Cache en cliente: `client.ClientCosmeticStates` (Map<UUID, CosmeticState>),
+     limpiado al dejar de rastrear la entidad.
+
+  Es poco codigo y desbloquea las dos etapas. Hacerlo mal (guardar la posicion
+  solo en config de cliente) es el error clasico de los mods de skins.
+
+
+===============================================================================
+ ETAPA A  (idea 5) — ACTIVAR / DESACTIVAR EL DOJUTSU
+ Ticket: DJT-230                                          [HECHO 2026-08-08]
+===============================================================================
+
+OBJETIVO
+  Tecla que enciende y apaga el ojo despierto. Al apagarlo desaparece la textura
+  ocular Y se pierden los beneficios. Estado visible por los demas jugadores.
+
+POR QUE VA PRIMERO
+  Es la que menos codigo nuevo necesita (el arnes de modos ya existe), la que mas
+  cambia como se juega, y es la que obliga a construir el canal cosmetico del
+  que depende la etapa 3.
+
+PASOS
+
+  A1. Auditar `EyeState` antes de tocar nada.
+      Comprobar si ya existe un campo de "ojo activo" o si hoy el ojo despierto
+      esta permanentemente encendido. De eso depende si esto es un campo nuevo o
+      solo exponer uno existente. NO asumir: leerlo.
+
+  A2. Si hace falta campo nuevo -> patron enchufable (R6), NO tocar el contrato
+      central de PlayerNinjaData. `EyeState.withActive(boolean)` devolviendo
+      copia (R10b).
+
+  A3. Servicio: `dojutsu.EyeToggleService`.  [DECISIONES TOMADAS 2026-08-08]
+
+      (1) APAGAR QUITA LOS BONOS. Decidido: SI.
+          Si no, nadie apagaria el ojo salvo por estetica y el toggle dejaria de
+          ser una decision de juego.
+
+      (2) DRENAJE PASIVO DE CHAKRA MIENTRAS ESTA ACTIVO. Decidido: SI.
+          El numero NO hay que inventarlo (RA-4): esta en el datapack, en
+          `functions/dojutsu/basic_costs.mcfunction` + los `*/cost.mcfunction`
+          de cada ojo. Ver la tabla A3-BIS.
+
+      (3) Encender exige tener el ojo despierto y no estar en fatiga bloqueante.
+          Consultar EyeStrainService, NO duplicar su logica.
+
+  A3-BIS. EL DRENAJE PASIVO YA EXISTE EN EL DATAPACK Y NO ESTA PORTADO
+      -------------------------------------------------------------------------
+      HALLAZGO: esto no es una mecanica nueva, es un PORT PENDIENTE.
+      El javadoc de `EyeDefinition` lo dice literalmente:
+
+          "Coste pasivo y eye strain: DJT-116. Este ticket (DJT-113) modela el
+           grafo y el estado; el drenaje de chakra por llevar el ojo y la curva
+           de fatiga se anaden como campos tolerantes cuando llegue su servicio."
+
+      DJT-116 porto la FATIGA (EyeStrainService) pero NO el drenaje de chakra.
+      Verificado por grep: no hay coste pasivo en `dojutsu/*.java`.
+
+      MECANICA DEL DATAPACK (verificada archivo a archivo, 2026-08-08):
+        - `main/tick.mcfunction` corre `player_functions` -> `dojutsu/main`
+          CADA TICK, por jugador.
+        - `basic_costs.mcfunction` suma +1 por tick a `d.<ojo>_time`.
+        - Al llegar a 40 (predicado `*_time_40p`) ejecuta el `cost` del ojo y
+          resetea el contador a 0.
+        => EL DRENAJE ES: X DE CHAKRA CADA 40 TICKS (2 SEGUNDOS).
+
+      TABLA DE COSTES (chakra cada 2 segundos), leida de los `cost.mcfunction`:
+
+        OJO                             DESPERTADO   IMPLANTADO (no despertado)
+        ---------------------------------------------------------------------
+        Byakugan                             8              12
+        Sharingan 1 tomoe (eye_2)            6              12
+        Sharingan 2 tomoe (eye_3)            7              14
+        Sharingan 3 tomoe (eye_4)            8              16
+        Sharingan 3 tomoe CON mangekyo       4               8
+        Mangekyo (eyematch)                 14              --
+        Mangekyo (sin eyematch)             18              --
+        Mangekyo (no Uchiha/Otsutsuki)      --              28
+        Rinnegan (eyematch)                 12              --
+        Rinnegan (Uchiha/Otsutsuki/Uzumaki) --              18
+        Rinnegan (otros clanes)             --              36
+        Ketsuryugan                         14              28
+        Tenseigan                           20              40
+        Isshiki                             16 (fijo, sin rama de despertar)
+        Jougan                               8 (fijo, sin rama de despertar)
+
+      MODIFICADORES POR CLAN (el datapack los trata aparte, son intencionados):
+        - Hatake: Sharingan mas barato que "otros clanes" (12/14/16, y 8 con
+          mangekyo) pero mas caro que un Uchiha despierto. Mangekyo: 18.
+          Es Kakashi: un forastero que sabe usarlo.
+        - Uzumaki: trato de favor en Rinnegan (18 en vez de 36).
+        - "Otros clanes": penalizacion fuerte. Es el coste de llevar un ojo
+          robado que no es tuyo.
+
+      REFERENCIA DE MAGNITUD: el chakra maximo base sube +20 al despertar
+      Byakugan/Sharingan y +100 con el Rinnegan (`awakenMaxChakraBonus`).
+      Un Tenseigan implantado a 40 cada 2 s vacia una reserva muy rapido: el
+      coste esta pensado para que un ojo que no es tuyo sea insostenible.
+
+      DOS RAREZAS DEL DATAPACK — decidir si se portan o se corrigen:
+        a) `rinnegan/cost_0.mcfunction`: si NO hay `eyematch`, no descuenta NADA.
+           Un Uchiha/Uzumaki con el Rinnegan despierto pero con un ojo que no
+           casa lleva el Rinnegan GRATIS. Parece un olvido, no un diseno.
+        b) `basic_costs` tiene la linea de vision nocturna de `wearing_eye_10`
+           (Rinne Sharingan) duplicada.
+        -> Registrar la discrepancia en docs/development_log.md al portarlo
+           (regla 16 del repo) y decidir explicitamente. Recomendacion: portar
+           (a) como coste real, no como gratis, anotando la desviacion.
+
+      OJO CON ESTO — EL DATAPACK NO TIENE TOGGLE:
+        En el datapack el coste se aplica mientras se LLEVA el ojo
+        (`wearing_eye_N`). No hay activar/desactivar: "apagarlo" es quitarselo, y
+        el unico apagado automatico es `eye_strain/force_deactivate` al llegar al
+        100% de fatiga, que llama a `dojutsu/give/check`.
+        => El toggle de esta etapa es una MECANICA NUEVA, no un port.
+           Consecuencia: con toggle, el jugador tiene el ojo implantado sin pagar
+           nada mientras lo lleve apagado. Eso ABARATA el juego frente al
+           datapack, sobre todo para los ojos robados, que es justo lo que el
+           datapack queria castigar.
+           Opciones, hay que elegir una:
+             i.  Coste solo con el ojo ACTIVO (lo natural). Se acepta la
+                 desviacion de balance y se registra. RECOMENDADA.
+             ii. Coste reducido tambien con el ojo apagado (el ojo implantado
+                 sigue consumiendo algo). Mas fiel al espiritu, mas confuso.
+            iii. Coste activo mas alto que el del datapack para compensar.
+                 Rompe los numeros auditados; solo si i. resulta rota en QA.
+           NO dejarlo sin decidir: cambia la economia de todo el sistema ocular.
+
+      IMPLEMENTACION:
+        - Anadir los campos de coste a `EyeDefinition` como "campos tolerantes"
+          (con valor por defecto), que es exactamente como su javadoc dice que se
+          hara. Data-driven en `data/dojutsu/eyes/*.json`, NO numeros en Java.
+        - Los modificadores por clan tambien data-driven: un mapa
+          clan -> coste dentro de la definicion del ojo. Si se meten con `if`
+          en Java, portar los 14 ojos sera inmantenible.
+        - El drenaje va por `ChakraService` y por NINGUNA otra via (regla 10).
+        - Como hay pulso cada 40 ticks, aqui SI merece la pena hospedarlo en
+          `empowerment.ToggleableModeService`: ya hace pulsos, caida y sync, y
+          seria su 4o consumidor tras Susanoo, Tenseigan y Sage.
+        - Caida por falta de chakra: si el chakra no llega, el ojo se apaga solo
+          (el arnes ya contempla la caida). Avisar en chat al caer.
+
+  A4. Red: `network.ToggleEyePayload` (C2S). El cliente manda "quiero alternar",
+      NO manda el estado destino. El servidor decide, valida y aplica (R12).
+      Rate-limit: minimo ~10 ticks entre pulsaciones, para evitar el spam de
+      encendido/apagado (y el parpadeo en los demas clientes).
+
+  A5. Emitir evento de dominio en DomainEvents al cambiar el estado. Lo que
+      reaccione (HUD, render de la textura, buffs) se suscribe (R11).
+
+  A6. Construir aqui el `CosmeticStatePayload` de la seccion 0-BIS.
+
+  A7. Cliente: keybind nueva. Propuesta: **K** (ver seccion 5).
+      Render de la textura ocular condicionado a `ClientCosmeticStates`.
+
+  A8. Pulido (dejarlo para el final del ticket, no bloquea):
+        - animacion de encendido ~10 ticks (escala/alpha del overlay),
+        - sonido distinto al encender y al apagar,
+        - aviso en chat si el intento falla por fatiga (ya hay avisos `esw_*`,
+          reutilizar el formato).
+
+  A9. QA: extender `/dojutsudojutsu` con `toggle` para forzar el estado.
+      Validar en runtime en LOS DOS loaders antes de cerrar (regla 2 del repo).
+
+CRITERIO DE CIERRE
+  Dos jugadores en un servidor dedicado: A enciende el ojo, B lo ve encenderse;
+  A se desconecta y reconecta, el estado persiste; B se aleja y vuelve, lo ve
+  bien. Tests verdes. Build multiloader verde.
+
+
+===============================================================================
+ ETAPA B  (idea 1) — INTERFAZ DE JUTSUS Y CASTEO POR TECLA
+ Tickets REALES: DJT-231 selector · 232 retirada del objeto · 234 rueda+huecos
+                 235 libro · 236 fusion en pestañas          [HECHO 2026-08-28]
+===============================================================================
+
+OBJETIVO
+  Sustituir "el jutsu se castea usando un objeto" por "selecciono el jutsu en una
+  interfaz y lo lanzo con una tecla".
+
+LO BUENO: EL MOTOR YA ESTA HECHO
+  JutsuCastPipeline es el unico camino de cast y ya valida en servidor.
+  CastJutsuPayload ya existe. La tecla V ya castea.
+  => Esta etapa NO toca el pipeline. Solo anade la capa de seleccion delante.
+
+DECISION TOMADA (2026-08-08, revisada): EL OBJETO DEJA DE CASTEAR
+  El objeto `items.JutsuItem` NO se borra, pero DEJA DE SER UNA VIA DE CASTEO.
+  A partir de esta etapa, un jutsu se lanza SOLO con la tecla.
+
+  QUE ES EL OBJETO ENTONCES:
+    Un PERGAMINO: recompensa, loot, mercancia de comercio y —lo mas util— el
+    soporte fisico del aprendizaje, que encaja con `LearnerItem` y
+    `JutsuLearningService`, que ya existen. Usarlo ENSENA el jutsu; ya no lo
+    lanza.
+
+  POR QUE ESTO SIMPLIFICA EL TICKET (frente a mantener las dos vias):
+    - UNA SOLA VIA DE CAST. Nada de cooldowns compartidos entre rutas, ni QA
+      doble, ni dos sitios donde se pueda desincronizar el balanceo.
+    - El `JutsuCastPipeline` sigue siendo el unico camino y ahora ademas es el
+      unico PUNTO DE ENTRADA. Menos superficie que validar (R12).
+
+  TRABAJO CONCRETO QUE APARECE POR ESTE CAMBIO:
+    B0a. Localizar el `use`/`onItemRightClick` del JutsuItem que hoy dispara el
+         cast y retirarlo. Si el objeto no tiene otra funcion aun, dejarlo
+         inerte con un mensaje ("Este pergamino se estudia, no se lanza") antes
+         que borrarlo: borrarlo arrastra recetas, loot y comercio.
+    B0b. Revisar los TESTS que casteen a traves del objeto. Hay tests colgando
+         de esa ruta y van a romper. Reapuntarlos al pipeline.
+    B0c. MIGRACION PARA PARTIDAS EXISTENTES: quien ya tenga pergaminos en el
+         cofre debe poder aprender esos jutsus, no quedarse con papel muerto.
+         Lo natural: al usarlos, que ensenen el jutsu.
+    B0d. Revisar la localizacion (`lang`): los tooltips que digan "click derecho
+         para lanzar" dejan de ser ciertos.
+
+  NOTA DE ARTE (afecta a la etapa 2): el pergamino SIGUE EXISTIENDO en el
+  inventario, asi que sigue necesitando su icono 2D. Los `custom_model_data`
+  actuales NO se pueden reciclar para los modelos 3D del mundo. Ver 6.1 de
+  GUIA_BLOCKBENCH_MODELOS_JUTSUS.txt (rango 3000+).
+
+PASOS
+
+  B1. [CAMBIO] Estado de seleccion: ACABO EN EL SERVIDOR, no en config de
+      cliente. Implementado en `JutsuKnowledge` (DJT-231 y 234):
+          - selectedJutsu : Optional<String>
+          - quickSlots    : List<String> de 8 ("" = hueco libre)
+
+      POR QUE se movio: el plan lo trataba como preferencia de UI, pero de ahi
+      sale lo que lanza la tecla de cast y lo que lanzan las teclas ALT+1..8.
+      Si el reparto viviera en el cliente, el cliente estaria decidiendo QUE se
+      lanza, que es exactamente lo que prohibe R12. Ademas asi sobrevive a la
+      reconexion y viaja entre maquinas.
+
+      Invariantes, en el constructor del record para que no se puedan olvidar:
+          - no se puede tener seleccionado lo que no se conoce;
+          - un hueco con un jutsu que ya no conoces se vacia solo;
+          - la lista de huecos siempre tiene exactamente 8 entradas (el NBT de
+            otra version se recorta o se rellena, nunca bloquea la carga).
+
+      Sincronizacion (DJT-231/234): `JutsuSnapshot` dentro de
+      SyncNinjaDataPayload. La lista de aprendidos y el reparto de huecos van
+      con DELTA PROPIO (Optional = "sin cambios") porque los deltas los dispara
+      la regeneracion de chakra; el jutsu seleccionado es un solo id y viaja en
+      todos. Detalle no obvio: StreamCodec.composite admite 6 componentes como
+      maximo, y el payload ya los tenia todos; de ahi el sub-record.
+
+      Autorelleno: aprender un jutsu lo coloca en el primer hueco libre. Vive en
+      `withKnown` y no en los servicios que lo llaman porque hay tres caminos
+      para aprender (learner, comando/clan, copia del Sharingan) y basta que uno
+      se olvide para que a ese jugador la rueda le salga vacia sin motivo.
+
+  B2. Rueda radial (`client.screen.JutsuWheelScreen`):
+        - Se abre MANTENIENDO la tecla, se cierra al SOLTARLA, y al soltar
+          selecciona el sector donde este el raton. Es mas rapido que abrir una
+          pantalla completa y es el patron que ya conoce la gente (Curios,
+          Blood Magic).
+        - [CAMBIO, decision del usuario] Muestra SOLO LOS OCHO HUECOS, no el
+          catalogo entero. Una rueda de 128 sectores es ilegible y lenta de leer
+          justo cuando se usa. Que va en cada hueco se elige en el libro (B5).
+        - Marcar en gris los que no puedas lanzar ahora mismo (sin chakra, en
+          cooldown). El cliente puede DIBUJARLO en gris —eso es presentacion—
+          pero el servidor sigue siendo quien decide si el cast sale (R12).
+          En la practica: velo oscuro + segundos restantes, y SE PUEDE elegir un
+          jutsu en cooldown (seleccionar no es lanzar).
+        - [CAMBIO] Tecla **Z**, no B: B ya era el sello maldito.
+        - Se resuelve por ANGULO, no por la caja del icono: en una rueda se
+          apunta hacia un lado, y exigir punteria sobre un cuadrado la vuelve
+          incomoda con prisa. Zona muerta central = salir sin elegir.
+        - El toque corto deja la rueda ABIERTA y se elige con el raton; si se
+          cerrara al instante, un tap la volveria inservible.
+        - TRAMPA ENCONTRADA: el cierre al soltar NO puede usar
+          KeyMapping.isDown(). Con una pantalla abierta vanilla deja de
+          alimentar ese estado, asi que contesta false nada mas abrirse la rueda.
+          Hay que sondear GLFW resolviendo el codigo de tecla desde el keybind
+          (asi se respeta el remapeo).
+
+  B3. La tecla V pasa a lanzar el jutsu seleccionado. [HECHO, DJT-231]
+      CastJutsuPayload se queda SIN datos (era la InteractionHand): el cliente ya
+      no dice que lanzar, solo que quiere lanzar.
+      [CAMBIO menor] Sin seleccion, hoy avisa en la actionbar en vez de abrir la
+      rueda. Abrirla sola desde una tecla de combate se probo intrusivo; el aviso
+      se queda como red de seguridad y la rueda esta a una tecla.
+
+  B4. Huecos rapidos ALT+1..8. [HECHO, DJT-234]
+      EL PROBLEMA REAL: 1..8 son la hotbar de vanilla. Robarlas deja al jugador
+      sin cambiar de objeto; no robarlas hace que al lanzar tambien cambies de
+      objeto en plena pelea.
+      SOLUCION: engancharse a ClientRawInputEvent.KEY_PRESSED de Architectury,
+      que corre ANTES que vanilla, y devolver interruptFalse() para consumir la
+      pulsacion. Descartadas: los modificadores de KeyMapping (solo NeoForge, no
+      valen para Fabric) y ocho keybinds sin asignar (funcion invisible).
+      ALT+9 sigue siendo hotbar: la hotbar tiene 9 slots y la rueda 8.
+      Lanzar desde un hueco tambien lo SELECCIONA (si no, el HUD y la tecla de
+      cast seguirian apuntando a otra cosa).
+
+  B5. Libro de jutsus. [HECHO, DJT-235; hoy es la pestaña `JutsuBookTab`]
+        - Todos los aprendidos, filtro por elemento (cicla solo por las que
+          TIENES) y buscador que mira tambien el NOMBRE TRADUCIDO, no solo el id.
+        - [CAMBIO] Se asigna con DOS CLICS (ficha, luego hueco), no arrastrando:
+          sobrevive a que se escape el raton y no exige acertar un objetivo
+          pequeño manteniendo el boton. Clic derecho sobre un hueco lo vacia.
+        - OBSTACULO: el JutsuRegistry es data-driven y vive SOLO en el servidor;
+          en dedicado el cliente no tiene esos numeros. Se resolvio con el patron
+          peticion/respuesta que ya usaba el menu ocular (OpenJutsuBookPayload ->
+          JutsuBookPayload). Se mandan solo las fichas de lo APRENDIDO.
+        - [CAMBIO] El dano se lee de effectParams del JSON, no de
+          JutsuDefinition: 49 de las 128 tecnicas no tienen dano (buffs,
+          teleports, estructuras) y subirlo al contrato obligaria a inventarles
+          un valor. Lectura tolerante: un parametro malformado da 0, no rompe.
+        - NO lleva el requisito de nivel: es la puerta de APRENDIZAJE, y el libro
+          solo muestra lo que ya aprendiste.
+        - La pantalla no pinta el cambio hasta que el servidor contesta. Se nota
+          un instante de latencia en LAN; la alternativa deja la pantalla
+          mintiendo cuando el servidor rechaza.
+
+  B6. Rate-limit del cast en servidor. [HECHO]
+      Ya existia (CastJutsuHandler, 50 ms). Lo importante que se anadio: el cast
+      por hueco (ALT+N) COMPARTE ese mismo limitador. Con uno propio, alternar
+      las dos teclas doblaria el ritmo aceptado y el limite no serviria de nada.
+
+  B7. [NUEVO, no estaba en el plan] Fusion de pantallas. DJT-236.
+      Peticion del usuario a mitad de la etapa: no seguir acaparando teclas.
+      Las TRES pantallas de preparacion —menu ninja (M), habilidades oculares
+      (N) y libro de jutsus (P)— pasan a ser PESTAÑAS bajo M. N y P quedan
+      libres. Es lo que la seccion 5.1 de este mismo plan ya proponia.
+      Estructura: interfaz `MenuTab` + `NinjaMenuScreen` como contenedor; cada
+      pestaña sigue en su fichero (NinjaStatsTab, JutsuBookTab, EyeAbilitiesTab).
+      Cada pestaña declara que cache observa; el contenedor la reconstruye cuando
+      cambia la version. La rueda se queda FUERA: es la unica de combate.
+
+CRITERIO DE CIERRE
+  Se puede jugar una partida entera sin tocar el inventario para lanzar jutsus.
+  Un cliente modificado que mande un id de jutsu no aprendido recibe un rechazo
+  del servidor (probar a mano, es el punto que mas importa de R12).
+
+  ESTADO: codigo terminado y con tests; falta la pasada EN PARTIDA en los dos
+  loaders. Ver CHECKLIST_PRUEBAS_F11_ETAPA_B.txt (bloques B1..B9).
+  El punto de R12 esta cubierto por B2.5 y B2.6 del checklist, y ademas por
+  tests: una peticion invalida se rechaza SIN tocar la seleccion previa, para
+  que nadie pueda desarmar a otro jugador mandando basura.
+
+  APOYO DE DEPURACION anadido para poder probar antes de que existieran las
+  interfaces (se retira con el resto del comando):
+      /dojutsujutsu learn <id> | select <id|none> | slot <1-8> <id|none> | known
+
+
+===============================================================================
+ ETAPA C  (idea 4) — HUD MOVIBLE (BARRA DE CHAKRA Y NIVEL)
+ Ticket: DJT-233                                          [HECHO 2026-08-08]
+===============================================================================
+
+OBJETIVO
+  Que el jugador coloque los elementos del HUD donde quiera.
+
+ES LA ETAPA MAS BARATA DE LAS CUATRO. Es 100% cliente, no toca red ni servidor.
+
+PASOS
+
+  C1. `client.hud.HudLayout` — config de cliente con una entrada por elemento:
+        chakra · rango/nivel · cooldown de jutsu · (futuro: jutsu seleccionado,
+        estado del ojo, energia natural)
+      Cada entrada: anclaje (esquina), offsetX %, offsetY %, escala, visible.
+
+  C2. GUARDAR EN PORCENTAJE DE PANTALLA, NO EN PIXELES ABSOLUTOS.
+      Es el fallo tipico: si guardas pixeles, al cambiar la escala de GUI o la
+      resolucion el HUD se descoloca o se sale de pantalla. Anclaje a esquina +
+      offset relativo lo resuelve.
+
+  C3. `client.screen.HudEditorScreen`:
+        - Se abre desde el menu M (pestana), no con tecla propia.
+        - Elementos arrastrables con SNAP a bordes y al centro.
+        - Boton "Restablecer" por elemento y global.
+        - Casilla de visibilidad por elemento (hay quien quiere el chakra y nada mas).
+        - Vista previa con valores falsos, para poder colocarlo sin estar en combate.
+
+  C4. Clamp al guardar: ningun elemento puede quedar fuera del area visible.
+
+  C5. Refactor previo si hace falta: si los 3 HUD actuales tienen las coordenadas
+      escritas a mano en cada clase, extraerlas a HudLayout primero y DESPUES
+      hacer el editor. Si no, el editor solo movera uno de los tres.
+
+CRITERIO DE CIERRE
+  Cambiar la escala de GUI de 2 a 4 y la resolucion, y que el HUD siga donde el
+  jugador lo dejo.
+
+
+===============================================================================
+ ETAPA D  (idea 3) — EDITOR DE POSICION DE LA TEXTURA DEL DOJUTSU
+ Ticket: DJT-237 (era 234; 234 se uso para la rueda)      [NO EMPEZADA]
+
+ BLOQUEADA, y la razon no estaba en el plan: NO EXISTE render de overlay ocular
+ sobre el jugador, ni texturas de ojo en assets. Esta etapa da por hechas las
+ dos cosas. Hay que crear el overlay (y el arte) antes de poder colocar nada.
+ Por lo mismo, el canal cosmetico de 0-BIS NO se construyo: no tenia consumidor.
+===============================================================================
+
+OBJETIVO
+  Interfaz donde se ve la cara del jugador y se arrastra la textura del ojo
+  (sharingan, rinnegan...) hasta que encaje con su skin.
+
+POR QUE ES LA ULTIMA
+  Es la de mayor riesgo visual y la que depende del canal cosmetico de la etapa A.
+  Tambien es la unica que se puede recortar sin danar el resto (un preset fijo
+  decente cubre al 90% de los jugadores).
+
+PRINCIPIO IRRENUNCIABLE
+  NO se modifica la textura de skin del jugador. Se dibuja un OVERLAY sobre la
+  capa de cabeza del modelo, con offsets guardados por jugador. Tocar la skin
+  significaria descargarla, componerla y subirla: fragil, lento y rompe con los
+  mods de skins.
+
+PASOS
+
+  D1. Render: capa nueva sobre PlayerRenderer que dibuja la textura del ojo en la
+      cara, aplicando offsetX/offsetY/scale. Emisiva (los ojos brillan) —
+      mismo tratamiento que se decida para los jutsus en la etapa 2.
+      Comprobar que se ve bien tambien en:
+        - primera persona (no deberia verse nada),
+        - la cabeza del jugador durmiendo / montado,
+        - modelo slim vs classic (la CABEZA es igual en ambos, asi que no deberia
+          afectar; verificarlo igualmente).
+
+  D2. Datos: offsetX, offsetY, scale por jugador. Viajan en el
+      `CosmeticStatePayload` de la etapa A.
+
+      LA DIFERENCIA ENTRE LAS DOS OPCIONES (esta era la pregunta 4):
+
+      OPCION 1 - CONFIG DE CLIENTE
+        Donde vive:  un archivo en la carpeta del juego DEL JUGADOR
+                     (config/dojutsu-client.toml o similar), en SU PC.
+        Quien lo ve: solo su ordenador. Para que los demas lo vean, el cliente
+                     manda el valor al servidor al entrar, y el servidor lo
+                     reparte (eso es el CosmeticStatePayload).
+        Le sigue a:  LA INSTALACION. El mismo ajuste vale para TODOS los mundos
+                     y TODOS los servidores a los que entre desde ese PC.
+        Si cambia de PC: lo pierde. Tiene que reajustarlo una vez.
+        Coste tecnico: bajo. Un archivo de config y un envio al entrar.
+                     NO toca PlayerNinjaData ni el guardado del mundo.
+        Si desinstala el mod: se va con el.
+
+      OPCION 2 - ESTADO DEL JUGADOR (servidor)
+        Donde vive:  dentro del guardado del mundo, colgando de PlayerNinjaData,
+                     junto al chakra, el nivel y los ojos.
+        Quien lo ve: el servidor es la fuente de verdad; ya se reparte con el
+                     sync que existe.
+        Le sigue a:  EL MUNDO / EL SERVIDOR. Si entra desde otro PC al MISMO
+                     servidor, lo conserva. Pero cada mundo nuevo empieza de cero
+                     y hay que reajustarlo otra vez, en cada servidor.
+        Coste tecnico: mas alto. Sub-estado nuevo con value object + CODEC +
+                     linea de codec + puerta de escritura (regla 6), migracion
+                     de saves, y tres campos mas cruzando la red.
+        Si desinstala el mod: queda basura en el save.
+
+      EL ARGUMENTO QUE DECIDE:
+        El offset del ojo depende de LA SKIN del jugador. La skin es de la
+        CUENTA y es la misma en todos los servidores. Por tanto el ajuste
+        deberia ser tambien el mismo en todos los servidores.
+        La opcion 1 da exactamente eso: ajustas una vez y vale en todas partes.
+        La opcion 2 da lo contrario: te obliga a reajustar servidor por servidor,
+        que es el comportamiento equivocado para un dato que no cambia.
+
+      DECISION: OPCION 1 (config de cliente + envio al entrar).
+        Es la mas barata Y la que se comporta bien. No hay que ampliar
+        PlayerNinjaData para un dato cosmetico.
+        (Es reversible: si algun dia hace falta que el servidor imponga o
+        bloquee posiciones, se anade la validacion en el handler del payload sin
+        mover donde vive el dato.)
+
+  D3. `client.screen.EyeAlignScreen`:
+        - Izquierda: la cabeza del jugador ampliada de frente, con su skin real,
+          y el ojo arrastrable encima.
+        - Derecha: vista 3D rotable del jugador entero, para comprobar como queda
+          de lejos (que es como lo van a ver los demas).
+        - Sliders finos para ajuste de 1 pixel — arrastrar no basta para precision.
+        - Presets: "Steve/Alex" (por defecto) y "Restablecer".
+        - Pestana dentro del menu M, no tecla propia.
+
+  D4. Preset por defecto bien elegido: la mayoria no va a abrir esta pantalla
+      nunca. Si el valor por defecto es malo, la funcion es un parche a un
+      problema que tu creaste.
+
+  D5. Limites: clamp de scale y de offsets para que nadie se ponga el Rinnegan
+      flotando a tres bloques de la cabeza. Es cosmetico, pero visible por los
+      demas, y sin limites alguien lo usara para molestar.
+
+CRITERIO DE CIERRE
+  Con una skin custom de ojos desplazados, el jugador ajusta el ojo, y OTRO
+  jugador lo ve exactamente igual de bien colocado.
+
+
+===============================================================================
+ 5. DOS DECISIONES TRANSVERSALES (tomarlas ANTES de la etapa A)
+===============================================================================
+
+5.1 UNA SOLA PANTALLA CON PESTANAS   [HECHO 2026-08-28, DJT-236]
+  Las etapas B, C y D anaden pantallas. Con las que ya hay (menu M, menu ocular N,
+  onboarding), el mod va camino de siete pantallas sueltas.
+  => La tecla M abre UNA pantalla con pestanas:
+       [Ninja] [Jutsus] [Dojutsu] [HUD]
+     La rueda radial (B2) es la excepcion justificada: es de combate, tiene que
+     abrirse y cerrarse en medio segundo, no puede vivir dentro de un menu.
+
+  COMO QUEDO: pestañas [Ninja] [Jutsus] [Eye] bajo M. La cuarta que proponia el
+  plan, [HUD], no hizo falta: el editor de HUD ya era un boton dentro del menu y
+  es una pantalla de pantalla completa, no una pestaña. La rueda, fuera, como
+  estaba previsto.
+
+5.2 AUDITORIA DE TECLAS   [HECHA, y el plan se equivocaba]
+  El plan decia "ocupadas hoy: M, V, N, R, C, G" y proponia K y B como libres.
+  Al mirar el codigo estaban ocupadas M V N R G B H J K Y C U: el doble.
+    -> El toggle de ojo fue a X, no a K (K era la forma de jinchuriki).
+    -> La rueda fue a Z, no a B (B era el sello maldito).
+  Y el saldo final MEJORO en vez de empeorar: DJT-236 libero N y P, asi que hoy
+  hay DOS teclas menos que al empezar, con mas funcionalidad.
+
+  LECCION: la lista de teclas del plan salio de CLAUDE.md y estaba desfasada.
+  Antes de fijar una tecla por defecto, mirar KeyBindings.java, no la doc.
+
+  Mitigaciones, por orden de preferencia:
+    a) Registrar todas las keybinds bajo la misma categoria "Dojutsu" para que el
+       jugador las encuentre y las reasigne de golpe.
+    b) NO asignar tecla por defecto a lo secundario (los slots ALT+numero pueden
+       venir sin asignar; quien los quiera, se los pone).
+    c) Revisar que ninguna default pise una vanilla comun. K y B estan libres en
+       vanilla 1.21.1; confirmarlo en la pantalla de controles antes de fijarlas.
+
+
+===============================================================================
+ 6. RESUMEN DEL ORDEN Y POR QUE
+===============================================================================
+
+  A (idea 5) — Toggle de dojutsu ............ DJT-230
+      Cambia como se juega desde el minuto uno, reutiliza el arnes de modos que
+      ya existe, y construye el canal cosmetico que necesita D.
+
+  B (idea 1) — Rueda + casteo por tecla ..... DJT-231/232/234/235/236
+      El cambio de UX mas grande del mod. El motor de cast ya estaba hecho, pero
+      "sobre todo trabajo de cliente" resulto FALSO: la mitad del ticket fue
+      estado de servidor y sincronizacion, porque el reparto de huecos y el jutsu
+      seleccionado no podian vivir en el cliente sin romper R12.
+
+  C (idea 4) — HUD movible .................. DJT-233
+      La mas barata. Va despues de B porque B anade elementos nuevos al HUD
+      (jutsu seleccionado) y conviene que nazcan ya dentro de HudLayout.
+
+  D (idea 3) — Editor de posicion del ojo ... DJT-237
+      La ultima: mayor riesgo, depende de A, y es la unica recortable.
+      Hoy ademas esta BLOQUEADA por falta de overlay ocular y de arte.
+
+  Dependencia dura:  A -> D  (canal cosmetico)
+  Dependencia blanda: B -> C  (elementos nuevos de HUD)
+  A, B y C se pueden solapar si hay ganas; D no debe empezar antes de cerrar A.
+
+
+===============================================================================
+ 7. DECISIONES CERRADAS (2026-08-08)
+===============================================================================
+
+  1. Apagar el dojutsu, quita los bonos?
+     -> SI. Cerrado. Ver etapa A, paso A3 (1).
+
+  2. El dojutsu activo drena chakra pasivo? Cuanto?
+     -> SI drena. El "cuanto" NO es una pregunta abierta: los numeros estan en el
+        datapack y estan extraidos en la tabla A3-BIS de la etapa A.
+        Resumen: X de chakra cada 40 ticks (2 segundos), donde X va de 4
+        (Sharingan de 3 tomoe con Mangekyo despierto) a 40 (Tenseigan implantado
+        sin despertar), con modificadores por clan.
+        Ademas se descubrio que este drenaje es un PORT PENDIENTE, no una
+        mecanica nueva: el javadoc de EyeDefinition lo declara como deuda de
+        DJT-116, que solo porto la fatiga.
+     -> COMPENSACION DEL TOGGLE: cerrado en la OPCION i.
+        El coste corre SOLO con el ojo ACTIVO. Se acepta que un ojo apagado no
+        cuesta nada y que eso abarata los ojos robados frente al datapack.
+        OBLIGATORIO al implementarlo: registrar la desviacion en
+        docs/development_log.md (regla 16), diciendo que es deliberada y por que
+        (el datapack no tenia toggle, asi que no hay numero fiel que copiar).
+        Vigilar en QA: si un Rinnegan robado sale rentable a base de encender y
+        apagar, se revisa —pero con datos de partida, no antes.
+
+  3. Que pasa con JutsuItem?
+     -> EL OBJETO DEJA DE CASTEAR. Los jutsus se lanzan SOLO con la tecla.
+        El objeto sobrevive como pergamino de aprendizaje / loot / comercio.
+        HECHO en DJT-232. Al usarlo con clic derecho ahora SELECCIONA su jutsu:
+        quitarle el cast sin poner nada dejaba un pergamino que no responde.
+        No hizo falta migracion (B0c): el componente del objeto no cambio, los
+        pergaminos de partidas viejas siguen valiendo y solo hacen otra cosa.
+        Efecto colateral que el plan no preveia: la barra de cooldown del HUD
+        leia el objeto de la mano y se quedaba mintiendo; se repunto al jutsu
+        seleccionado en el mismo ticket.
+        NOTA: el pergamino sigue en el inventario, asi que conserva su icono 2D
+        y sus custom_model_data. Los modelos 3D usan un rango aparte.
+
+  4. Los offsets del ojo: config de cliente o estado del jugador?
+     -> CONFIG DE CLIENTE. Confirmado. La diferencia entre ambas y el porque
+        estan explicados en la etapa D, paso D2.
+
+  5. Rango de tickets.
+     -> DJT-230..234, como FASE 11. Verificado: F10 usa 220-229 y esta cerrada;
+        230+ no aparece en docs/. Alternativa libre si hiciera falta: 240-244.
+     -> [ACTUALIZADO] Hicieron falta 230..236, y la etapa D pasa a 237.
+
+  6. [NUEVA, 2026-08-28] Que muestra la rueda?
+     -> SOLO LOS OCHO HUECOS, no el catalogo. Decision del usuario. Elegir que va
+        en cada hueco es cosa del libro.
+
+  7. [NUEVA, 2026-08-28] Donde vive el libro de jutsus?
+     -> PESTAÑA del menu ninja (M), no tecla propia. Decision del usuario para no
+        acaparar atajos. Arrastro con ella la fusion de las tres pantallas.
+
+
+===============================================================================
+ 8. LO QUE QUEDA POR DECIDIR ANTES DE PICAR CODIGO
+===============================================================================
+
+  [ACTUALIZADO 2026-08-28] Estado de las tres que quedaban:
+
+  a) [A3-BIS] Las dos rarezas del datapack: el Rinnegan gratis cuando no hay
+     `eyematch`, y la linea duplicada de vision nocturna de `wearing_eye_10`.
+     Portar tal cual o corregir, y registrarlo en development_log.md (regla 16).
+     Recomendacion: corregir el Rinnegan (cobrar), anotando la desviacion.
+
+  b) [RESUELTA] Las teclas: K y B estaban ocupadas. Se usaron X (toggle ojo) y
+     Z (rueda). Falta confirmarlas contra la pantalla de controles de vanilla en
+     partida — esta en los checklists.
+
+  c) [RESUELTA] El JutsuItem no se quedo inerte: el clic derecho SELECCIONA su
+     jutsu. Se le dio funcion en el mismo ticket, como recomendaba el plan.
+
+  d) [NUEVA] Coste pasivo de chakra por llevar el ojo: SIGUE SIN IMPLEMENTAR.
+     Es la deuda de DJT-116 y los numeros ya estan extraidos en la tabla A3-BIS.
+     Con el toggle ya en juego (DJT-230), este ticket es ahora mas urgente que
+     antes: hoy tener el ojo encendido no cuesta nada. Sugerido: DJT-238.
+
+  e) [NUEVA] Etapa D bloqueada por falta de overlay ocular y de arte. Mientras
+     no exista el render, ni el editor ni el canal cosmetico tienen sentido.
+
+
+===============================================================================
+ 9. ORDEN DE ARRANQUE SUGERIDO
+===============================================================================
+
+  [ESTA SECCION YA SE EJECUTO. Se conserva por trazabilidad; lo que sigue es lo
+   que queda por hacer a partir del 2026-08-28.]
+
+  1. PASAR LOS CHECKLISTS EN PARTIDA, en NeoForge y en Fabric (regla 2). Es lo
+     unico que separa a A, B y C de estar cerradas de verdad. Nada nuevo deberia
+     empezar antes de esto.
+         CHECKLIST_PRUEBAS_F11.txt          -> etapas A y C
+         CHECKLIST_PRUEBAS_F11_ETAPA_B.txt  -> etapa B (bloques B1..B9)
+  2. DJT-238: coste pasivo de chakra del ojo (deuda de DJT-116). Los numeros
+     estan en A3-BIS. Registrar la desviacion del toggle en development_log.md.
+  3. Retirar el andamiaje de depuracion de /dojutsujutsu (learn/select/slot):
+     existia para poder probar antes de que hubiera interfaces, y ya las hay.
+  4. Actualizar docs/current_state.md y docs/backlog.md con DJT-230..236.
+  5. Etapa D (DJT-237) solo cuando exista el overlay ocular y el arte.
+
+  ORDEN ORIGINAL (ejecutado):
+    1. DJT-230 (etapa A) — empezar por A1: leer `EyeState`...
+    2. El drenaje pasivo (A3-BIS) como ticket propio si crece.
+    3. La retirada del cast por objeto ANTES de la rueda.
+       [DESVIACION: acabo haciendose DESPUES del selector y ANTES de la rueda,
+        que cumple el espiritu —no hubo dos caminos de cast vivos a la vez—
+        aunque no la letra.]
+
+===============================================================================
+ FIN
+===============================================================================

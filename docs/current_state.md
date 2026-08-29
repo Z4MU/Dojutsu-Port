@@ -1,8 +1,8 @@
 # Estado actual del proyecto — Dojutsu Port
 
 > ⚠️ **Este documento va por detrás del código.** Su cabecera y sus tablas llegan hasta F8; **F9 está cerrada
-> en código** (paquetes `sixpaths`, `story`, `world`) sin que nadie escribiera aquí su entrada, y **F10 está en
-> curso**. Para el estado verificado archivo a archivo la referencia es
+> en código** (paquetes `sixpaths`, `story`, `world`) sin que nadie escribiera aquí su entrada, **F10 está
+> cerrada** y **F11 (UX) tiene el código terminado**. Para el estado verificado archivo a archivo la referencia es
 > [`AUDITORIA_ESTADO_ACTUAL.md`](AUDITORIA_ESTADO_ACTUAL.md) (2026-07-30, 912 tests); para lo hecho después,
 > `development_log.md` y `backlog.md §Fase 10`. Ponerlo al día entero es trabajo de DJT-223.
 >
@@ -49,6 +49,33 @@
 >   la API no cambia nada. Uso en `docs/api.md`.
 > - **Pendiente de F10**: sólo **DJT-224 pasada 2** (arte: modelos de Susanoo y Mangekyō, protectores de frente)
 >   y la mitad interactiva de DJT-223, que únicamente se cierra jugando.
+>
+> **F11 — UX e interfaces (2026-08-28): código terminado, falta la pasada en partida.**
+> Nace de cinco ideas del usuario; plan y desviaciones en `PLAN_UI_ETAPAS_5-1-4-3.txt`, detalle por ticket en
+> `backlog.md §Fase 11`. Build multiloader verde, **1080 tests**.
+> - **DJT-230 ✅** — **toggle de dōjutsu** (tecla **X**): `EyeState.enabled` separa *qué ojo tienes* de *si está
+>   encendido*, y apagarlo quita los bonos. De paso **corrige un bug real**: al llegar al 100 % de fatiga el ojo
+>   se **borraba** —con su forma eterna— sin ninguna vía de recuperación en partida.
+> - **DJT-231 ✅** — **selector de jutsu**: el cliente ya conoce su lista de aprendidos (delta propio: la lista
+>   sólo viaja cuando cambia, porque los deltas los dispara la regeneración de chakra) y el **jutsu
+>   seleccionado** vive en el servidor, dentro de `JutsuKnowledge`. La tecla de cast lanza eso.
+> - **DJT-232 ✅** — **el ítem deja de castear**: `JutsuItem` es un pergamino; el clic derecho **selecciona**.
+>   Sin migración: el componente no cambió. Arrastró repuntar la barra de cooldown del HUD, que leía el ítem de
+>   la mano y habría quedado mintiendo.
+> - **DJT-233 ✅** — **HUD movible**: anclas + offsets **en fracción de pantalla** (sobreviven a un cambio de
+>   resolución) y `HudEditorScreen` con arrastre y guías. Auditoría del coste **por frame** en `perf.md §7`.
+> - **DJT-234 ✅** — **rueda radial** (tecla **Z**, mantener) que muestra **sólo los 8 huecos**, más los huecos
+>   rápidos **ALT+1..8**, que se comen la pulsación **antes** que vanilla para no mover la hotbar.
+> - **DJT-235 ✅** — **libro de jutsus**: fichas del `JutsuRegistry` (coste, cd, daño, afinidad) enviadas por red,
+>   porque el registro es data-driven y sólo existe en servidor; aquí se reparten los huecos.
+> - **DJT-236 ✅** — **las tres pantallas de preparación pasan a pestañas bajo M** (Ninja / Jutsus / Eye).
+>   **N y P quedan libres**: el mod usa **13** teclas donde antes usaba 15, con más funcionalidad.
+> - **DJT-237 ⬜ BLOQUEADO** — editor de posición de la textura del ojo: **no existe** render de overlay ocular
+>   sobre el jugador ni texturas de ojo en assets, y la etapa da por hechas las dos cosas.
+> - **Pendiente de F11**: la validación **en partida en los dos loaders** (regla 2) —
+>   `CHECKLIST_PRUEBAS_F11.txt` (A y C) y `CHECKLIST_PRUEBAS_F11_ETAPA_B.txt` (B) — y el **coste pasivo de
+>   chakra del ojo**, que sigue sin implementar (deuda de DJT-116; números ya extraídos en el plan, §A3-BIS).
+>   Con el toggle ya en juego, tener el ojo encendido hoy no cuesta nada.
 >
 > ---
 >
@@ -149,6 +176,7 @@ Fase 3 define al ninja (naturalezas, clanes, onboarding).
 | **F3** | Definición del ninja | ✅ **Completada** (DJT-050…063, validada en runtime) |
 | **F4** | Combate | ✅ **Completada** (DJT-070…112; contenido cargado y validado en runtime en ambos loaders; ver §3.4a) |
 | F5–F10 | Contenido incremental (plantillas) | ⬜ No iniciada |
+| **F11** | UX e interfaces (DJT-230…237) | 🔄 **Código terminado** (230…236 ✅, 1080 tests); falta partida. DJT-237 bloqueado por falta de arte |
 
 ## 3. Historias y subtareas (F0)
 
@@ -558,6 +586,10 @@ pipeline, scheduler, ciclo de vida, config, muerte/respawn); reload listener de 
   → `sistemas/` (ingeniería inversa S01–S25), `arquitectura/` (ADD), `backlog/` (DJT-###).
 
 ## 7. Fase actual
+
+> **Nota (2026-08-28):** esta sección quedó congelada en F5 y no se actualizó en F6…F10. La fase realmente en
+> curso es **F11 (UX e interfaces)**, con el código terminado y la validación en partida pendiente; ver el
+> bloque F11 de la cabecera y `backlog.md §Fase 11`. Lo de abajo se conserva por trazabilidad histórica.
 
 **F5 — Poderes oculares, LÓGICA COMPLETADA** (S05 ojos + S24 Susanoo + S25 Chakra Vision). Ficha de diseño:
 `D:\Projectos claude\Dojutsu reverse\DOCS\backlog\06_FASES5-10_RESUMEN_Y_PLANTILLAS.md §FASE 5`; orden, tabla de
