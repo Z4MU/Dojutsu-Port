@@ -76,6 +76,10 @@ public final class EyeDebugCommand {
                                         .suggests(FAMILIES)
                                         .then(Commands.argument("level", IntegerArgumentType.integer(0))
                                                 .executes(EyeDebugCommand::use))))
+                        .then(Commands.literal("implant")
+                                .then(Commands.argument("eye", StringArgumentType.word())
+                                        .suggests(EYES)
+                                        .executes(EyeDebugCommand::implant)))
                         .then(Commands.literal("strain")
                                 .then(Commands.argument("value", IntegerArgumentType.integer(0, 100))
                                         .executes(EyeDebugCommand::strain)))
@@ -100,6 +104,7 @@ public final class EyeDebugCommand {
                 + " | susanoo=" + SusanooCostTable.tier(susanoo.level()).name()
                 + " lvl=" + susanoo.level() + " uso=" + susanoo.use()
                 + " activo=" + SusanooService.isActive(player.getUUID())), false);
+        ctx.getSource().sendSuccess(() -> Component.literal(describeCost(data)), false);
         return 1;
     }
 
@@ -112,8 +117,30 @@ public final class EyeDebugCommand {
             return 0;
         }
         PlayerNinjaData data = NinjaData.get(player);
-        data.setEye(data.eye().withActiveEye(eyeId).withAwakened(def.get().family()));
+        // withAwakenedEye (no withAwakened): registra QUE variante desperto, que es lo que mira el
+        // eyematch del coste pasivo (F11/DJT-238). Con el wither de solo familia, todo saldria "no casa".
+        data.setEye(data.eye().withActiveEye(eyeId).withAwakenedEye(def.get().family(), eyeId));
         ctx.getSource().sendSuccess(() -> Component.literal("ojo activo: " + describe(data.eye())), false);
+        return 1;
+    }
+
+    /**
+     * Pone el ojo <b>sin despertarlo</b>: el caso del ojo implantado o robado (F11/DJT-238).
+     *
+     * <p>Existe porque {@code activate} despierta siempre, y sin esto la mitad de la tabla de coste pasivo
+     * -la cara, la que castiga llevar un ojo que no es tuyo- no se puede reproducir en partida.
+     */
+    private static int implant(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        String eyeId = StringArgumentType.getString(ctx, "eye").toLowerCase(Locale.ROOT);
+        if (EyeRegistry.get(eyeId).isEmpty()) {
+            ctx.getSource().sendFailure(Component.literal("ojo desconocido: " + eyeId));
+            return 0;
+        }
+        PlayerNinjaData data = NinjaData.get(player);
+        data.setEye(data.eye().withActiveEye(eyeId));
+        ctx.getSource().sendSuccess(
+                () -> Component.literal("ojo IMPLANTADO (sin despertar): " + describe(data.eye())), false);
         return 1;
     }
 
@@ -223,6 +250,28 @@ public final class EyeDebugCommand {
                 + " strain=" + eye.eyeStrain()
                 + " selected=" + eye.selectedAbility().orElse("(ninguna)")
                 + " awakened=" + eye.awakened()
+                + " awakenedEyes=" + eye.awakenedEyes()
                 + " useLevels=" + eye.useLevels();
+    }
+
+    /**
+     * Coste pasivo que se le cobraria <b>ahora mismo</b> (F11/DJT-238), calculado por el mismo resolutor que
+     * usa el servicio.
+     *
+     * <p>Se muestra en {@code get} para que probarlo no consista en mirar caer el chakra y hacer restas: el
+     * numero que decide el servidor se lee directamente.
+     */
+    private static String describeCost(PlayerNinjaData data) {
+        EyeState eye = data.eye();
+        EyeDefinition def = eye.activeEye().flatMap(EyeRegistry::get).orElse(null);
+        if (def == null) {
+            return "coste pasivo: (sin ojo)";
+        }
+        var cost = com.zamu.dojutsu.dojutsu.EyeCostResolver.costFor(def,
+                com.zamu.dojutsu.dojutsu.EyeCostResolver.contextOf(eye, def, data.clan().clan()));
+        String amount = cost.isPresent() ? String.valueOf(cost.getAsInt()) : "(este ojo no cobra)";
+        return "coste pasivo: " + amount + " cada "
+                + def.passiveCost().map(c -> c.intervalTicks()).orElse(0) + "t"
+                + (eye.enabled() ? "" : "  [APAGADO: no se cobra]");
     }
 }

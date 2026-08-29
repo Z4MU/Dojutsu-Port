@@ -1,0 +1,203 @@
+===============================================================================
+ CHECKLIST DE PRUEBAS EN PARTIDA - DJT-238
+ Coste pasivo de chakra por llevar el dojutsu ENCENDIDO
+ Rama: djt-230-toggle-dojutsu . Fecha: 2026-08-28
+ Estado automatico: build multiloader VERDE . 1097 tests . 0 fallos
+===============================================================================
+
+QUE ESTAS PROBANDO
+  Hasta ahora llevar un dojutsu encendido salia GRATIS. Ahora drena chakra cada
+  2 segundos, y cuanto drena depende de tu clan, de si el ojo lo despertaste tu,
+  y en el Sharingan tambien de los tomoe y de si tienes el Mangekyo.
+
+  Hay que pasarlo en LOS DOS LOADERS (regla 2).
+  Loader probado:   [ ] NeoForge    [ ] Fabric
+
+
+-------------------------------------------------------------------------------
+ 0. LA HERRAMIENTA QUE HACE ESTO FACIL
+-------------------------------------------------------------------------------
+
+  /dojutsudojutsu get
+
+  Ademas del estado del ojo, ahora imprime una segunda linea:
+
+      coste pasivo: 20 cada 40t
+
+  Ese es el numero que el SERVIDOR va a cobrar, calculado por el mismo codigo
+  que lo cobra. No hace falta mirar caer el chakra y hacer restas: se lee.
+  Si el ojo esta apagado, la linea lo dice: [APAGADO: no se cobra].
+
+  COMANDOS
+      /dojutsudojutsu get                  -> estado + coste actual
+      /dojutsudojutsu activate <ojo>       -> te da el ojo Y lo despierta (es TUYO)
+      /dojutsudojutsu implant <ojo>        -> te da el ojo SIN despertarlo (ROBADO)
+      /dojutsudojutsu toggle               -> enciende / apaga
+      /dojutsudojutsu use sharingan <n>    -> fija el uso (de aqui salen los tomoe)
+      /dojutsudojutsu strain <0-100>       -> fatiga, para el cruce con DJT-230
+      /dojutsuclans set <clan>             -> te cambia de clan sin bonos
+      /dojutsuchakra get | consume <n> | full   -> chakra
+                                           (no hay "set": se baja consumiendo)
+
+  ATAJO IMPORTANTE: `implant` es nuevo, y es lo que permite probar la mitad cara
+  de la tabla. `activate` despierta siempre, asi que por si solo no sirve para
+  reproducir un ojo robado.
+
+  UMBRALES DE TOMOE (uso del Sharingan)
+      tomoe 1: menos de 144001      tomoe 2: 144001 .. 215999
+      tomoe 3: 216000 o mas
+  Valores comodos: 100000 / 150000 / 300000
+
+
+-------------------------------------------------------------------------------
+ 1. QUE COBRA DE VERDAD (lo primero, es el cimiento)
+-------------------------------------------------------------------------------
+
+  [ ] 1.1  /dojutsuchakra full  y luego  /dojutsudojutsu activate byakugan
+           /dojutsudojutsu get  -> "coste pasivo: 8 cada 40t"
+  [ ] 1.2  Anota el chakra, espera 10 segundos QUIETO, vuelve a mirarlo.
+           Han pasado 5 intervalos de 2s: deberia haber bajado ~40 (menos lo que
+           regenere; por eso conviene comparar contra 1.3, no en absoluto).
+  [ ] 1.3  /dojutsudojutsu toggle (apagar). Espera otros 10 segundos.
+           El chakra ya NO baja; sube. Esta es la prueba de que solo se cobra
+           encendido.
+  [ ] 1.4  /dojutsudojutsu get con el ojo apagado -> la linea de coste incluye
+           "[APAGADO: no se cobra]".
+
+
+-------------------------------------------------------------------------------
+ 2. LA TABLA DEL SHARINGAN - los doce numeros
+-------------------------------------------------------------------------------
+
+  Todo con /dojutsudojutsu get leyendo la linea de coste. No hace falta esperar.
+
+  --- Uchiha que lo desperto (barato) ---
+  /dojutsuclans set uchiha
+  [ ] 2.1  activate sharingan + use sharingan 100000  ->  6
+  [ ] 2.2  use sharingan 150000                       ->  7
+  [ ] 2.3  use sharingan 300000                       ->  8
+
+  --- Uchiha con el Mangekyo despierto (MAS BARATO, no mas caro) ---
+  [ ] 2.4  Con uso 300000, despierta tambien el Mangekyo:
+              /dojutsudojutsu activate mangekyo_itachi
+              /dojutsudojutsu activate sharingan
+           (el primer comando deja MANGEKYO en awakened; el segundo te devuelve
+            al Sharingan como ojo activo)
+           get -> 4.  Si sale 8, el flag del Mangekyo no se esta viendo.
+
+  --- Uchiha con un Sharingan que NO desperto ---
+  [ ] 2.5  /dojutsudojutsu implant sharingan + use 100000  -> 12
+  [ ] 2.6  use 150000 -> 14      [ ] 2.7  use 300000 -> 16
+
+  --- Hatake: paga igual despierto que no (es Kakashi) ---
+  /dojutsuclans set hatake
+  [ ] 2.8  activate sharingan + use 100000 -> 12
+  [ ] 2.9  implant  sharingan + use 100000 -> 12   (MISMO numero que 2.8)
+  [ ] 2.10 use 300000 -> 16
+
+  --- Otro clan: la tarifa de ladron. ES LA QUE FALTABA EN EL PLAN ---
+  /dojutsuclans set nara
+  [ ] 2.11 implant sharingan + use 100000 -> 16
+  [ ] 2.12 use 150000 -> 18
+  [ ] 2.13 use 300000 -> 20     <-- el numero mas alto del Sharingan
+  [ ] 2.14 Con el Mangekyo despierto y uso 300000 -> 12
+
+
+-------------------------------------------------------------------------------
+ 3. EYEMATCH - tu ojo contra el de otro
+-------------------------------------------------------------------------------
+
+  Esto es lo que obligo a ampliar el estado del jugador. `activate` registra que
+  variante despertaste; `implant` no registra nada.
+
+  /dojutsuclans set uchiha
+  [ ] 3.1  /dojutsudojutsu activate mangekyo_itachi   -> get: 14
+           (es TU Mangekyo: get muestra awakenedEyes={MANGEKYO=mangekyo_itachi})
+  [ ] 3.2  Ahora ponte el de OTRO sin volver a despertar:
+              /dojutsudojutsu implant mangekyo_obito
+           get -> 18.  awakenedEyes sigue diciendo mangekyo_itachi: llevas uno
+           que no es el tuyo, y por eso cuesta mas.
+  [ ] 3.3  /dojutsuclans set nara  +  implant mangekyo_itachi  -> 28
+  [ ] 3.4  /dojutsuclans set hatake +  implant mangekyo_itachi -> 18
+
+  --- Rinnegan: aqui corregimos un bug del datapack ---
+  [ ] 3.5  /dojutsuclans set uchiha + activate rinnegan -> 12
+  [ ] 3.6  /dojutsuclans set uzumaki + activate rinnegan -> 12 (trato de favor)
+  [ ] 3.7  /dojutsuclans set nara + implant rinnegan -> 36 (el mas caro)
+  [ ] 3.8  LA DESVIACION: uchiha + implant rinnegan -> 18.
+           En el datapack original este caso salia GRATIS (cost_0 solo cobra
+           "if eyematch" y no tiene rama else). Si aqui sale 0, la correccion no
+           esta aplicada.
+
+
+-------------------------------------------------------------------------------
+ 4. QUEDARSE SIN CHAKRA - el caso que mas me preocupa
+-------------------------------------------------------------------------------
+
+  Si no puedes pagar, el ojo SE APAGA. No se pierde. Esto es exactamente el bug
+  que DJT-230 corrigio, y hay que verificar que no vuelve por otra puerta.
+
+  [ ] 4.1  /dojutsuclans set nara + implant tenseigan  (40 cada 2s, el mas caro)
+  [ ] 4.2  Dejalo casi vacio: mira el total con /dojutsuchakra get y luego
+           /dojutsuchakra consume <casi todo>. Espera.
+  [ ] 4.3  Al no llegar el chakra: actionbar roja
+           "You lack the chakra to sustain your ...".
+  [ ] 4.4  /dojutsudojutsu get  ->  enabled=false, pero activeEye SIGUE SIENDO
+           tenseigan.  ***SI activeEye SALE (ninguno), ES UN FALLO GRAVE.***
+  [ ] 4.5  /dojutsuchakra full  +  /dojutsudojutsu toggle  -> se vuelve a
+           encender con normalidad.
+  [ ] 4.6  Repite 4.1-4.5 con un ojo ETERNO (/dojutsudojutsu eternal true):
+           el flag eternal tambien debe sobrevivir.
+
+
+-------------------------------------------------------------------------------
+ 5. CRUCE CON LO YA EXISTENTE
+-------------------------------------------------------------------------------
+
+  [ ] 5.1  FATIGA: /dojutsudojutsu strain 100 con el ojo encendido. Se apaga por
+           fatiga (DJT-230) y, al estar apagado, DEJA de cobrar. Las dos cosas.
+  [ ] 5.2  El Rinne Sharingan NO cuesta chakra:
+              /dojutsudojutsu activate rinne_sharingan
+           get -> "coste pasivo: (este ojo no cobra)". Es correcto: no aparece
+           en basic_costs del datapack.
+  [ ] 5.3  MUERTE Y RESPAWN: con el ojo encendido, muere. Al reaparecer, el
+           cobro sigue funcionando (no se queda un contador atascado).
+  [ ] 5.4  RECONEXION: sal del mundo con el ojo encendido y vuelve. El cobro
+           continua. El temporizador vive en el estado, asi que no se reinicia.
+  [ ] 5.5  Con el ojo encendido, usa una habilidad ocular (tecla R): la fatiga
+           sube y el coste pasivo sigue corriendo. Son cosas distintas.
+
+  --- PARTIDA VIEJA (compatibilidad) ---
+  [ ] 5.6  Si tienes un mundo de ANTES de hoy, entra con un dojutsu ya
+           despertado. get -> awakenedEyes sale vacio {}, y el coste se calcula
+           con benevolencia (tarifa de "tu ojo", no la cara). Es a proposito: no
+           cobrar de mas a quien ya tenia el ojo.
+
+
+-------------------------------------------------------------------------------
+ 6. SANIDAD
+-------------------------------------------------------------------------------
+
+  [ ] 6.1  Log del servidor sin excepciones tras toda la sesion.
+  [ ] 6.2  El log NO se llena de WARN "no sabe cuanto cobrarle a X". Si aparece,
+           hay un ojo con reglas incompletas.
+  [ ] 6.3  Con el ojo apagado y sin fatiga, el rendimiento no cambia: el
+           servicio sale del tick antes de tocar nada.
+  [ ] 6.4  Multijugador (LAN vale): dos jugadores de clanes distintos con el
+           mismo ojo pagan tarifas distintas.
+
+
+===============================================================================
+ LO QUE NO SE PUEDE PROBAR
+===============================================================================
+
+  ISSHIKI y JOUGAN tienen coste en el datapack (16 y 8) pero esos ojos NO
+  EXISTEN todavia en el mod: son roster diferido. Sus numeros estan anotados en
+  el plan para cuando lleguen.
+
+  Los comandos `implant` y la linea de coste en `get` son andamiaje de
+  depuracion; se retiran con el resto del comando.
+
+===============================================================================
+ FIN
+===============================================================================
