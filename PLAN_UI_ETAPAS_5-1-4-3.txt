@@ -764,10 +764,11 @@ CRITERIO DE CIERRE
   c) [RESUELTA] El JutsuItem no se quedo inerte: el clic derecho SELECCIONA su
      jutsu. Se le dio funcion en el mismo ticket, como recomendaba el plan.
 
-  d) [NUEVA] Coste pasivo de chakra por llevar el ojo: SIGUE SIN IMPLEMENTAR.
-     Es la deuda de DJT-116 y los numeros ya estan extraidos en la tabla A3-BIS.
-     Con el toggle ya en juego (DJT-230), este ticket es ahora mas urgente que
-     antes: hoy tener el ojo encendido no cuesta nada. Sugerido: DJT-238.
+  d) [RESUELTA 2026-08-28] Coste pasivo de chakra: HECHO en DJT-238, validado en
+     partida en los dos loaders. OJO: al portarlo se descubrio que la tabla
+     A3-BIS de este plan estaba INCOMPLETA -le faltaba el nivel de "otros
+     clanes" del Sharingan, 16/18/20/12-. Los numeros buenos estan en
+     docs/backlog.md, ficha de DJT-238, y en los JSON de los ojos.
 
   e) [NUEVA] Etapa D bloqueada por falta de overlay ocular y de arte. Mientras
      no exista el render, ni el editor ni el canal cosmetico tienen sentido.

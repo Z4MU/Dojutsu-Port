@@ -74,9 +74,13 @@
 >   sobre el jugador ni texturas de ojo en assets, y la etapa da por hechas las dos cosas.
 > - **Validación en partida ✅** — las **182 comprobaciones** de `CHECKLIST_PRUEBAS_F11.txt` (A y C) y
 >   `CHECKLIST_PRUEBAS_F11_ETAPA_B.txt` (B) pasan en **los dos loaders**, sin incidencias.
-> - **Pendiente de F11**: sólo **DJT-237**, que es arte, y —fuera ya de la fase— el **coste pasivo de chakra
->   del ojo**, que sigue sin implementar (deuda de DJT-116; números ya extraídos en el plan, §A3-BIS).
->   Con el toggle ya en juego, tener el ojo encendido hoy no cuesta nada: sugerido como **DJT-238**.
+> - **DJT-238 ✅** — **coste pasivo de chakra del ojo**, la deuda que `EyeDefinition` declaraba desde DJT-113
+>   (DJT-116 portó la fatiga y dejó el drenaje sin portar). Drenaje data-driven cada 2 s, por clan, por si
+>   despertaste el ojo, por `eyematch` y —en el Sharingan— por tomoe y por tener el Mangekyō. Al leer los
+>   `cost.mcfunction` en origen apareció **un nivel de clan que el resumen del plan no tenía**: otro clan paga
+>   16/18/20/12 por el Sharingan, la penalización más dura del sistema. Si no puedes pagar, el ojo **se apaga,
+>   no se pierde**. **1097 tests**, validado en partida en ambos loaders.
+> - **Pendiente de F11**: sólo **DJT-237**, que es arte.
 >
 > ---
 >
@@ -177,7 +181,7 @@ Fase 3 define al ninja (naturalezas, clanes, onboarding).
 | **F3** | Definición del ninja | ✅ **Completada** (DJT-050…063, validada en runtime) |
 | **F4** | Combate | ✅ **Completada** (DJT-070…112; contenido cargado y validado en runtime en ambos loaders; ver §3.4a) |
 | F5–F10 | Contenido incremental (plantillas) | ⬜ No iniciada |
-| **F11** | UX e interfaces (DJT-230…237) | ✅ **Cerrada** (230…236 ✅, 1080 tests, **validada en partida en ambos loaders**). DJT-237 bloqueado por falta de arte |
+| **F11** | UX e interfaces (DJT-230…238) | ✅ **Cerrada** (230…236 y 238 ✅, **1097 tests**, validada en partida en ambos loaders). DJT-237 bloqueado por falta de arte |
 
 ## 3. Historias y subtareas (F0)
 

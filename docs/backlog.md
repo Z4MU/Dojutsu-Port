@@ -982,7 +982,7 @@ tanto como lo que sí.
 
 ---
 
-## Fase 11 — UX e interfaces (DJT-230…237) — ✅ CERRADA (queda DJT-237, bloqueado por arte)
+## Fase 11 — UX e interfaces (DJT-230…238) — ✅ CERRADA (queda DJT-237, bloqueado por arte)
 
 Nace de cinco ideas de UX del usuario (2026-08-08). Plan y desviaciones:
 [`PLAN_UI_ETAPAS_5-1-4-3.txt`](../PLAN_UI_ETAPAS_5-1-4-3.txt). La idea 2 —modelos 3D de los jutsus— va aparte,
@@ -1002,6 +1002,7 @@ podía vivir en el cliente sin romper R12— y una petición del usuario a mitad
 | **DJT-235** | **Libro de jutsus**: fichas del `JutsuRegistry` por red y asignación de huecos | ✅ (**1080 tests**) |
 | **DJT-236** | **Fusión de pantallas**: menú ninja, habilidades oculares y libro pasan a **pestañas bajo M**; **N y P quedan libres** | ✅ (**1080 tests**) |
 | DJT-237 | **Editor de posición de la textura del ojo** (etapa D del plan) | ⬜ **BLOQUEADA** — no existe render de overlay ocular ni texturas de ojo en assets; la etapa las da por hechas |
+| **DJT-238** | **Coste pasivo de chakra del ojo** (deuda de DJT-116): drenaje data-driven por clan, despertar, `eyematch` y tomoe | ✅ (**1097 tests**; validado en partida en ambos loaders. Salda la deuda que `EyeDefinition` declaraba desde DJT-113) |
 
 **Validada en partida (2026-08-28):** las **182 comprobaciones** de los dos checklists pasan en **NeoForge
 y en Fabric** (regla 2). Checklists: [`CHECKLIST_PRUEBAS_F11.txt`](../CHECKLIST_PRUEBAS_F11.txt) (A y C) y
@@ -1096,6 +1097,55 @@ escape el ratón y no exige acertar un objetivo pequeño manteniendo el botón.
 
 La pantalla **no pinta el cambio hasta que el servidor contesta**. Se nota latencia en LAN; la alternativa deja
 la pantalla mintiendo cuando el servidor rechaza.
+
+### DJT-238 — El ojo encendido vuelve a costar chakra ✅
+
+Salda la deuda que el javadoc de `EyeDefinition` declaraba desde DJT-113: aquel ticket modeló el grafo y el
+estado, DJT-116 portó la **fatiga**, y el **drenaje** se quedó sin portar. Hasta este ticket, llevar un dōjutsu
+encendido salía gratis — y con el interruptor de DJT-230 eso además abarataba los ojos robados, que es justo lo
+que el datapack quería castigar.
+
+**La tabla del plan se había quedado corta.** El resumen de `PLAN_UI_ETAPAS_5-1-4-3.txt` §A3-BIS daba dos
+columnas (despierto / implantado). Leyendo los `cost.mcfunction` en origen aparecieron **tres** niveles de clan
+para el Sharingan, y el tercero —el más caro— no estaba:
+
+| Sharingan | 1 tomoe | 2 tomoe | 3 tomoe | 3 tomoe + Mangekyō |
+|---|---|---|---|---|
+| Uchiha/Ōtsutsuki despierto | 6 | 7 | 8 | 4 |
+| Uchiha/Ōtsutsuki sin despertar | 12 | 14 | 16 | 8 |
+| Hatake (cualquier estado) | 12 | 14 | 16 | 8 |
+| **Otros clanes** | **16** | **18** | **20** | **12** |
+
+Un Sharingan robado por alguien de otro clan cuesta **20 cada 2 segundos**. Es la penalización más dura del
+sistema y era la que faltaba. **Confirmación de la regla 16:** el datapack manda sobre los resúmenes, incluidos
+los nuestros.
+
+**El coste es una lista de reglas en orden, no unos campos fijos.** Cada `cost.mcfunction` es una cadena de
+`execute if predicate … run remove` evaluada de arriba abajo, y el JSON hace lo mismo: la primera regla que
+encaja manda. Así se puede leer al lado del original y comprobar que dicen lo mismo. Con campos fijos no
+llegaba: doce números sólo para el Sharingan.
+
+**`eyematch` obligó a ampliar el estado.** El datapack cobra 14 por el Mangekyō que tú despertaste y 18 por el
+de otro Uchiha; `EyeState` guardaba `awakened` como `Set<EyeFamily>` y no podía distinguirlos. Se añade
+`awakenedEyes` por familia y el wither `withAwakenedEye`, que usan los tres sitios que despiertan. Campo
+tolerante: las partidas anteriores lo traen vacío y se tratan **como si casara**, para no cobrar de más a quien
+ya tenía el ojo.
+
+**Tres desviaciones deliberadas**, registradas en `development_log.md` (regla 16):
+
+1. **Sólo se cobra con el ojo encendido.** El datapack cobra por llevarlo, porque allí no hay interruptor.
+   Cobrar por poseerlo convertiría el interruptor de DJT-230 en un adorno.
+2. **El Rinnegan sin `eyematch` deja de ser gratis.** `rinnegan/cost_0.mcfunction` sólo cobra `if eyematch` y no
+   tiene rama `else`. Se cobra **18**, la tarifa que el propio datapack aplica a esos clanes sin despertar: no se
+   inventa un número.
+3. **Si no puedes pagar, el ojo se apaga** — no se pierde. `ChakraService` no permite consumos que no caben, y
+   perder el ojo era el bug que DJT-230 corrigió.
+
+**No llevan coste:** Isshiki (16) y Jōugan (8) porque esos ojos aún no existen en el mod (roster diferido), y el
+Rinne Sharingan porque no aparece en `basic_costs` del datapack.
+
+Los 17 tests cargan **el JSON real de cada ojo**, no una tabla escrita a mano: si alguien toca un dato, saltan.
+Checklist en partida: `CHECKLIST_PRUEBAS_DJT238.txt`.
 
 ### DJT-236 — Las tres pantallas bajo una tecla ✅
 
