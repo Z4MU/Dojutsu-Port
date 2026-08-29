@@ -61,26 +61,75 @@ la opción 2, en vez de un modelo que no tendría dónde ir. Si prefieres la opc
 
 ---
 
-## 2. Estilo común a todas las piezas
+## 2. Estilo — el bloque que va SIEMPRE DELANTE
 
-Va repetido dentro de cada prompt para que sean autónomos, pero se edita aquí:
+> ⚠️ **Corregido el 2026-08-07.** La primera versión de este documento ponía la restricción de estilo **al
+> final** de cada prompt y describía los efectos con vocabulario de render realista ("acabado brillante y
+> húmedo", "reflejo especular marcado", "muy translúcido"). Resultado: los generadores devolvían **esferas de
+> agua fotorrealistas**, correctas como ilustración pero inservibles como referencia de Blockbench. Los
+> generadores pesan mucho más los primeros tokens, y una palabra como *brillante* pesa más que un *"sin
+> degradados"* escrito ochenta palabras después.
 
-- Estética **Minecraft**: voxel, caras planas, bordes duros, **sin degradados suaves ni antialiasing**.
-- Paleta corta y saturada: 4–6 tonos por pieza.
-- Fondo **transparente o gris neutro liso**. Sin escenario, sin paisaje, sin personajes.
-- Vista **3/4 (isométrica ligera)**, la más útil para reconstruir volúmenes en Blockbench.
-- Objeto **centrado, completo, bien iluminado**, sin recortes ni sombras dramáticas.
-- **Emisivo**: estos efectos son luz. El color debe leerse como si brillara por sí mismo, no como plástico
-  iluminado desde fuera.
-- Sin texto, sin logos, sin marcos, sin firma.
+### El bloque de estilo (pégalo SIEMPRE al principio)
 
-**Sobre la escala.** Cada entrada indica el tamaño aproximado **en bloques de Minecraft** (1 bloque = 16 px).
-Es el dato que más falta hace al pasar a Blockbench y el que una imagen suelta nunca transmite.
+```
+Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench.
+Cubos grandes y contables, aristas rectas, esquinas duras, superficie escalonada.
+Color aplicado en bandas planas y separadas, cada cara de un tono liso.
+Vista tres cuartos, fondo gris neutro liso, objeto único centrado y completo.
+Diseño de videojuego pixelado, no ilustración.
 
-**Sobre la resolución de textura.** Las texturas existentes son **32×32** (no 16×16), salvo
-`drilling_hand_of_sage_lightning`, que es **64×128** — un caso raro que conviene revisar (§6).
+NEGATIVO: fotorrealista, render 3D suave, CGI, ray tracing, cristal, agua real,
+degradado, desenfoque, antialiasing, reflejo especular, superficie lisa, brillo suave.
 
----
+EL OBJETO:
+```
+
+Y a continuación la descripción concreta de la pieza. **Ese orden importa**: primero qué clase de imagen es,
+después qué se ve en ella.
+
+### Vocabulario: cómo decir en voxel lo que antes decía en realista
+
+La tentación es describir el material como es en la vida real. En voxel hay que describir **cómo se construye
+la ilusión con cubos**, que es lo que luego se modela:
+
+| ❌ No escribir | ✅ Escribir en su lugar |
+|---|---|
+| "translúcido", "transparente" | "caras alternando dos azules, unas más claras que otras, dejando huecos entre cubos" |
+| "reflejo especular", "brillo" | "dos o tres cubos blancos planos en la cara superior izquierda" |
+| "superficie suave", "redondeado" | "silueta escalonada en cubos", "esquinas recortadas en escalón" |
+| "emisivo", "brilla por sí mismo" | "color plano muy saturado y uniforme, sin sombreado" |
+| "húmedo", "pulido", "cristalino" | *(eliminar: no aportan nada y sí atraen realismo)* |
+| "degradado del centro al borde" | "tres anillos concéntricos de tonos distintos, cada uno liso" |
+| "estela difusa" | "tres o cuatro cubos sueltos alineados detrás, cada vez más pequeños" |
+
+### Lo que sí conviene conservar de la versión anterior
+
+- **El tamaño en bloques.** Es el dato que más falta hace al pasar a Blockbench.
+- **La paleta corta**, 4–6 tonos. En voxel es aún más importante: cada tono es una cara.
+- **El fondo gris neutro liso** y el objeto solo, sin escenario ni personajes.
+- **Sin texto, sin marco, sin firma.**
+
+### Si aun así sale realista
+
+Por orden de eficacia:
+
+1. **Añade "pixel art 3D" o "voxel" también al final**, repitiendo. La repetición al principio y al final ancla
+   mucho mejor que una sola mención.
+2. **Sube el tamaño de cubo explícitamente**: "construido con unos 200 cubos visibles, no más". Un número
+   fuerza al generador a mostrar la faceta.
+3. **Pide el modelo sin textura**: "modelo sin texturizar, colores planos por cara". Elimina de golpe medio
+   vocabulario realista.
+4. **Menciona el software**: "captura de pantalla del visor de Blockbench" funciona muy bien en varios
+   generadores, porque hay muchas imágenes así etiquetadas.
+
+### Sobre la hoja de referencia que estás generando
+
+El **formato** de la lámina (vistas ortográficas frontal/lateral/superior, paleta, escala comparada con el
+jugador, estructura de cubos) es exactamente lo que hace falta para modelar, y conviene conservarlo. El
+problema era sólo el estilo de render de las viñetas. Si el generador acepta la lámina completa, pide
+explícitamente que **las tres vistas ortográficas sean planas y sin sombreado** — son las que de verdad se
+usan como plantilla en Blockbench.
 
 ## 3. Fuego (Katon) — 7 jutsus
 
@@ -113,12 +162,17 @@ Debe leerse como **munición**, no como llamarada.
 **Paleta.** Naranja quemado `#E05A10`, núcleo amarillo `#F5A03C`, borde rojo oscuro `#8C2A06`.
 
 > **Prompt:**
-> Un proyectil de fuego pequeño en pleno vuelo, cuerpo ovoide compacto ligeramente aplastado y alargado en la
-> dirección del movimiento, de unos 0,5 bloques de Minecraft de ancho. Núcleo amarillo brillante que se satura
-> hacia naranja quemado y rojo oscuro en el borde. Estela muy corta: dos o tres jirones de llama pegados al
-> cuerpo, sin chispas sueltas. Efecto emisivo, brilla por sí mismo. Estilo Minecraft voxel: caras planas,
-> bordes duros, sin degradados suaves ni antialiasing. Paleta de 4 tonos. Objeto único centrado sobre fondo gris
-> neutro liso, vista tres cuartos isométrica ligera, sin personajes ni escenario. Sin texto, sin marco.
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Un proyectil de fuego pequeño en pleno vuelo, cuerpo ovoide compacto ligeramente aplastado y
+> alargado en la dirección del movimiento, de unos 0,5 bloques de Minecraft de ancho. Núcleo amarillo
+> brillante que se satura hacia naranja quemado y rojo oscuro en el borde. Estela muy corta: Dos o tres
+> jirones de llama pegados al cuerpo, sin chispas sueltas. Color plano muy saturado y uniforme, sin
+> sombreado. Paleta de 4 tonos. Objeto único centrado sobre fondo gris neutro liso, vista tres cuartos
+> isométrica ligera, sin personajes ni escenario. Repetir: Voxel art de Minecraft, cubos visibles, colores
+> planos. Sin texto, sin marco.
 
 ---
 
@@ -136,13 +190,17 @@ verse el interior — no puede ser una burbuja opaca o taparía al jugador.
 **Paleta.** Naranja translúcido `#F2731C`, puntas amarillo pálido `#FFDE9E`, base rojo `#B33A0C`.
 
 > **Prompt:**
-> Un aura protectora de fuego con forma de cáscara ovoide vertical, del tamaño justo para envolver a un
-> personaje de Minecraft, hueca y abierta para que se vea el interior. Está formada por lengüetas de llama
-> verticales separadas entre sí, anchas y densas en la base y afinándose hasta desaparecer por encima de la
-> parte superior. Translúcida, sin superficie sólida ni burbuja cerrada. Efecto emisivo. Estilo Minecraft
-> voxel: caras planas, bordes duros, sin degradados suaves ni antialiasing. Paleta de 4 tonos: amarillo pálido,
-> naranja, rojo, negro de contorno. Aura sola centrada sobre fondo gris neutro liso, vista tres cuartos
-> isométrica ligera, sin personaje dentro. Sin texto, sin marco.
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Un aura protectora de fuego con forma de cascara ovoide vertical, del tamaño justo para envolver a
+> un personaje de Minecraft, hueca y abierta para que se vea el interior. Esta formada por lengüetas de
+> llama verticales separadas entre si, anchas y densas en la base y afinandose hasta desaparecer por encima
+> de la parte superior. De caras en dos tonos alternos, sin superficie sólida ni burbuja cerrada. Color
+> plano muy saturado y uniforme, sin sombreado. Paleta de 4 tonos: Amarillo palido, naranja, rojo, negro de
+> contorno. Aura sola centrada sobre fondo gris neutro liso, vista tres cuartos isométrica ligera, sin
+> personaje dentro. Repetir: Voxel art de Minecraft, cubos visibles, colores planos. Sin texto, sin marco.
 
 ---
 
@@ -160,12 +218,17 @@ lectura debe ser "algo que se dispersó desde un punto", que es literalmente lo 
 **Paleta.** Naranja intenso `#F26A0C`, centro amarillo pálido `#FFD98A`, puntas rojo `#C0300A`.
 
 > **Prompt:**
-> Una explosión de fuego radial congelada en el instante de expandirse: núcleo esférico compacto del que
-> irradian puntas cónicas cortas y regulares en todas las direcciones, con simetría limpia, de unos 2 bloques de
-> Minecraft de diámetro. Centro amarillo pálido muy brillante que se satura a naranja intenso y termina en rojo
-> en cada punta. Efecto emisivo. Estilo Minecraft voxel: caras planas, bordes duros, sin degradados suaves ni
-> antialiasing. Paleta de 4 tonos. Efecto único centrado sobre fondo gris neutro liso, vista tres cuartos
-> isométrica ligera, sin personajes ni escenario. Sin texto, sin marco.
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Una explosión de fuego radial congelada en el instante de expandirse: Núcleo esférico compacto del
+> que irradian puntas cónicas cortas y regulares en todas las direcciones, con simetría limpia, de unos 2
+> bloques de Minecraft de diámetro. Centro amarillo palido de color claro plano que se satura a naranja
+> intenso y termina en rojo en cada punta. Color plano muy saturado y uniforme, sin sombreado. Paleta de 4
+> tonos. Efecto único centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera, sin
+> personajes ni escenario. Repetir: Voxel art de Minecraft, cubos visibles, colores planos. Sin texto, sin
+> marco.
 
 ---
 
@@ -183,13 +246,17 @@ aquí las formas dejan de ser limpias.
 **Paleta.** Naranja saturado `#F04E08`, núcleo amarillo `#FFC24D`, puntas rojo oscuro `#9E2205`.
 
 > **Prompt:**
-> Un proyectil de fuego en vuelo rápido con forma de esfera erizada de casi un bloque de Minecraft de diámetro:
-> masa central densa y rugosa de la que brotan lengüetas de llama de longitudes desiguales, unas afiladas hacia
-> delante y otras curvadas hacia atrás como arrastradas por la velocidad. Núcleo amarillo intenso, cuerpo
-> naranja saturado, puntas rojo oscuro. Aspecto agresivo y claramente en movimiento. Efecto emisivo. Estilo
-> Minecraft voxel: caras planas, bordes duros, sin degradados suaves ni antialiasing. Paleta de 4 tonos. Objeto
-> único centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera, sin personajes ni
-> escenario. Sin texto, sin marco.
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Un proyectil de fuego en vuelo rápido con forma de esfera erizada de casi un bloque de Minecraft
+> de diámetro: Masa central densa y rugosa de la que brotan lengüetas de llama de longitudes desiguales,
+> unas afiladas hacia delante y otras curvadas hacia atrás como arrastradas por la velocidad. Núcleo
+> amarillo intenso, cuerpo naranja saturado, puntas rojo oscuro. Aspecto agresivo y claramente en
+> movimiento. Color plano muy saturado y uniforme, sin sombreado. Paleta de 4 tonos. Objeto único centrado
+> sobre fondo gris neutro liso, vista tres cuartos isométrica ligera, sin personajes ni escenario. Repetir:
+> Voxel art de Minecraft, cubos visibles, colores planos. Sin texto, sin marco.
 
 ---
 
@@ -211,14 +278,18 @@ fauces y tiene un núcleo rojo oscuro diferenciado — conviene conservarlo, es 
 `#2B0C04`.
 
 > **Prompt:**
-> Una cabeza de dragón de fuego muy estilizada surcando el aire, de unos 2 bloques de Minecraft de largo:
-> cuerpo bulboso envuelto en llamas naranjas con un núcleo rojo oscuro claramente diferenciado, y una parte
-> frontal que sugiere unas fauces abiertas mediante dos planos de mandíbula angulosos y una cavidad interior
-> casi negra. Sin escamas, sin ojos, sin detalle orgánico fino: la lectura de dragón viene solo de la silueta.
-> Forma direccional con frente definido y estela de llamas detrás. Efecto emisivo. Estilo Minecraft voxel:
-> caras planas, bordes duros, sin degradados suaves ni antialiasing. Paleta de 5 tonos. Objeto único centrado
-> sobre fondo gris neutro liso, vista tres cuartos isométrica ligera, sin personajes ni escenario. Sin texto,
-> sin marco.
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Una cabeza de dragon de fuego muy estilizada surcando el aire, de unos 2 bloques de Minecraft de
+> largo: Cuerpo bulboso envuelto en llamas naranjas con un núcleo rojo oscuro claramente diferenciado, y una
+> parte frontal que sugiere unas fauces abiertas mediante dos planos de mandibula angulosos y una cavidad
+> interior casi negra. Sin escamas, sin ojos, sin detalle orgánico fino: La lectura de dragon viene sólo de
+> la silueta. Forma direccional con frente definido y estela de llamas detras. Color plano muy saturado y
+> uniforme, sin sombreado. Paleta de 5 tonos. Objeto único centrado sobre fondo gris neutro liso, vista tres
+> cuartos isométrica ligera, sin personajes ni escenario. Repetir: Voxel art de Minecraft, cubos visibles,
+> colores planos. Sin texto, sin marco.
 
 ---
 
@@ -237,13 +308,17 @@ la masa, no del contorno. Es el proyectil más grande del set salvo el nº 7, y 
 **Paleta.** Rojo-naranja `#DD3F0C`, moteado `#F58A2A`, brillo central `#FFCE73`, borde rojo profundo `#8E1A04`.
 
 > **Prompt:**
-> Una gran bola de fuego esférica de unos 2 bloques de Minecraft de diámetro, de contorno limpio y
-> perfectamente redondo, con superficie facetada de relieve muy leve y moteado interno de brasa. Degradado por
-> bandas duras desde un brillo amarillo cálido en el centro hacia naranja y rojo profundo en el borde. Masa
-> densa y contundente, sin lengüetas de llama, sin pinchos, sin estela. Efecto emisivo, brilla por sí mismo.
-> Estilo Minecraft voxel: caras planas, bordes duros, sin degradados suaves ni antialiasing. Paleta de 4 tonos.
-> Objeto único centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera, sin personajes ni
-> escenario. Sin texto, sin marco.
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Una gran bola de fuego esférica de unos 2 bloques de Minecraft de diámetro, de contorno limpio y
+> perfectamente redondo, con superficie facetada de relieve muy leve y moteado interno de brasa. Bandas de
+> color planas y separadas desde un brillo amarillo cálido en el centro hacia naranja y rojo profundo en el
+> borde. Masa densa y contundente, sin lengüetas de llama, sin pinchos, sin estela. Color plano muy saturado
+> y uniforme, sin sombreado. Paleta de 4 tonos. Objeto único centrado sobre fondo gris neutro liso, vista
+> tres cuartos isométrica ligera, sin personajes ni escenario. Repetir: Voxel art de Minecraft, cubos
+> visibles, colores planos. Sin texto, sin marco.
 
 ---
 
@@ -263,13 +338,18 @@ geométrico claro — el opuesto exacto del nº 6.
 `#2A0E05`.
 
 > **Prompt:**
-> Una masa de fuego enorme e informe avanzando como un frente de llamas, de unos 3 bloques de Minecraft de
-> ancho: volumen irregular con grandes protuberancias desiguales en varias direcciones, sin contorno
-> geométrico reconocible ni centro definido. Bolsas de brasa amarillo-anaranjada repartidas por el interior,
-> sombras rojo profundo en los pliegues y algunos puntos de carbón oscuro. Sensación de escala y de avance
-> imparable, no de proyectil. Efecto emisivo. Estilo Minecraft voxel: caras planas, bordes duros, sin
-> degradados suaves ni antialiasing. Paleta de 5 tonos. Efecto único centrado sobre fondo gris neutro liso,
-> vista tres cuartos isométrica ligera, sin personajes ni escenario. Sin texto, sin marco.
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Una masa de fuego enorme e informe avanzando como un frente de llamas, de unos 3 bloques de
+> Minecraft de ancho: Volumen irregular con grandes protuberancias desiguales en varias direcciones, sin
+> contorno geométrico reconocible ni centro definido. Bolsas de brasa amarillo-anaranjada repartidas por el
+> interior, sombras rojo profundo en los pliegues y algunos puntos de carbon oscuro. Sensación de escala y
+> de avance imparable, no de proyectil. Color plano muy saturado y uniforme, sin sombreado. Paleta de 5
+> tonos. Efecto único centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera, sin
+> personajes ni escenario. Repetir: Voxel art de Minecraft, cubos visibles, colores planos. Sin texto, sin
+> marco.
 
 ---
 
@@ -313,13 +393,18 @@ primer peldaño de la rama y el nº 5 y el nº 8 tienen que poder superarlo clar
 **Paleta.** Crema eléctrica `#E8DCA8`, núcleo blanco `#FFFAE8`, sombra `#B8A874`.
 
 > **Prompt:**
-> Un arco eléctrico pequeño envolviendo un puño, de unos 0,7 bloques de Minecraft: cuatro o cinco descargas
-> angulosas en zigzag que nacen de los nudillos y se curvan sobre sí mismas, dejando mucho aire entre ellas.
-> Núcleo blanco muy brillante con los brazos en crema eléctrica y sombras doradas apagadas. Aspecto escaso y
-> contenido, la versión más débil de una técnica eléctrica. Puede incluirse una mano cúbica estilizada de
-> Minecraft solo como referencia de escala, en gris plano. Efecto emisivo. Estilo Minecraft voxel: caras
-> planas, bordes duros, sin degradados suaves ni antialiasing. Paleta de 4 tonos. Centrado sobre fondo gris
-> neutro liso, vista tres cuartos isométrica ligera. Sin texto, sin marco.
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Un arco eléctrico pequeño envolviendo un puno, de unos 0,7 bloques de Minecraft: Cuatro o cinco
+> descargas angulosas en zigzag que nacen de los nudillos y se curvan sobre si mismas, dejando mucho aire
+> entre ellas. Núcleo blanco de color claro plano con los brazos en crema eléctrica y sombras doradas
+> apagadas. Aspecto escaso y contenido, la version más débil de una tecnica eléctrica. Puede incluirse una
+> mano cubica estilizada de Minecraft sólo como referencia de escala, en gris plano. Color plano muy
+> saturado y uniforme, sin sombreado. Paleta de 4 tonos. Centrado sobre fondo gris neutro liso, vista tres
+> cuartos isométrica ligera. Repetir: Voxel art de Minecraft, cubos visibles, colores planos. Sin texto, sin
+> marco.
 
 ---
 
@@ -337,12 +422,16 @@ no como explosión: púas largas, delgadas y limpias, muy distinto del burst gru
 **Paleta.** Dorado apagado `#D9C87E`, centro blanco `#FFFBEA`, puntas pálidas `#F0E4B0`.
 
 > **Prompt:**
-> Un destello eléctrico radial y plano, de unos 2 bloques de Minecraft de diámetro, formado por rayos muy finos,
-> rectos y regulares que irradian desde un centro pequeño y blanco muy brillante. Las púas son largas y
-> delgadas, con aspecto de velocidad pura, no de explosión. Tono dorado apagado, casi pálido. Efecto emisivo.
-> Estilo Minecraft voxel: caras planas, bordes duros, sin degradados suaves ni antialiasing. Paleta de 4 tonos.
-> Efecto único centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera, sin personajes ni
-> escenario. Sin texto, sin marco.
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Un destello eléctrico radial y plano, de unos 2 bloques de Minecraft de diámetro, formado por
+> rayos muy finos, rectos y regulares que irradian desde un centro pequeño y blanco de color claro plano.
+> Las púas son largas y delgadas, con aspecto de velocidad pura, no de explosión. Tono dorado apagado, casi
+> palido. Color plano muy saturado y uniforme, sin sombreado. Paleta de 4 tonos. Efecto único centrado sobre
+> fondo gris neutro liso, vista tres cuartos isométrica ligera, sin personajes ni escenario. Repetir: Voxel
+> art de Minecraft, cubos visibles, colores planos. Sin texto, sin marco.
 
 ---
 
@@ -362,12 +451,17 @@ lado.
 **Paleta.** Cian claro `#9FE8F5`, nudos blanco `#FFFFFF`, sombra azul `#4FA8C4`.
 
 > **Prompt:**
-> Una red eléctrica en forma de malla abierta y amplia, construida con cables de rayo rectos que se cruzan
-> formando huecos romboidales grandes, con nudos blancos muy brillantes en cada intersección. Estructura
-> completamente calada: se ve a través de ella de lado a lado, no es una masa sólida. Cian claro con sombras
-> azules. Amplia y baja, cubriendo un área extensa. Efecto emisivo. Estilo Minecraft voxel: caras planas,
-> bordes duros, sin degradados suaves ni antialiasing. Paleta de 4 tonos. Efecto único centrado sobre fondo
-> gris neutro liso, vista tres cuartos isométrica ligera, sin personajes ni escenario. Sin texto, sin marco.
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Una red eléctrica en forma de malla abierta y amplia, construida con cables de rayo rectos que se
+> cruzan formando huecos romboidales grandes, con nudos blancos de color claro planos en cada interseccion.
+> Estructura completamente calada: Se ve el interior por los huecos de ella de lado a lado, no es una masa
+> sólida. Cian claro con sombras azules. Amplia y baja, cubriendo un área extensa. Color plano muy saturado
+> y uniforme, sin sombreado. Paleta de 4 tonos. Efecto único centrado sobre fondo gris neutro liso, vista
+> tres cuartos isométrica ligera, sin personajes ni escenario. Repetir: Voxel art de Minecraft, cubos
+> visibles, colores planos. Sin texto, sin marco.
 
 ---
 
@@ -386,12 +480,17 @@ cian del set** y le da identidad propia.
 **Paleta.** Dorado eléctrico `#E8C63A`, centro pálido `#FFF0A0`, sombra ámbar `#A8801C`.
 
 > **Prompt:**
-> Un estallido eléctrico denso y compacto con forma de esfera erizada de unos 4 bloques de Minecraft, cubierta
-> por completo de púas cortas y muy apretadas, sin huecos ni transparencia. Centro amarillo pálido muy
-> brillante que se satura hacia dorado eléctrico y ámbar en las puntas. Aspecto macizo y contundente, lo
-> contrario de una estructura calada. Efecto emisivo. Estilo Minecraft voxel: caras planas, bordes duros, sin
-> degradados suaves ni antialiasing. Paleta de 4 tonos dorados. Efecto único centrado sobre fondo gris neutro
-> liso, vista tres cuartos isométrica ligera, sin personajes ni escenario. Sin texto, sin marco.
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Un estallido eléctrico denso y compacto con forma de esfera erizada de unos 4 bloques de
+> Minecraft, cubierta por completo de púas cortas y muy apretadas, sin huecos ni transparencia. Centro
+> amarillo palido de color claro plano que se satura hacia dorado eléctrico y ambar en las puntas. Aspecto
+> macizo y contundente, lo contrario de una estructura calada. Color plano muy saturado y uniforme, sin
+> sombreado. Paleta de 4 tonos dorados. Efecto único centrado sobre fondo gris neutro liso, vista tres
+> cuartos isométrica ligera, sin personajes ni escenario. Repetir: Voxel art de Minecraft, cubos visibles,
+> colores planos. Sin texto, sin marco.
 
 ---
 
@@ -410,13 +509,17 @@ masa es **compacta y llena**: se nota que es una concentración, no unas chispas
 **Paleta.** Cian pálido `#8FD8F0`, núcleo blanco `#FFFFFF`, azul profundo `#3A7FA8`.
 
 > **Prompt:**
-> Una esfera densa de electricidad concentrada alrededor de un puño, de casi un bloque de Minecraft de
-> diámetro: decenas de arcos en zigzag corto entrelazados de forma caótica formando una masa compacta y llena,
-> con un núcleo casi blanco cegador del que salen brazos cian pálido y azul profundo en las puntas. Sensación
-> de energía comprimida a punto de descargarse. Puede incluirse una mano cúbica estilizada de Minecraft solo
-> como referencia de escala, en gris plano. Efecto emisivo. Estilo Minecraft voxel: caras planas, bordes duros,
-> sin degradados suaves ni antialiasing. Paleta de 4 tonos. Centrado sobre fondo gris neutro liso, vista tres
-> cuartos isométrica ligera. Sin texto, sin marco.
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Una esfera densa de electricidad concentrada alrededor de un puno, de casi un bloque de Minecraft
+> de diámetro: Decenas de arcos en zigzag corto entrelazados de forma caotica formando una masa compacta y
+> llena, con un núcleo casi blanco puro plano del que salen brazos cian palido y azul profundo en las
+> puntas. Sensación de energía comprimida a punto de descargarse. Puede incluirse una mano cubica estilizada
+> de Minecraft sólo como referencia de escala, en gris plano. Color plano muy saturado y uniforme, sin
+> sombreado. Paleta de 4 tonos. Centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera.
+> Repetir: Voxel art de Minecraft, cubos visibles, colores planos. Sin texto, sin marco.
 
 ---
 
@@ -438,13 +541,18 @@ estalla" del nº 5.
 **Alternativa (arte actual):** violeta `#A96FD9`, lila pálido `#D9B8F0`, púrpura `#6B3A9E`.
 
 > **Prompt:**
-> Una concentración de electricidad en la mano que se prolonga hacia delante en una única punta alargada, recta
-> y afilada como una hoja de cuchillo, de aproximadamente 1,4 bloques de Minecraft de largo. Núcleo compacto y
-> blanco cegador en la base, arcos secundarios cortos y pegados al cuerpo, todo muy ordenado y direccional.
-> Transmite control y filo, no caos. Tonos blanco y cian con sombras azul profundo. Puede incluirse una mano
-> cúbica estilizada de Minecraft solo como referencia de escala, en gris plano. Efecto emisivo. Estilo
-> Minecraft voxel: caras planas, bordes duros, sin degradados suaves ni antialiasing. Paleta de 4 tonos.
-> Centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera. Sin texto, sin marco.
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Una concentracion de electricidad en la mano que se prolonga hacia delante en una única punta
+> alargada, recta y afilada como una hoja de cuchillo, de aproximadamente 1,4 bloques de Minecraft de largo.
+> Núcleo compacto y blanco puro plano en la base, arcos secundarios cortos y pegados al cuerpo, todo muy
+> ordenado y direccional. Transmite control y filo, no caos. Tonos blanco y cian con sombras azul profundo.
+> Puede incluirse una mano cubica estilizada de Minecraft sólo como referencia de escala, en gris plano.
+> Color plano muy saturado y uniforme, sin sombreado. Paleta de 4 tonos. Centrado sobre fondo gris neutro
+> liso, vista tres cuartos isométrica ligera. Repetir: Voxel art de Minecraft, cubos visibles, colores
+> planos. Sin texto, sin marco.
 
 ---
 
@@ -464,13 +572,18 @@ pieza del set hace.
 **Paleta.** Cian `#6FD4F0`, canal blanco `#EAFBFF`, ramas azul `#2E8FB8`, base violácea `#7B6FD4`.
 
 > **Prompt:**
-> Un rayo descendente colosal: una columna vertical gruesa y angulosa que baja desde lo alto, con ramificaciones
-> cortas a los lados, y que al llegar abajo se abre en una corona radial de arcos eléctricos dispersándose por
-> el suelo. Proporción muy alta y estrecha, unas seis veces más alta que ancha. Canal central blanco cegador,
-> cuerpo cian y ramas azules, con un tinte violáceo en la base. Sensación de descarga natural venida del cielo,
-> enorme. Efecto emisivo. Estilo Minecraft voxel: caras planas, bordes duros, sin degradados suaves ni
-> antialiasing. Paleta de 5 tonos. Efecto único centrado sobre fondo gris neutro liso, vista tres cuartos
-> isométrica ligera, sin personajes ni escenario. Sin texto, sin marco.
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Un rayo descendente colosal: Una columna vertical gruesa y angulosa que baja desde lo alto, con
+> ramificaciones cortas a los lados, y que al llegar abajo se abre en una corona radial de arcos eléctricos
+> dispersandose por el suelo. Proporción muy alta y estrecha, unas seis veces más alta que ancha. Canal
+> central blanco puro plano, cuerpo cian y ramas azules, con un tinte violaceo en la base. Sensación de
+> descarga natural venida del cielo, enorme. Color plano muy saturado y uniforme, sin sombreado. Paleta de 5
+> tonos. Efecto único centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera, sin
+> personajes ni escenario. Repetir: Voxel art de Minecraft, cubos visibles, colores planos. Sin texto, sin
+> marco.
 
 ---
 
@@ -490,14 +603,18 @@ elaborada de las cuatro de mano, como corresponde al techo de la rama.
 **Paleta.** Cian `#4FD0EA`, núcleo blanco `#FFFFFF`, espiral azul profundo `#1F7A96`, chispas pálidas `#CFF6FF`.
 
 > **Prompt:**
-> Un taladro de electricidad proyectado hacia delante desde un antebrazo: un cono alargado de unos 2,5 bloques
-> de Minecraft en el que varias bandas de rayo se enroscan en espiral alrededor de un eje central blanco
-> cegador y convergen en una punta afilada. La torsión helicoidal debe ser muy visible, transmitiendo rotación
-> y perforación. Cuerpo cian con las espirales en azul profundo y chispas pálidas desprendiéndose de la punta.
-> Puede incluirse un antebrazo cúbico estilizado de Minecraft solo como referencia de escala, en gris plano.
-> Efecto emisivo. Estilo Minecraft voxel: caras planas, bordes duros, sin degradados suaves ni antialiasing.
-> Paleta de 5 tonos. Centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera. Sin texto,
-> sin marco.
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Un taladro de electricidad proyectado hacia delante desde un antebrazo: Un cono alargado de unos
+> 2,5 bloques de Minecraft en el que varias bandas de rayo se enroscan en espiral alrededor de un eje
+> central blanco puro plano y convergen en una punta afilada. La torsion helicoidal debe ser muy visible,
+> transmitiendo rotación y perforación. Cuerpo cian con las espirales en azul profundo y chispas palidas
+> desprendiendose de la punta. Puede incluirse un antebrazo cubico estilizado de Minecraft sólo como
+> referencia de escala, en gris plano. Color plano muy saturado y uniforme, sin sombreado. Paleta de 5
+> tonos. Centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera. Repetir: Voxel art de
+> Minecraft, cubos visibles, colores planos. Sin texto, sin marco.
 
 ---
 
@@ -551,12 +668,16 @@ color.
 **Paleta.** Blanco `#FFFFFF`, gris pálido `#D8E2E8`, sombra gris azulada `#9EB0BC`.
 
 > **Prompt:**
-> Un cojín de aire comprimido justo bajo los pies: un disco muy achatado de unos 2 bloques de Minecraft de
-> ancho y muy poca altura, formado por dos o tres anillos concéntricos de borde dentado, ligeramente
-> desalineados entre sí como si girasen. Casi incoloro: blanco y gris pálido con sombras gris azulado, se lee
-> por la forma y no por el color. Semitransparente. Estilo Minecraft voxel: caras planas, bordes duros, sin
-> degradados suaves ni antialiasing. Paleta de 3 tonos. Efecto único centrado sobre fondo gris neutro liso,
-> vista tres cuartos isométrica ligera, sin personajes ni escenario. Sin texto, sin marco.
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Un cojin de aire comprimido justo bajo los pies: Un disco muy achatado de unos 2 bloques de
+> Minecraft de ancho y muy poca altura, formado por dos o tres anillos concéntricos de borde dentado,
+> ligeramente desalineados entre si como si girasen. Casi incoloro: Blanco y gris palido con sombras gris
+> azulado, se lee por la forma y no por el color. Con caras alternas huecas. Paleta de 3 tonos. Efecto único
+> centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera, sin personajes ni escenario.
+> Repetir: Voxel art de Minecraft, cubos visibles, colores planos. Sin texto, sin marco.
 
 ---
 
@@ -574,12 +695,17 @@ solapados. **Es hueco**: se ve entre las vueltas de la espiral, a diferencia de 
 **Paleta.** Blanco `#FFFFFF`, gris claro `#DCE6EC`, sombra `#A6B8C4`.
 
 > **Prompt:**
-> Un torpedo de aire en vuelo con forma de espiral alargada: una hélice de arcos blancos apilados que giran
-> alrededor de un eje horizontal y se estrechan progresivamente hasta una punta, de aproximadamente 1 bloque de
-> Minecraft de largo y muy estrecho. Estructura hueca y calada, se ve entre las vueltas de la espiral. Blanco
-> y gris pálido, casi incoloro, semitransparente. Estilo Minecraft voxel: caras planas, bordes duros, sin
-> degradados suaves ni antialiasing. Paleta de 3 tonos. Objeto único centrado sobre fondo gris neutro liso,
-> vista tres cuartos isométrica ligera, sin personajes ni escenario. Sin texto, sin marco.
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Un torpedo de aire en vuelo con forma de espiral alargada: Una hélice de arcos blancos apilados
+> que giran alrededor de un eje horizontal y se estrechan progresivamente hasta una punta, de
+> aproximadamente 1 bloque de Minecraft de largo y muy estrecho. Estructura hueca y calada, hay huecos de
+> aire entre las vueltas de la espiral. Blanco y gris palido, casi incoloro, Con caras alternas huecas.
+> Paleta de 3 tonos. Objeto único centrado sobre fondo gris neutro liso, vista tres cuartos isométrica
+> ligera, sin personajes ni escenario. Repetir: Voxel art de Minecraft, cubos visibles, colores planos. Sin
+> texto, sin marco.
 
 ---
 
@@ -598,12 +724,16 @@ de un centro brillante; **aquí no hay centro en absoluto**, porque el aire se a
 **Paleta.** Blanco `#FFFFFF`, gris pálido `#D0DDE4`, sombra `#98ACB8`.
 
 > **Prompt:**
-> Un anillo de aire desplazado, plano y de unos 2 bloques de Minecraft de diámetro, con el centro
-> completamente hueco y vacío. El borde del aro está erizado de púas cortas e irregulares apuntando hacia
-> fuera, como una onda de presión que aparta el aire. Blanco y gris pálido, casi incoloro, semitransparente,
-> sin ningún núcleo brillante en el centro. Estilo Minecraft voxel: caras planas, bordes duros, sin degradados
-> suaves ni antialiasing. Paleta de 3 tonos. Efecto único centrado sobre fondo gris neutro liso, vista tres
-> cuartos isométrica ligera, sin personajes ni escenario. Sin texto, sin marco.
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Un anillo de aire desplazado, plano y de unos 2 bloques de Minecraft de diámetro, con el centro
+> completamente hueco y vacio. El borde del aro esta erizado de púas cortas e irregulares apuntando hacia
+> fuera, como una onda de presión que aparta el aire. Blanco y gris palido, casi incoloro, Con caras
+> alternas huecas., sin ningun núcleo brillante en el centro. Paleta de 3 tonos. Efecto único centrado sobre
+> fondo gris neutro liso, vista tres cuartos isométrica ligera, sin personajes ni escenario. Repetir: Voxel
+> art de Minecraft, cubos visibles, colores planos. Sin texto, sin marco.
 
 ---
 
@@ -623,13 +753,17 @@ exteriores sean más finos y tenues que los interiores.
 **Paleta.** Blanco `#FFFFFF`, gris pálido `#DAE4EA`, borde tenue `#B4C4CE`.
 
 > **Prompt:**
-> Una onda expansiva de aire a ras de suelo: tres o cuatro anillos concéntricos planos y muy finos
-> expandiéndose desde un centro común, cubriendo un área muy amplia y baja. Los anillos exteriores son más
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Una onda expansiva de aire a ras de suelo: Tres o cuatro anillos concéntricos planos y muy finos
+> expandiendose desde un centro comun, cubriendo un área muy amplia y baja. Los anillos exteriores son más
 > delgados y tenues que los interiores, sugiriendo que se disipan al alejarse. Sin púas, sin masa, sin
-> explosión: solo desplazamiento limpio de aire. Blanco y gris pálido, casi incoloro, semitransparente. Estilo
-> Minecraft voxel: caras planas, bordes duros, sin degradados suaves ni antialiasing. Paleta de 3 tonos.
-> Efecto único centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera con la cámara
-> ligeramente elevada, sin personajes ni escenario. Sin texto, sin marco.
+> explosión: Sólo desplazamiento limpio de aire. Blanco y gris palido, casi incoloro, Con caras alternas
+> huecas. Paleta de 3 tonos. Efecto único centrado sobre fondo gris neutro liso, vista tres cuartos
+> isométrica ligera con la camara ligeramente elevada, sin personajes ni escenario. Repetir: Voxel art de
+> Minecraft, cubos visibles, colores planos. Sin texto, sin marco.
 
 ---
 
@@ -647,13 +781,17 @@ lo que lo distingue del nº 2: el Wind Torpedo es una espiral suelta; este es un
 **Paleta.** Blanco `#FFFFFF`, gris claro `#DCE6EC`, sombra `#A0B4C0`.
 
 > **Prompt:**
-> Un proyectil de aire comprimido con forma de taladro alargado: un cuerpo cónico de aproximadamente 1,3
-> bloques de Minecraft de largo, envuelto por una retícula tensa de líneas blancas finas que se cruzan
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Un proyectil de aire comprimido con forma de taladro alargado: Un cuerpo cónico de aproximadamente
+> 1,3 bloques de Minecraft de largo, envuelto por una reticula tensa de líneas blancas finas que se cruzan
 > formando rombos apretados alrededor de un núcleo hueco, convergiendo en una punta afilada. Estructura de
-> rejilla, no de espiral suelta. Blanco y gris pálido, casi incoloro, semitransparente. Aspecto de velocidad
-> extrema. Estilo Minecraft voxel: caras planas, bordes duros, sin degradados suaves ni antialiasing. Paleta
-> de 3 tonos. Objeto único centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera, sin
-> personajes ni escenario. Sin texto, sin marco.
+> rejilla, no de espiral suelta. Blanco y gris palido, casi incoloro, Con caras alternas huecas. Aspecto de
+> velocidad extrema. Paleta de 3 tonos. Objeto único centrado sobre fondo gris neutro liso, vista tres
+> cuartos isométrica ligera, sin personajes ni escenario. Repetir: Voxel art de Minecraft, cubos visibles,
+> colores planos. Sin texto, sin marco.
 
 ---
 
@@ -672,13 +810,17 @@ aproximado **1.4 × 2.2 × 1.4 bloques**.
 **Paleta.** Verde `#3FBF6A`, brillo verde claro `#8AE8A8`, sombra verde oscuro `#1E7A42`.
 
 > **Prompt:**
-> Una envoltura de viento verde formada por seis u ocho placas planas y angulosas suspendidas alrededor de un
-> espacio vertical del tamaño de un personaje, claramente separadas entre sí y dejando grandes huecos por los
-> que se ve a través. Cada placa tiene borde definido y un brillo verde claro en el canto. Aspecto ordenado y
-> geométrico, contenido, nada caótico. Verde saturado con sombras verde oscuro. Semitransparente. Estilo
-> Minecraft voxel: caras planas, bordes duros, sin degradados suaves ni antialiasing. Paleta de 3 tonos.
-> Efecto solo, centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera, sin personaje
-> dentro. Sin texto, sin marco.
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Una envoltura de viento verde formada por seis u ocho placas planas y angulosas suspendidas
+> alrededor de un espacio vertical del tamaño de un personaje, claramente separadas entre si y dejando
+> grandes huecos por los que se ve el interior por los huecos. Cada placa tiene borde definido y un brillo
+> verde claro en el canto. Aspecto ordenado y geométrico, contenido, nada caotico. Verde saturado con
+> sombras verde oscuro. Con caras alternas huecas. Paleta de 3 tonos. Efecto sólo, centrado sobre fondo gris
+> neutro liso, vista tres cuartos isométrica ligera, sin personaje dentro. Repetir: Voxel art de Minecraft,
+> cubos visibles, colores planos. Sin texto, sin marco.
 
 ---
 
@@ -698,13 +840,18 @@ dentado y así debe quedarse.
 **Paleta.** Azul cian `#3FA8E8`, núcleo blanco `#FFFFFF`, azul profundo `#1B6FA8`.
 
 > **Prompt:**
-> Una esfera de chakra azul girando, del tamaño de un puño (unos 0,8 bloques de Minecraft), sostenida sobre una
-> palma abierta y sin tocarla ni envolverla. Superficie recorrida por estriaciones en espiral que giran
-> alrededor de un eje visible, núcleo blanco brillante en el centro y borde erizado de púas muy cortas y
-> regulares. Azul cian con sombras azul profundo. Sensación de rotación rápida y contenida. Puede incluirse
-> una mano cúbica estilizada de Minecraft abierta, en gris plano, solo como referencia de escala. Efecto
-> emisivo. Estilo Minecraft voxel: caras planas, bordes duros, sin degradados suaves ni antialiasing. Paleta de
-> 4 tonos. Centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera. Sin texto, sin marco.
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Una esfera de chakra azul girando, del tamaño de un puno (unos 0,8 bloques de Minecraft),
+> sostenida sobre una palma abierta y sin tocarla ni envolverla. Superficie recorrida por estriaciones en
+> espiral que giran alrededor de un eje visible, núcleo blanco brillante en el centro y borde erizado de
+> púas muy cortas y regulares. Azul cian con sombras azul profundo. Sensación de rotación rápida y
+> contenida. Puede incluirse una mano cubica estilizada de Minecraft abierta, en gris plano, sólo como
+> referencia de escala. Color plano muy saturado y uniforme, sin sombreado. Paleta de 4 tonos. Centrado
+> sobre fondo gris neutro liso, vista tres cuartos isométrica ligera. Repetir: Voxel art de Minecraft, cubos
+> visibles, colores planos. Sin texto, sin marco.
 
 ---
 
@@ -723,14 +870,18 @@ en el Rasengan pequeño.
 **Paleta.** La misma del nº 7 — azul cian `#3FA8E8`, núcleo blanco `#FFFFFF`, azul profundo `#1B6FA8`.
 
 > **Prompt:**
-> Una esfera de chakra azul girando, muy grande, de aproximadamente 1,6 bloques de Minecraft de diámetro,
-> sostenida desde abajo por un brazo que apenas la abarca. Superficie recorrida por estriaciones en espiral
-> muy marcadas y densas girando alrededor de un eje visible, con un núcleo blanco cegador en el centro que se
-> difumina hacia el azul cian del exterior. Borde ligeramente irregular por la velocidad de giro. Sensación de
-> masa y poder contenido. Puede incluirse un brazo cúbico estilizado de Minecraft, en gris plano, solo como
-> referencia de escala. Efecto emisivo. Estilo Minecraft voxel: caras planas, bordes duros, sin degradados
-> suaves ni antialiasing. Paleta de 4 tonos. Centrado sobre fondo gris neutro liso, vista tres cuartos
-> isométrica ligera. Sin texto, sin marco.
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Una esfera de chakra azul girando, muy grande, de aproximadamente 1,6 bloques de Minecraft de
+> diámetro, sostenida desde abajo por un brazo que apenas la abarca. Superficie recorrida por estriaciones
+> en espiral muy marcadas y densas girando alrededor de un eje visible, con un núcleo blanco puro plano en
+> el centro que cambia en un escalon a el azul cian del exterior. Borde ligeramente irregular por la
+> velocidad de giro. Sensación de masa y poder contenido. Puede incluirse un brazo cubico estilizado de
+> Minecraft, en gris plano, sólo como referencia de escala. Color plano muy saturado y uniforme, sin
+> sombreado. Paleta de 4 tonos. Centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera.
+> Repetir: Voxel art de Minecraft, cubos visibles, colores planos. Sin texto, sin marco.
 
 ---
 
@@ -750,14 +901,18 @@ sugiriendo corriente ascendente. Debe ser **translúcida**, no puede tapar al ju
 **Paleta.** Verde `#35B562`, brillo `#7FE49B`, verde oscuro `#166B38`.
 
 > **Prompt:**
-> Un manto de viento verde envolviendo por completo un espacio vertical del tamaño de un personaje, con forma
-> de gota o llama que rodea el cuerpo y se afina en una punta por encima de la cabeza. Superficie continua y
-> translúcida, recorrida por estriaciones verticales que ascienden sugiriendo corriente de aire. A diferencia
-> de una envoltura de placas separadas, esta es una cáscara entera y cerrada, pero lo bastante transparente
-> para ver a través. Verde saturado con brillo verde claro en los bordes y sombras verde oscuro. Estilo
-> Minecraft voxel: caras planas, bordes duros, sin degradados suaves ni antialiasing. Paleta de 3 tonos.
-> Efecto solo, centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera, sin personaje
-> dentro. Sin texto, sin marco.
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Un manto de viento verde envolviendo por completo un espacio vertical del tamaño de un personaje,
+> con forma de gota o llama que rodea el cuerpo y se afina en una punta por encima de la cabeza. Superficie
+> continua y de caras en dos tonos alternos, recorrida por estriaciones verticales que ascienden sugiriendo
+> corriente de aire. A diferencia de una envoltura de placas separadas, esta es una cascara entera y
+> cerrada, pero con huecos regulares que dejan ver el interior. Verde saturado con brillo verde claro en los
+> bordes y sombras verde oscuro. Paleta de 3 tonos. Efecto sólo, centrado sobre fondo gris neutro liso,
+> vista tres cuartos isométrica ligera, sin personaje dentro. Repetir: Voxel art de Minecraft, cubos
+> visibles, colores planos. Sin texto, sin marco.
 
 ---
 
@@ -778,14 +933,18 @@ puede sugerir con un **disco tenue y translúcido** que une las puntas de las as
 **Paleta.** Cian `#4FC4F0`, núcleo blanco `#FFFFFF`, azul profundo `#1D6E9E`, disco tenue `#B8E8FA`.
 
 > **Prompt:**
-> Un shuriken gigante de viento y chakra, de unos 2 bloques de Minecraft de envergadura y muy plano: cuatro
-> aspas curvas idénticas que nacen de un núcleo esférico blanco cegador y se abren en molinete, todas
-> inclinadas en el mismo sentido de giro, con los bordes afilados. Un disco muy tenue y translúcido de aire
-> conecta las puntas de las cuatro aspas, sugiriendo el anillo de viento que genera al girar. Cian brillante
-> con sombras azul profundo. Sensación de rotación violenta y de arma peligrosa. Efecto emisivo. Estilo
-> Minecraft voxel: caras planas, bordes duros, sin degradados suaves ni antialiasing. Paleta de 4 tonos.
-> Objeto único centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera, sin personajes ni
-> escenario. Sin texto, sin marco.
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Un shuriken gigante de viento y chakra, de unos 2 bloques de Minecraft de envergadura y muy plano:
+> Cuatro aspas curvas idénticas que nacen de un núcleo esférico blanco puro plano y se abren en molinete,
+> todas inclinadas en el mismo sentido de giro, con los bordes afilados. Un disco muy tenue y de caras en
+> dos tonos alternos de aire conecta las puntas de las cuatro aspas, sugiriendo el anillo de viento que
+> genera al girar. Cian brillante con sombras azul profundo. Sensación de rotación violenta y de arma
+> peligrosa. Color plano muy saturado y uniforme, sin sombreado. Paleta de 4 tonos. Objeto único centrado
+> sobre fondo gris neutro liso, vista tres cuartos isométrica ligera, sin personajes ni escenario. Repetir:
+> Voxel art de Minecraft, cubos visibles, colores planos. Sin texto, sin marco.
 
 ---
 
@@ -830,13 +989,17 @@ En 3D: un **anillo de losas de roca inclinadas** que brotan del suelo y se cierr
 como pinchos: bordes romos, nada afilado — la técnica no hace daño.
 
 > **Prompt:**
-> Una trampa de tierra emergiendo del suelo: un anillo amplio de losas de roca gruesas e inclinadas hacia
-> dentro, brotando del terreno y cerrándose sobre el centro, con huecos irregulares entre unas y otras. Bordes
-> romos y desgastados, nada afilado ni puntiagudo. Unos 10 bloques de Minecraft de diámetro y baja altura.
-> Marrón tierra y gris roca, superficie mate y opaca, sin brillo propio ni emisión de luz. Estilo Minecraft
-> voxel: caras planas, bordes duros, sin degradados suaves ni antialiasing. Paleta de 4 tonos terrosos. Efecto
-> único centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera con la cámara ligeramente
-> elevada, sin personajes ni escenario. Sin texto, sin marco.
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Una trampa de tierra emergiendo del suelo: Un anillo amplio de losas de roca gruesas e inclinadas
+> hacia dentro, brotando del terreno y cerrandose sobre el centro, con huecos irregulares entre unas y
+> otras. Bordes romos y desgastados, nada afilado ni puntiagudo. Unos 10 bloques de Minecraft de diámetro y
+> baja altura. Marron tierra y gris roca, superficie mate y opaca, sin brillo propio ni emision de luz.
+> Paleta de 4 tonos terrosos. Efecto único centrado sobre fondo gris neutro liso, vista tres cuartos
+> isométrica ligera con la camara ligeramente elevada, sin personajes ni escenario. Repetir: Voxel art de
+> Minecraft, cubos visibles, colores planos. Sin texto, sin marco.
 
 ---
 
@@ -853,13 +1016,17 @@ textura actual es exactamente eso: un guijarro achatado marrón. **No debe tener
 es el único jutsu del documento que puede pasar por un objeto natural, y esa humildad es su carácter.
 
 > **Prompt:**
-> Una piedra irregular lanzada por el aire, achatada y más ancha que alta, de aproximadamente medio bloque de
-> Minecraft. Superficie de facetas grandes y desiguales con dos o tres aristas marcadas y esquinas
-> desgastadas, como un canto rodado. Marrón tierra con zonas de gris roca y sombras profundas en las
-> hendiduras. Completamente mate y opaca, sin brillo, sin aura, sin energía visible: parece una piedra
-> corriente. Estilo Minecraft voxel: caras planas, bordes duros, sin degradados suaves ni antialiasing. Paleta
-> de 4 tonos terrosos. Objeto único centrado sobre fondo gris neutro liso, vista tres cuartos isométrica
-> ligera, sin personajes ni escenario. Sin texto, sin marco.
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Una piedra irregular lanzada por el aire, achatada y más ancha que alta, de aproximadamente medio
+> bloque de Minecraft. Superficie de facetas grandes y desiguales con dos o tres aristas marcadas y esquinas
+> desgastadas, como un canto rodado. Marron tierra con zonas de gris roca y sombras profundas en las
+> hendiduras. Completamente mate y opaca, sin brillo, sin aura, sin energía visible: Parece una piedra
+> corriente. Paleta de 4 tonos terrosos. Objeto único centrado sobre fondo gris neutro liso, vista tres
+> cuartos isométrica ligera, sin personajes ni escenario. Repetir: Voxel art de Minecraft, cubos visibles,
+> colores planos. Sin texto, sin marco.
 
 ---
 
@@ -876,12 +1043,17 @@ jutsu actual (una losa de roca rugosa vista de frente) ya da el tono: superficie
 y más gris que el `dirt` vanilla, para que se note que es tierra **levantada por chakra** y no del terreno.
 
 > **Prompt (solo si registras bloque propio):**
-> Una textura de bloque de Minecraft para tierra compactada por chakra, cuadrada y que tesele sin costuras
-> visibles al repetirse. Superficie de tierra prensada con guijarros incrustados, más dura, más gris y más
-> compacta que la tierra normal de Minecraft, con grietas finas y algunas vetas de roca. Marrón tierra medio
-> con sombras profundas y motas de gris roca. Mate y opaca. Estilo Minecraft: píxeles definidos, sin degradados
-> suaves ni antialiasing, paleta de 4 tonos. Textura plana vista completamente de frente, ocupando todo el
-> encuadre. Sin objeto en perspectiva, sin texto, sin marco.
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Una textura de bloque de Minecraft para tierra compactada por chakra, cuadrada y que tesele sin
+> costuras visibles al repetirse. Superficie de tierra prensada con guijarros incrustados, más dura, más
+> gris y más compacta que la tierra normal de Minecraft, con grietas finas y algunas vetas de roca. Marrón
+> tierra medio con sombras profundas y motas de gris roca. Mate y opaca. Estilo Minecraft: Píxeles
+> definidos, sin degradados suaves ni antialiasing, paleta de 4 tonos. Textura plana vista completamente de
+> frente, ocupando todo el encuadre. Sin objeto en perspectiva, sin texto, sin marco. Repetir: Voxel art de
+> Minecraft, cubos visibles, colores planos. Sin texto, sin marco.
 
 ---
 
@@ -901,12 +1073,16 @@ Es el tercer "destello de salida" del documento y debe separarse de los otros do
 aparta, tierra revienta**.
 
 > **Prompt:**
-> Un reventón de tierra y grava saliendo del suelo: una masa esférica de unos 2 bloques de Minecraft erizada de
-> púas cortas, gruesas y desiguales apuntando en todas direcciones, con terrones sueltos y guijarros
-> desprendiéndose por los bordes. Aspecto sucio e irregular, nada limpio ni simétrico. Marrón tierra con gris
-> roca y sombras profundas. Completamente mate y opaca, sin brillo ni emisión de luz. Estilo Minecraft voxel:
-> caras planas, bordes duros, sin degradados suaves ni antialiasing. Paleta de 4 tonos terrosos. Efecto único
-> centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera, sin personajes ni escenario. Sin
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Un reventon de tierra y grava saliendo del suelo: Una masa esférica de unos 2 bloques de Minecraft
+> erizada de púas cortas, gruesas y desiguales apuntando en todas direcciones, con terrones sueltos y
+> guijarros desprendiendose por los bordes. Aspecto sucio e irregular, nada limpio ni simetrico. Marron
+> tierra con gris roca y sombras profundas. Completamente mate y opaca, sin brillo ni emision de luz. Paleta
+> de 4 tonos terrosos. Efecto único centrado sobre fondo gris neutro liso, vista tres cuartos isométrica
+> ligera, sin personajes ni escenario. Repetir: Voxel art de Minecraft, cubos visibles, colores planos. Sin
 > texto, sin marco.
 
 ---
@@ -943,13 +1119,18 @@ debe verse **montado a piedra bruta**, como si alguien hubiera apilado rocas con
 oscuras en las junturas.
 
 > **Prompt (opción C):**
-> Un gólem de tierra y roca tosco y macizo, más alto que un personaje de Minecraft, con hombros muy anchos,
-> brazos largos y desproporcionados que casi rozan el suelo, piernas cortas y gruesas y la cabeza hundida entre
-> los hombros sin cuello visible. Construido con pocos bloques grandes por miembro, sin detalle fino, como
-> rocas apiladas con forma humanoide. Grietas oscuras en las junturas entre bloques. Marrón tierra y gris roca,
-> superficie mate y opaca, sin brillo ni ojos luminosos. Estilo Minecraft voxel: caras planas, bordes duros,
-> sin degradados suaves ni antialiasing. Paleta de 4 tonos terrosos. Criatura sola centrada sobre fondo gris
-> neutro liso, de cuerpo entero, vista tres cuartos isométrica ligera, sin escenario. Sin texto, sin marco.
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Un golem de tierra y roca tosco y macizo, más alto que un personaje de Minecraft, con hombros muy
+> anchos, brazos largos y desproporcionados que casi rozan el suelo, piernas cortas y gruesas y la cabeza
+> hundida entre los hombros sin cuello visible. Construido con pocos bloques grandes por miembro, sin
+> detalle fino, como rocas apiladas con forma humanoide. Grietas oscuras en las junturas entre bloques.
+> Marron tierra y gris roca, superficie mate y opaca, sin brillo ni ojos luminosos. Paleta de 4 tonos
+> terrosos. Criatura sola centrada sobre fondo gris neutro liso, de cuerpo entero, vista tres cuartos
+> isométrica ligera, sin escenario. Repetir: Voxel art de Minecraft, cubos visibles, colores planos. Sin
+> texto, sin marco.
 
 ---
 
@@ -970,21 +1151,29 @@ la melena de esquirlas** que rodea el cráneo, con terrones desprendiéndose por
 textura literalmente, el prompt alternativo está debajo.
 
 > **Prompt (cabeza de dragón, recomendado):**
-> Una cabeza de dragón hecha de roca surcando el aire en trayectoria descendente, de unos 2 bloques de
-> Minecraft de largo: cráneo construido con planos de piedra angulosos y grandes, fauces abiertas formadas por
-> dos mandíbulas rectas con una cavidad oscura y profunda entre ellas, y una melena de esquirlas de roca
-> puntiagudas rodeando la parte trasera del cráneo. Terrones y guijarros desprendiéndose detrás. Sin escamas ni
-> ojos. Marrón tierra y gris roca, mate y opaca, sin brillo. Aspecto pesado, se nota que cae. Estilo Minecraft
-> voxel: caras planas, bordes duros, sin degradados suaves ni antialiasing. Paleta de 5 tonos terrosos. Objeto
-> único centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera, sin personajes ni
-> escenario. Sin texto, sin marco.
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Una cabeza de dragon hecha de roca surcando el aire en trayectoria descendente, de unos 2 bloques
+> de Minecraft de largo: Cráneo construido con planos de piedra angulosos y grandes, fauces abiertas
+> formadas por dos mandibulas rectas con una cavidad oscura y profunda entre ellas, y una melena de
+> esquirlas de roca puntiagudas rodeando la parte trasera del cráneo. Terrones y guijarros desprendiendose
+> detras. Sin escamas ni ojos. Marron tierra y gris roca, mate y opaca, sin brillo. Aspecto pesado, se nota
+> que cae. Paleta de 5 tonos terrosos. Objeto único centrado sobre fondo gris neutro liso, vista tres
+> cuartos isométrica ligera, sin personajes ni escenario. Repetir: Voxel art de Minecraft, cubos visibles,
+> colores planos. Sin texto, sin marco.
 
 > **Prompt (alternativo, fiel a la textura):**
-> Un proyectil de roca en vuelo con forma de esfera erizada de casi 1,5 bloques de Minecraft: núcleo de piedra
-> compacto cubierto de esquirlas puntiagudas y desiguales apuntando hacia fuera, con terrones desprendiéndose
-> por detrás. Marrón tierra y gris roca, mate y opaca. Aspecto pesado y contundente. Estilo Minecraft voxel:
-> caras planas, bordes duros, sin degradados suaves ni antialiasing. Paleta de 4 tonos terrosos. Objeto único
-> centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera, sin personajes ni escenario. Sin
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Un proyectil de roca en vuelo con forma de esfera erizada de casi 1,5 bloques de Minecraft: Núcleo
+> de piedra compacto cubierto de esquirlas puntiagudas y desiguales apuntando hacia fuera, con terrones
+> desprendiendose por detras. Marron tierra y gris roca, mate y opaca. Aspecto pesado y contundente. Paleta
+> de 4 tonos terrosos. Objeto único centrado sobre fondo gris neutro liso, vista tres cuartos isométrica
+> ligera, sin personajes ni escenario. Repetir: Voxel art de Minecraft, cubos visibles, colores planos. Sin
 > texto, sin marco.
 
 ---
@@ -1005,14 +1194,18 @@ Es la pieza más sutil del documento y la única que representa una **ausencia**
 contraste conviene conservarlo: no debe tener partículas ni energía, solo el agujero y la tierra removida.
 
 > **Prompt:**
-> Una boca de túnel excavada en el suelo: un hueco circular de aproximadamente 1,5 bloques de Minecraft de
-> diámetro, rodeado por un reborde bajo de terrones de tierra levantada y desordenada. El interior se oscurece
-> progresivamente por bandas hasta el negro absoluto en el centro, sugiriendo profundidad. Sin partículas, sin
-> energía, sin brillo: solo tierra removida y oscuridad. Marrón tierra en el reborde, marrones cada vez más
-> oscuros hacia dentro. Mate y opaco. Estilo Minecraft voxel: caras planas, bordes duros, sin degradados suaves
-> ni antialiasing. Paleta de 5 tonos terrosos. Efecto único centrado sobre fondo gris neutro liso, vista tres
-> cuartos isométrica ligera con la cámara elevada mirando hacia el agujero, sin personajes ni escenario. Sin
-> texto, sin marco.
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Una boca de túnel excavada en el suelo: Un hueco circular de aproximadamente 1,5 bloques de
+> Minecraft de diámetro, rodeado por un reborde bajo de terrones de tierra levantada y desordenada. El
+> interior se oscurece progresivamente por bandas hasta el negro absoluto en el centro, sugiriendo
+> profundidad. Sin particulas, sin energía, sin brillo: Sólo tierra removida y oscuridad. Marron tierra en
+> el reborde, marrones cada vez más oscuros hacia dentro. Mate y opaco. Paleta de 5 tonos terrosos. Efecto
+> único centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera con la camara elevada
+> mirando hacia el agujero, sin personajes ni escenario. Repetir: Voxel art de Minecraft, cubos visibles,
+> colores planos. Sin texto, sin marco.
 
 ---
 
@@ -1054,13 +1247,18 @@ translúcida**, con el borde erizado de ondulaciones cortas y romas (la textura 
 canto serrado). Debe verse **el interior a través**: es una prisión, y se tiene que notar que hay algo dentro.
 
 > **Prompt:**
-> Una esfera de agua tensa y muy translúcida, de unos 2,4 bloques de Minecraft de diámetro, lo bastante grande
-> para encerrar a una persona dentro. Superficie recorrida por ondas concéntricas suaves y borde festoneado con
-> ondulaciones cortas y romas, nada afilado. Muy transparente: se ve claramente a través de ella hasta el otro
-> lado. Azul cian con reflejos blancos de espuma arriba y azul profundo en la base. Acabado brillante y húmedo,
-> con un reflejo especular marcado. Estilo Minecraft voxel: caras planas, bordes duros, sin degradados suaves
-> ni antialiasing. Paleta de 4 tonos azules. Efecto único centrado sobre fondo gris neutro liso, vista tres
-> cuartos isométrica ligera, sin personajes ni escenario. Sin texto, sin marco.
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Una esfera de agua tensa y con caras alternando dos tonos, unas más claras que otras, de unos 2,4
+> bloques de Minecraft de diámetro, lo bastante grande para encerrar a una persona dentro. Superficie
+> recorrida por tres anillos concéntricos de tonos distintos, cada uno liso y borde festoneado con
+> ondulaciones cortas y romas, nada afilado. Con huecos entre cubos por los que se ve el interior. Azul cian
+> con cubos blancos planos de espuma arriba y azul profundo en la base. Colores planos y saturados, con dos
+> o tres cubos blancos planos en la cara superior a modo de brillo. Paleta de 4 tonos azules. Efecto único
+> centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera, sin personajes ni escenario.
+> Repetir: Voxel art de Minecraft, cubos visibles, colores planos. Sin texto, sin marco.
 
 ---
 
@@ -1097,13 +1295,17 @@ formada por **burbujas de tamaños distintos** apiñadas, muy translúcida, con 
 desprendiéndose por arriba.
 
 > **Prompt:**
-> Un casco de burbujas de agua flotando en el aire, del tamaño justo para rodear una cabeza, aproximadamente un
-> bloque de Minecraft. Formado por burbujas esféricas de tamaños muy distintos apiñadas entre sí, las grandes
-> agrupadas abajo y las pequeñas desprendiéndose y ascendiendo por arriba. Extremadamente translúcido, casi
-> todo transparente, con finos bordes blancos definiendo cada burbuja. Azul muy pálido con reflejos blancos.
-> Hueco por dentro. Estilo Minecraft voxel: caras planas, bordes duros, sin degradados suaves ni antialiasing.
-> Paleta de 3 tonos. Efecto solo, centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera,
-> sin personaje dentro. Sin texto, sin marco.
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Un casco de burbujas de agua flotando en el aire, del tamaño justo para rodear una cabeza,
+> aproximadamente un bloque de Minecraft. Formado por burbujas esféricas de tamaños muy distintos apinadas
+> entre si, las grandes agrupadas abajo y las pequeñas desprendiendose y ascendiendo por arriba.
+> Extremadamente de caras en dos tonos alternos, con la mayoría de las caras huecas, con finos bordes
+> blancos definiendo cada burbuja. Azul muy palido con cubos blancos planos. Hueco por dentro. Paleta de 3
+> tonos. Efecto sólo, centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera, sin
+> personaje dentro. Repetir: Voxel art de Minecraft, cubos visibles, colores planos. Sin texto, sin marco.
 
 ---
 
@@ -1122,13 +1324,17 @@ las puntas en gotas redondeadas**, con la cabeza más ancha que la base.
 Con este se cierra la serie: **fuego arde, rayo destella, viento se aparta, tierra revienta, agua salpica.**
 
 > **Prompt:**
-> Una corona de salpicadura de agua vista desde arriba, de unos 2 bloques de Minecraft de diámetro: un anillo
-> de gotas alargadas irradiando desde un centro hundido, cada gota con la punta redondeada y más ancha que su
-> base, como en el instante de romperse una superficie de agua. Algunas gotas ya desprendidas flotando por
-> encima del anillo. Azul cian translúcido con espuma blanca en las crestas. Acabado brillante y húmedo. Estilo
-> Minecraft voxel: caras planas, bordes duros, sin degradados suaves ni antialiasing. Paleta de 4 tonos azules.
-> Efecto único centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera con la cámara
-> ligeramente elevada, sin personajes ni escenario. Sin texto, sin marco.
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Una corona de salpicadura de agua vista desde arriba, de unos 2 bloques de Minecraft de diámetro:
+> Un anillo de gotas alargadas irradiando desde un centro hundido, cada gota con la punta redondeada y más
+> ancha que su base, como en el instante de romperse una superficie de agua. Algunas gotas ya desprendidas
+> flotando por encima del anillo. Azul cian de caras en dos tonos alternos con espuma blanca en las crestas.
+> Colores planos y saturados,. Paleta de 4 tonos azules. Efecto único centrado sobre fondo gris neutro liso,
+> vista tres cuartos isométrica ligera con la camara ligeramente elevada, sin personajes ni escenario.
+> Repetir: Voxel art de Minecraft, cubos visibles, colores planos. Sin texto, sin marco.
 
 ---
 
@@ -1150,13 +1356,16 @@ elemento**, justo al revés que las otras seis piezas: la niebla no deja ver, y 
 Es además la única pieza de los cinco elementos documentados que **debe leerse como suave**.
 
 > **Prompt:**
-> Un banco de niebla denso y bajo, muy ancho, formado por cúmulos redondeados y mullidos apilados sin orden
-> aparente, con los bordes blandos y esponjosos, sin ninguna arista ni punta. Blanco y gris claro, sin nada de
-> azul. Opaco en el interior y algo más deshilachado en los bordes exteriores. Aspecto algodonoso, lo contrario
-> de una forma cristalina o afilada. Estilo Minecraft voxel: caras planas, bordes duros, pero con la silueta
-> general redondeada. Sin degradados suaves ni antialiasing. Paleta de 3 tonos: blanco, gris claro, gris medio.
-> Efecto único centrado sobre fondo gris neutro **oscuro** para que contraste, vista tres cuartos isométrica
-> ligera, sin personajes ni escenario. Sin texto, sin marco.
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, objeto único centrado. NEGATIVO: fotorrealista, render suave,
+> CGI, nubes reales, degradado, desenfoque, niebla volumétrica, humo realista. EL OBJETO: Un banco de niebla
+> denso y bajo, muy ancho, construido apilando cubos grandes de distinto tamaño sin orden aparente, de modo
+> que la silueta general sea redondeada pero todo el contorno quede escalonado. Cubos sueltos separándose
+> del borde exterior. Sin ninguna arista afilada ni punta. Tres tonos planos y nada más: blanco en la parte
+> superior, gris claro en el cuerpo y gris medio en la base, cada cubo de un solo tono. Interior macizo, sin
+> huecos: es lo único opaco del set. Fondo gris neutro OSCURO para que contraste. Repetir: voxel art de
+> Minecraft, cubos visibles, colores planos, sin texto ni marco.
 
 ---
 
@@ -1177,14 +1386,19 @@ parece bastante. Se separan porque aquí el material debe verse **líquido** —
 que fluye, algún goteo—. El hielo es opaco, rígido y facetado; esto no.
 
 > **Prompt:**
-> Una hoja de agua a presión viajando por el aire: tres o cuatro láminas verticales de agua comprimida de
-> alturas distintas, la mayor de aproximadamente 1,4 bloques de Minecraft, con el canto superior afilado como
-> una cuchilla y la base ancha, dispuestas en fila y avanzando de perfil con el filo por delante. El material
-> se ve claramente líquido: bordes ligeramente ondulados, superficie que fluye y alguna gota desprendiéndose.
-> Azul cian translúcido con espuma blanca en los filos. Brillante y húmedo, nunca rígido ni cristalino como el
-> hielo. Estilo Minecraft voxel: caras planas, bordes duros, sin degradados suaves ni antialiasing. Paleta de 4
-> tonos azules. Objeto único centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera, sin
-> personajes ni escenario. Sin texto, sin marco.
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Una hoja de agua a presión viajando por el aire: Tres o cuatro laminas verticales de agua
+> comprimida de alturas distintas, la mayor de aproximadamente 1,4 bloques de Minecraft, con el canto
+> superior afilado como una cuchilla y la base ancha, dispuestas en fila y avanzando de perfil con el filo
+> por delante. El material se ve claramente líquido: Bordes escalonados en cubos, superficie escalonada en
+> cubos desalineados y alguna gota desprendiendose. Azul cian de caras en dos tonos alternos con espuma
+> blanca en los filos. De color plano y saturado, nunca rigido ni cristalino como el hielo. Paleta de 4
+> tonos azules. Objeto único centrado sobre fondo gris neutro liso, vista tres cuartos isométrica ligera,
+> sin personajes ni escenario. Repetir: Voxel art de Minecraft, cubos visibles, colores planos. Sin texto,
+> sin marco.
 
 ---
 
@@ -1205,22 +1419,30 @@ pulida y brillante de los cinco elementos documentados. Si prefieres respetar la
 prompt alternativo está debajo.
 
 > **Prompt (ola que rompe, recomendado):**
-> Una ola de agua rompiendo, congelada a media rotura y avanzando por el aire, de unos 2,2 bloques de Minecraft
-> de ancho. La cresta se enrolla hacia delante formando un tubo, con el frente afilado como una hoja y espuma
-> blanca desprendiéndose del borde superior. El cuerpo de la ola es liso, pulido y muy brillante, con un
-> reflejo especular blanco marcado, y muy translúcido: se ve el otro lado a través. Azul cian con azul profundo
-> en el hueco del tubo. Estilo Minecraft voxel: caras planas, bordes duros, sin degradados suaves ni
-> antialiasing. Paleta de 4 tonos azules. Objeto único centrado sobre fondo gris neutro liso, vista tres
-> cuartos isométrica ligera, sin personajes ni escenario. Sin texto, sin marco.
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Una ola de agua rompiendo, congelada a media rotura y avanzando por el aire, de unos 2,2 bloques
+> de Minecraft de ancho. La cresta se enrolla hacia delante formando un tubo, con el frente afilado como una
+> hoja y espuma blanca desprendiendose del borde superior. El cuerpo de la ola es de caras planas y color
+> uniforme, con dos o tres cubos blancos planos en la cara superior izquierda a modo de brillo. Azul cian
+> con azul profundo en el hueco del tubo. Paleta de 4 tonos azules. Objeto único centrado sobre fondo gris
+> neutro liso, vista tres cuartos isométrica ligera, sin personajes ni escenario. Repetir: Voxel art de
+> Minecraft, cubos visibles, colores planos. Sin texto, sin marco.
 
 > **Prompt (alternativo, fiel a la textura):**
-> Una esfera de agua perfectamente lisa y pulida, de unos 1,8 bloques de Minecraft de diámetro, con la
-> superficie tensa como una gota gigante y un reflejo especular blanco marcado arriba a la izquierda. Muy
-> translúcida, se ve el otro lado a través. Azul cian con azul profundo en la base. Sin espuma, sin
-> ondulaciones, sin aristas: la contundencia viene de lo limpia que es. Estilo Minecraft voxel: caras planas,
-> bordes duros, sin degradados suaves ni antialiasing. Paleta de 4 tonos azules. Objeto único centrado sobre
-> fondo gris neutro liso, vista tres cuartos isométrica ligera, sin personajes ni escenario. Sin texto, sin
-> marco.
+> Voxel art estilo Minecraft, modelo low-poly hecho de cubos visibles, como un modelo de Blockbench. Cubos
+> grandes y contables, aristas rectas, esquinas duras, superficie escalonada. Color en bandas planas, cada
+> cara de un tono liso. Vista tres cuartos, fondo gris neutro liso, objeto único centrado. NEGATIVO:
+> Fotorrealista, render suave, CGI, cristal, degradado, desenfoque, reflejo especular, superficie lisa. EL
+> OBJETO: Una esfera de agua perfectamente lisa y pulida, de unos 1,8 bloques de Minecraft de diámetro, con
+> la superficie tensa como una gota gigante y un cubo blanco plano de brillo blanco marcado arriba a la
+> izquierda. Con caras alternando dos tonos, unas más claras que otras, se ve el interior por los huecos
+> entre cubos. Azul cian con azul profundo en la base. Sin espuma, sin ondulaciones, sin aristas: La
+> contundencia viene de lo limpia que es. Paleta de 4 tonos azules. Objeto único centrado sobre fondo gris
+> neutro liso, vista tres cuartos isométrica ligera, sin personajes ni escenario. Repetir: Voxel art de
+> Minecraft, cubos visibles, colores planos. Sin texto, sin marco.
 
 ---
 

@@ -26,7 +26,7 @@ class EyeMenuServiceTest {
     @BeforeEach
     void loadRegistry() {
         EyeDefinition sharingan = new EyeDefinition("sharingan", EyeFamily.SHARINGAN, true, 20, 20,
-                Optional.of(78000), Optional.of(78000), SHARINGAN_ABILITIES, List.of(), List.of(), false, 0, Optional.empty());
+                Optional.of(78000), Optional.of(78000), SHARINGAN_ABILITIES, List.of(), List.of(), false, 0, Optional.empty(), Optional.empty());
         EyeRegistry.load(Map.of("sharingan", sharingan));
     }
 

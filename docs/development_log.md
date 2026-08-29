@@ -6350,3 +6350,73 @@ lista de tareas para que sustituirlo sea posible.
 
 `build` multiloader verde, **991 tests** (+3). Fabric arranca limpio. Los enlaces del README se comprobaron uno
 a uno. Sin JVMs colgadas.
+
+## 2026-08-28 · DJT-238 — El ojo encendido vuelve a costar chakra
+
+Cierra la deuda que el javadoc de `EyeDefinition` declaraba desde DJT-113: aquel ticket modeló el grafo y el
+estado, DJT-116 portó la **fatiga**, y el **drenaje de chakra** se quedó sin portar. Hasta hoy llevar un
+dōjutsu encendido salía gratis.
+
+### La tabla del plan se había quedado corta
+
+El plan (`PLAN_UI_ETAPAS_5-1-4-3.txt`, §A3-BIS) resumía los costes en dos columnas: despierto e implantado.
+Al leer los `cost.mcfunction` en origen aparecieron **tres** niveles para el Sharingan, no dos, y el tercero
+—el más caro— no estaba en el resumen:
+
+| Sharingan | 1 tomoe | 2 tomoe | 3 tomoe | 3 tomoe + Mangekyō |
+|---|---|---|---|---|
+| Uchiha/Ōtsutsuki despierto | 6 | 7 | 8 | 4 |
+| Uchiha/Ōtsutsuki sin despertar | 12 | 14 | 16 | 8 |
+| Hatake (cualquier estado) | 12 | 14 | 16 | 8 |
+| **Otros clanes** | **16** | **18** | **20** | **12** |
+
+Un Sharingan robado por alguien de otro clan cuesta 20 cada 2 segundos, no 16. Es la penalización más dura del
+sistema y era justo la que faltaba. **Confirmación de la regla 16:** el datapack es la fuente de verdad, no los
+resúmenes, ni siquiera los que escribimos nosotros la semana pasada.
+
+### Por qué el coste es una lista de reglas y no unos campos
+
+Cada `cost.mcfunction` es una cadena de `execute if predicate ... run remove` evaluada de arriba abajo. El
+modelo lo reproduce: `passiveCost.rules`, en orden, **la primera que encaja manda**. Así el JSON se puede leer
+al lado del mcfunction original y comprobar que dicen lo mismo.
+
+Un esquema de campos fijos (despierto/implantado) no llegaba: el Sharingan cruza tres niveles de clan con tres
+tomoe y con si tienes el Mangekyō, o sea doce números.
+
+### `eyematch` obligó a ampliar el estado
+
+El datapack cobra **14** por el Mangekyō que tú despertaste y **18** por el de otro Uchiha. `EyeState` guardaba
+`awakened` como `Set<EyeFamily>` — sabía que despertaste *un* Mangekyō, no *cuál*, así que esas dos situaciones
+eran indistinguibles.
+
+Se añade `awakenedEyes: Map<EyeFamily, String>` y el wither `withAwakenedEye(familia, ojoId)`, que usan los tres
+sitios que despiertan (`AwakeningService` ×2 y `EvolutionService`). Campo tolerante: las partidas anteriores lo
+traen vacío y se tratan **como si casara**, para no cobrarle de más a quien ya tenía el ojo.
+
+### Tres desviaciones deliberadas
+
+**1. Sólo se cobra con el ojo ENCENDIDO.** En el datapack el coste corre mientras *llevas* el ojo, porque allí
+no existe interruptor. Con el interruptor de DJT-230, un ojo apagado no cuesta nada. Se acepta: cobrar por
+poseerlo convertiría el interruptor en un adorno. Abarata los ojos robados frente al datapack — vigilar en
+partida, pero con datos, no antes.
+
+**2. El Rinnegan sin `eyematch` deja de ser gratis.** `rinnegan/cost_0.mcfunction` sólo cobra `if eyematch` y
+no tiene rama `else`: un Uchiha o Uzumaki despierto con una variante que no casa lo lleva **a coste cero**. Es
+casi seguro un olvido. Se cobra **18**, que es la tarifa que el propio datapack aplica a esos mismos clanes con
+el Rinnegan sin despertar: no se inventa un número, se reutiliza uno existente para un caso comparable.
+
+**3. Si no puedes pagar, el ojo se apaga.** El datapack dejaba el chakra en negativo, que aquí no es
+representable: `ChakraService` no permite consumos que no caben. Apagarlo es la lectura más cercana —te quedas
+sin fuerzas para sostenerlo— y encaja con lo que ya hace la fatiga al 100 %. **El ojo no se pierde**, que es el
+error que DJT-230 corrigió y que no se va a reintroducir por la puerta de atrás.
+
+### Lo que no lleva coste, y por qué
+
+**Isshiki (16) y Jōugan (8)** no se portan: esos ojos **no existen todavía** en el mod, son roster diferido.
+Sus números quedan en el plan para cuando lleguen. El **Rinne Sharingan** no aparece en `basic_costs` del
+datapack — no cuesta chakra, y así se queda.
+
+### Validación
+
+`build` multiloader verde, **1097 tests** (+17). Los tests del coste cargan **el JSON real de cada ojo**, no
+una tabla escrita a mano: si alguien toca un dato, saltan. Falta la pasada en partida.

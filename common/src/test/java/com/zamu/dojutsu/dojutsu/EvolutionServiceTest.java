@@ -41,12 +41,12 @@ class EvolutionServiceTest {
                                 List.of(EyeRequirement.clan("otsutsuki_uchiha"), EyeRequirement.useAtLeast(360000))),
                         new EyeEvolution("rinnegan",
                                 List.of(EyeRequirement.clan("uchiha"), EyeRequirement.flag("hashirama_dna")))),
-                List.of(), false, 0, Optional.empty());
+                List.of(), false, 0, Optional.empty(), Optional.empty());
     }
 
     private static EyeDefinition terminal(String id, EyeFamily family) {
         return new EyeDefinition(id, family, true, 0, 0, Optional.empty(), Optional.empty(), List.of(), List.of(),
-                List.of(), false, 0, Optional.empty());
+                List.of(), false, 0, Optional.empty(), Optional.empty());
     }
 
     private static Function<String, Optional<EyeDefinition>> lookup(EyeDefinition... eyes) {
@@ -132,7 +132,7 @@ class EvolutionServiceTest {
         // eternalRequirements), para que el 864000 del ems_req sea alcanzable en nuestro modelo colapsado.
         EyeDefinition mangekyo = new EyeDefinition("mangekyo_itachi", EyeFamily.MANGEKYO, true, 20, 80,
                 Optional.empty(), Optional.empty(), List.of("amaterasu"), List.of(),
-                List.of(EyeRequirement.clan("otsutsuki_uchiha"), EyeRequirement.useAtLeast(864000)), true, 0, Optional.empty());
+                List.of(EyeRequirement.clan("otsutsuki_uchiha"), EyeRequirement.useAtLeast(864000)), true, 0, Optional.empty(), Optional.empty());
         assertTrue(EvolutionService.hasUseGatedEternal(mangekyo));
 
         EyeState start = EyeState.DEFAULT.withActiveEye("mangekyo_itachi").withUseLevel(EyeFamily.MANGEKYO, 100);
@@ -149,7 +149,7 @@ class EvolutionServiceTest {
                 List.of(new EyeEvolution("mangekyo_itachi",
                         List.of(EyeRequirement.clan("otsutsuki_uchiha"), EyeRequirement.useAtLeast(360000)),
                         List.of("mangekyo_itachi", "mangekyo_obito", "mangekyo_sasuke"))),
-                List.of(), false, 0, Optional.empty());
+                List.of(), false, 0, Optional.empty(), Optional.empty());
         Function<String, Optional<EyeDefinition>> world = lookup(sharinganRng,
                 terminal("mangekyo_itachi", EyeFamily.MANGEKYO),
                 terminal("mangekyo_obito", EyeFamily.MANGEKYO),
@@ -177,7 +177,7 @@ class EvolutionServiceTest {
                 List.of(new EyeEvolution("mangekyo_itachi",
                         List.of(EyeRequirement.clan("otsutsuki_uchiha"), EyeRequirement.useAtLeast(360000)),
                         List.of("mangekyo_itachi", "mangekyo_noexiste"))),
-                List.of(), false, 0, Optional.empty());
+                List.of(), false, 0, Optional.empty(), Optional.empty());
         Function<String, Optional<EyeDefinition>> world = lookup(sharinganRng,
                 terminal("mangekyo_itachi", EyeFamily.MANGEKYO));
 

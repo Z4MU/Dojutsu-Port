@@ -123,7 +123,8 @@ public final class EvolutionService implements PlayerTickSystem {
             }
             Optional<EyeDefinition> target = resolveTarget(evolution, eyeLookup, random);
             if (target.isPresent()) {
-                EyeState evolved = state.withActiveEye(target.get().id()).withAwakened(target.get().family());
+                EyeState evolved = state.withActiveEye(target.get().id())
+                        .withAwakenedEye(target.get().family(), target.get().id());
                 return new EvolveResult(evolved, Optional.of(new Transition(active.id(), target.get().id())));
             }
         }

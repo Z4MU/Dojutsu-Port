@@ -35,7 +35,7 @@ class AwakeningServiceTest {
     private static EyeDefinition eye(String id, EyeFamily family, Optional<Integer> awakenTicks,
             Optional<Integer> awakenInitialUse) {
         return new EyeDefinition(id, family, true, 20, 20, awakenTicks, awakenInitialUse, List.of(), List.of(),
-                List.of(), false, 0, Optional.empty());
+                List.of(), false, 0, Optional.empty(), Optional.empty());
     }
 
     private static Function<String, Optional<EyeDefinition>> lookup(EyeDefinition... eyes) {
@@ -126,7 +126,7 @@ class AwakeningServiceTest {
     @Test
     void ojoNoImplementadoSeIgnora() {
         EyeDefinition naka = new EyeDefinition("naka", EyeFamily.MANGEKYO, false, 0, 0, Optional.of(1),
-                Optional.empty(), List.of(), List.of(), List.of(), false, 0, Optional.empty());
+                Optional.empty(), List.of(), List.of(), List.of(), false, 0, Optional.empty(), Optional.empty());
         AwakenResult r = AwakeningService.evaluate(EyeState.DEFAULT, "x", clan("x", List.of("naka")),
                 lookup(naka), new Random(0));
         assertSame(EyeState.DEFAULT, r.state());

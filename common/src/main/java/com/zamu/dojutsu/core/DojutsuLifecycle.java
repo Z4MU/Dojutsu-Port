@@ -12,6 +12,7 @@ import com.zamu.dojutsu.dojutsu.AwakeningService;
 import com.zamu.dojutsu.dojutsu.EternalAwakeningService;
 import com.zamu.dojutsu.dojutsu.EvolutionService;
 import com.zamu.dojutsu.dojutsu.EyeReloadListener;
+import com.zamu.dojutsu.dojutsu.EyePassiveCostService;
 import com.zamu.dojutsu.dojutsu.EyeStrainService;
 import com.zamu.dojutsu.dojutsu.EyeToggleService;
 import com.zamu.dojutsu.dojutsu.ability.EyeAbilityService;
@@ -143,6 +144,11 @@ public final class DojutsuLifecycle {
         // Sharingan); la subida la producen las habilidades (DJT-118+); dormir la resetea (SleepChakraHandler).
         dispatcher.pipeline().register(new EyeStrainService());
         EyeStrainService.registerSleepReset(); // engancha el reset de fatiga al despertar (S05)
+
+        // EP-EYE-CORE: coste pasivo por llevar el ojo ENCENDIDO (TickPhase.DOJUTSU). Salda la deuda de
+        // DJT-116, que porto la fatiga y dejo el drenaje sin portar. Si no llega el chakra, el ojo se apaga
+        // (no se pierde). Los numeros son data-driven, uno por ojo. F11/DJT-238.
+        dispatcher.pipeline().register(new EyePassiveCostService());
 
         // EP-SUSANOO: el Susanoo como ToggleableMode (TickPhase.DOJUTSU). Cobra chakra+fatiga por pulsos segun
         // el nivel y cae solo si el chakra no llega; sube de maestria con el uso. Se enciende desde el menu

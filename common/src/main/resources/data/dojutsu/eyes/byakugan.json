@@ -14,9 +14,26 @@
     {
       "to": "tenseigan",
       "requirements": [
-        { "type": "clan", "value": "otsutsuki" },
-        { "type": "use_level", "min": 864000 }
+        {
+          "type": "clan",
+          "value": "otsutsuki"
+        },
+        {
+          "type": "use_level",
+          "min": 864000
+        }
       ]
     }
-  ]
+  ],
+  "passiveCost": {
+    "rules": [
+      {
+        "awakened": true,
+        "cost": 8
+      },
+      {
+        "cost": 12
+      }
+    ]
+  }
 }

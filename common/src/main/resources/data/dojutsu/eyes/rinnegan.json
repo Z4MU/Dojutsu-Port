@@ -11,5 +11,46 @@
     "chibaku_tensei",
     "preta_path",
     "asura_path"
-  ]
+  ],
+  "passiveCost": {
+    "rules": [
+      {
+        "clan": "otsutsuki_uchiha",
+        "awakened": true,
+        "eyeMatch": true,
+        "cost": 12
+      },
+      {
+        "clan": "otsutsuki_uchiha",
+        "awakened": true,
+        "eyeMatch": false,
+        "cost": 18
+      },
+      {
+        "clan": "otsutsuki_uchiha",
+        "awakened": false,
+        "cost": 18
+      },
+      {
+        "clan": "uzumaki",
+        "awakened": true,
+        "eyeMatch": true,
+        "cost": 12
+      },
+      {
+        "clan": "uzumaki",
+        "awakened": true,
+        "eyeMatch": false,
+        "cost": 18
+      },
+      {
+        "clan": "uzumaki",
+        "awakened": false,
+        "cost": 18
+      },
+      {
+        "cost": 36
+      }
+    ]
+  }
 }

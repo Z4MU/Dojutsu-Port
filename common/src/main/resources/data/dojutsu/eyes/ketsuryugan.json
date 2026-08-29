@@ -9,5 +9,16 @@
     "exploding_human",
     "iron_blood_fist",
     "rising_blood_spear"
-  ]
+  ],
+  "passiveCost": {
+    "rules": [
+      {
+        "awakened": true,
+        "cost": 14
+      },
+      {
+        "cost": 28
+      }
+    ]
+  }
 }

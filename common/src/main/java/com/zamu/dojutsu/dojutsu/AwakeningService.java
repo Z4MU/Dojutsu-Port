@@ -111,7 +111,7 @@ public final class AwakeningService implements PlayerTickSystem {
         }
         EyeDefinition chosen = candidates.get(random.nextInt(candidates.size())); // 50/50 de Otsutsuki
         EyeState awakened = eyeState
-                .withAwakened(chosen.family())
+                .withAwakenedEye(chosen.family(), chosen.id())
                 .withActiveEye(chosen.id())
                 .withTimer(clanId, 0);
         // Uso inicial de la familia al despertar (sharingan/awaken fija sharingan_use=78000: nace en tomoe 1).
@@ -140,7 +140,7 @@ public final class AwakeningService implements PlayerTickSystem {
         if (data.eye().isAwakened(def.family())) {
             return false; // ya tiene esa familia: no se re-despierta ni se repiten los bonus
         }
-        EyeState awakened = data.eye().withAwakened(def.family()).withActiveEye(def.id());
+        EyeState awakened = data.eye().withAwakenedEye(def.family(), def.id()).withActiveEye(def.id());
         if (def.awakenInitialUse().isPresent()) {
             awakened = awakened.withUseLevel(def.family(), def.awakenInitialUse().orElseThrow());
         }

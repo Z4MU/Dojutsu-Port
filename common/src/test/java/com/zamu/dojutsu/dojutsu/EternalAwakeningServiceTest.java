@@ -22,13 +22,13 @@ class EternalAwakeningServiceTest {
     private static EyeDefinition mangekyo() {
         return new EyeDefinition("mangekyo_itachi", EyeFamily.MANGEKYO, true, 20, 80,
                 Optional.empty(), Optional.empty(), List.of("amaterasu"), List.of(),
-                List.of(EyeRequirement.clan("otsutsuki_uchiha"), EyeRequirement.useAtLeast(864000)), true, 0, Optional.empty());
+                List.of(EyeRequirement.clan("otsutsuki_uchiha"), EyeRequirement.useAtLeast(864000)), true, 0, Optional.empty(), Optional.empty());
     }
 
     private static EyeDefinition byakugan() {
         // no eternalizable (sin eternalRequirements)
         return new EyeDefinition("byakugan", EyeFamily.BYAKUGAN, true, 20, 20,
-                Optional.of(78000), Optional.empty(), List.of(), List.of(), List.of(), true, 0, Optional.empty());
+                Optional.of(78000), Optional.empty(), List.of(), List.of(), List.of(), true, 0, Optional.empty(), Optional.empty());
     }
 
     private static EyeState mangekyoState(int use, boolean eternal) {

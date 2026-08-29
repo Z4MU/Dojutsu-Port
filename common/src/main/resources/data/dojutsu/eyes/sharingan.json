@@ -15,20 +15,154 @@
     {
       "to": "mangekyo_itachi",
       "requirements": [
-        { "type": "clan", "value": "otsutsuki_uchiha" },
-        { "type": "use_level", "min": 360000 }
+        {
+          "type": "clan",
+          "value": "otsutsuki_uchiha"
+        },
+        {
+          "type": "use_level",
+          "min": 360000
+        }
       ],
       "variants": [
-        "mangekyo_itachi", "mangekyo_obito", "mangekyo_sasuke", "mangekyo_madara",
-        "mangekyo_indra", "mangekyo_shisui", "mangekyo_fugaku", "mangekyo_shin"
+        "mangekyo_itachi",
+        "mangekyo_obito",
+        "mangekyo_sasuke",
+        "mangekyo_madara",
+        "mangekyo_indra",
+        "mangekyo_shisui",
+        "mangekyo_fugaku",
+        "mangekyo_shin"
       ]
     },
     {
       "to": "rinnegan",
       "requirements": [
-        { "type": "clan", "value": "uchiha" },
-        { "type": "flag", "value": "hashirama_dna" }
+        {
+          "type": "clan",
+          "value": "uchiha"
+        },
+        {
+          "type": "flag",
+          "value": "hashirama_dna"
+        }
       ]
     }
-  ]
+  ],
+  "passiveCost": {
+    "rules": [
+      {
+        "clan": "otsutsuki_uchiha",
+        "awakened": true,
+        "maxUse": 144001,
+        "cost": 6
+      },
+      {
+        "clan": "otsutsuki_uchiha",
+        "awakened": true,
+        "minUse": 144001,
+        "maxUse": 216000,
+        "cost": 7
+      },
+      {
+        "clan": "otsutsuki_uchiha",
+        "awakened": true,
+        "minUse": 216000,
+        "hasMangekyo": false,
+        "cost": 8
+      },
+      {
+        "clan": "otsutsuki_uchiha",
+        "awakened": true,
+        "minUse": 216000,
+        "hasMangekyo": true,
+        "cost": 4
+      },
+      {
+        "clan": "otsutsuki_uchiha",
+        "awakened": false,
+        "maxUse": 144001,
+        "cost": 12
+      },
+      {
+        "clan": "otsutsuki_uchiha",
+        "awakened": false,
+        "minUse": 144001,
+        "maxUse": 216000,
+        "cost": 14
+      },
+      {
+        "clan": "otsutsuki_uchiha",
+        "awakened": false,
+        "minUse": 216000,
+        "hasMangekyo": false,
+        "cost": 16
+      },
+      {
+        "clan": "otsutsuki_uchiha",
+        "awakened": false,
+        "minUse": 216000,
+        "hasMangekyo": true,
+        "cost": 8
+      },
+      {
+        "clan": "hatake",
+        "maxUse": 144001,
+        "cost": 12
+      },
+      {
+        "clan": "hatake",
+        "minUse": 144001,
+        "maxUse": 216000,
+        "cost": 14
+      },
+      {
+        "clan": "hatake",
+        "minUse": 216000,
+        "hasMangekyo": false,
+        "cost": 16
+      },
+      {
+        "clan": "hatake",
+        "minUse": 216000,
+        "hasMangekyo": true,
+        "cost": 8
+      },
+      {
+        "notClan": [
+          "hatake",
+          "otsutsuki_uchiha"
+        ],
+        "maxUse": 144001,
+        "cost": 16
+      },
+      {
+        "notClan": [
+          "hatake",
+          "otsutsuki_uchiha"
+        ],
+        "minUse": 144001,
+        "maxUse": 216000,
+        "cost": 18
+      },
+      {
+        "notClan": [
+          "hatake",
+          "otsutsuki_uchiha"
+        ],
+        "minUse": 216000,
+        "hasMangekyo": false,
+        "cost": 20
+      },
+      {
+        "notClan": [
+          "hatake",
+          "otsutsuki_uchiha"
+        ],
+        "minUse": 216000,
+        "hasMangekyo": true,
+        "cost": 12
+      }
+    ]
+  }
 }

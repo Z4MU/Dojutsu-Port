@@ -49,6 +49,7 @@
   "eternal.dojutsu.needs_development": "Your Mangekyo is not developed enough yet.",
   "key.dojutsu.toggle_sage": "Toggle Sage Mode",
   "key.dojutsu.toggle_eye": "Toggle Dojutsu",
+  "dojutsu.dojutsu.exhausted": "You lack the chakra to sustain your %s.",
   "sage.dojutsu.mode.on": "Sage Mode: Activated",
   "sage.dojutsu.mode.off": "Sage Mode: Deactivated",
   "sage.dojutsu.mode.exhausted": "Your natural energy runs dry; Sage Mode fades.",

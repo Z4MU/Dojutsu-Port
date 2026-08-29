@@ -10,7 +10,41 @@
     "susanoo"
   ],
   "eternalRequirements": [
-    { "type": "clan", "value": "otsutsuki_uchiha" },
-    { "type": "use_level", "min": 864000 }
-  ]
+    {
+      "type": "clan",
+      "value": "otsutsuki_uchiha"
+    },
+    {
+      "type": "use_level",
+      "min": 864000
+    }
+  ],
+  "passiveCost": {
+    "rules": [
+      {
+        "clan": "otsutsuki_uchiha",
+        "awakened": true,
+        "eyeMatch": true,
+        "cost": 14
+      },
+      {
+        "clan": "otsutsuki_uchiha",
+        "awakened": true,
+        "eyeMatch": false,
+        "cost": 18
+      },
+      {
+        "clan": "otsutsuki_uchiha",
+        "awakened": false,
+        "cost": 28
+      },
+      {
+        "clan": "hatake",
+        "cost": 18
+      },
+      {
+        "cost": 28
+      }
+    ]
+  }
 }

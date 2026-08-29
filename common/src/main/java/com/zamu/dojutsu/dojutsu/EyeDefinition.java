@@ -52,6 +52,9 @@ import java.util.Optional;
  * @param chakraVision          el ojo otorga chakra vision {@code [S25]} (DJT-125); {@code false} = no la da
  * @param chakraVisionUseLevel  uso minimo de la familia para que el ojo de vision ({@code sharingan}: solo el
  *                              maduro de 3 tomoe, {@code Eye:4}, uso >= 216000; 0 = desde que se lleva)
+ * @param passiveCost           coste pasivo de chakra por llevarlo encendido (F11/DJT-238), o vacio si el ojo
+ *                              no cobra nada. Salda la deuda que declara el parrafo de arriba: DJT-116 porto
+ *                              la fatiga y dejo el drenaje sin portar
  * @param awakenKekkeiGenkai    id del kekkei genkai que se concede <b>al despertar/alcanzar</b> este ojo (el
  *                              {@code natures/give/kg/blaze} que el Mangekyō de Sasuke otorga en
  *                              {@code mangekyo/awaken}); vacio = no concede ninguno
@@ -59,7 +62,8 @@ import java.util.Optional;
 public record EyeDefinition(String id, EyeFamily family, boolean implemented, int awakenMaxChakraBonus,
         int awakenNinjaXpBonus, Optional<Integer> awakenTicks, Optional<Integer> awakenInitialUse,
         List<String> abilities, List<EyeEvolution> evolutions, List<EyeRequirement> eternalRequirements,
-        boolean chakraVision, int chakraVisionUseLevel, Optional<String> awakenKekkeiGenkai) {
+        boolean chakraVision, int chakraVisionUseLevel, Optional<String> awakenKekkeiGenkai,
+        Optional<EyePassiveCost> passiveCost) {
 
     /** Codec del tipo de requisito por su nombre en minusculas ({@code "use_level"}, {@code "clan"}). */
     private static final Codec<EyeRequirement.Type> REQUIREMENT_TYPE = Codec.STRING.comapFlatMap(name -> {
@@ -102,7 +106,8 @@ public record EyeDefinition(String id, EyeFamily family, boolean implemented, in
             Codec.BOOL.optionalFieldOf("chakraVision", false).forGetter(EyeDefinition::chakraVision),
             Codec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("chakraVisionUseLevel", 0)
                     .forGetter(EyeDefinition::chakraVisionUseLevel),
-            Codec.STRING.optionalFieldOf("awakenKekkeiGenkai").forGetter(EyeDefinition::awakenKekkeiGenkai)
+            Codec.STRING.optionalFieldOf("awakenKekkeiGenkai").forGetter(EyeDefinition::awakenKekkeiGenkai),
+            EyePassiveCost.CODEC.optionalFieldOf("passiveCost").forGetter(EyeDefinition::passiveCost)
     ).apply(instance, EyeDefinition::new));
 
     public EyeDefinition {
