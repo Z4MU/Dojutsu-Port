@@ -266,6 +266,10 @@ public final class DojutsuLifecycle {
         TickEvent.SERVER_POST.register(GodTreeService::tick);
         // El drop-crafting mira entidades item del mundo, no jugadores: no cabe en el PlayerTickPipeline (F9/DJT-206).
         TickEvent.SERVER_POST.register(DropCraftingService::tick);
+
+        // EP-JUTSU: retirada de los modelos del ancla visual de los jutsus (F11/DJT-239). Sin esto, un
+        // ItemDisplay colocado por un efecto se quedaria en el mundo para siempre.
+        com.zamu.dojutsu.jutsu.effect.VfxService.register();
         // Cada mundo tiene su propio getGameTime: limpiar el registro de casts evita comparar ticks
         // de mundos distintos al cambiar de partida (DJT-079).
         LifecycleEvent.SERVER_STOPPING.register(server -> {

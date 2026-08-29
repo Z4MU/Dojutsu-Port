@@ -6420,3 +6420,59 @@ datapack — no cuesta chakra, y así se queda.
 
 `build` multiloader verde, **1097 tests** (+17). Los tests del coste cargan **el JSON real de cada ojo**, no
 una tabla escrita a mano: si alguien toca un dato, saltan. Falta la pasada en partida.
+
+## 2026-08-28 · DJT-239 — Un sitio donde colgar lo que aún no existe
+
+De las 128 técnicas, **sólo 23 dibujaban algo**: las de proyectil, porque son una entidad real volando. Las
+**54 de área** no emitían ni una partícula — un Katon que abrasa todo en 5 bloques funcionaba, hacía daño, y
+visualmente no pasaba **nada**. Igual los 11 golpes cargados, los 7 buffs y las 6 curaciones.
+
+No era un defecto del porte: el datapack tenía el mismo agujero. Pero sí es un bloqueo para el arte, porque un
+modelo 3D necesita un sitio donde aparecer, y ese sitio no existía.
+
+### Dos capas, y la primera funciona sin arte
+
+`EffectVfx` es el hermano de `EffectSfx`, y por el mismo motivo: se declara en el JSON de la técnica, no en un
+`switch` por id dentro del código.
+
+- **Partículas**, que funcionan hoy. Si la técnica no declara ninguna, **se deduce de su afinidad**: un jutsu de
+  fuego echa llamas, uno de agua salpica. **109 de las 128 declaran afinidad**, así que la inmensa mayoría pasa
+  a verse sin escribir un solo dato nuevo. Es lo que convierte este ticket en algo con valor **hoy** y no sólo
+  cuando llegue el arte.
+- **Un modelo**, opcional: el id de un ítem mostrado con un `ItemDisplay` de vanilla.
+
+### Por qué un ItemDisplay y no una entidad propia
+
+La regla 5 obliga a dar renderer en cliente a toda `EntityType` que el mod registre. El `ItemDisplay` es de
+vanilla: ya tiene renderer, ya sincroniza, soporta escala y rotación, y muestra **cualquier** modelo de ítem
+—incluidos los `custom_model_data` por técnica que lleguen después—. **El mod no registra ninguna entidad
+nueva**, así que los 128 modelos futuros no traen 128 renderers.
+
+Se construye **por NBT**, el camino de `/summon`: `ItemDisplay` no expone setters públicos para su ítem ni para
+su transformación en Mojmap, y la vía por NBT no depende de internos que cambian entre versiones.
+
+### Dos decisiones pequeñas que se notan
+
+**La dispersión sigue al radio real del efecto.** Un jutsu de área de 10 bloques no puede verse igual que uno
+de 2. Sin este detalle, el sistema habría hecho que todo pareciera lo mismo.
+
+**La decisión de qué partícula usar devuelve texto, no una partícula resuelta.** Es lo que la hace **pura** y
+por tanto testeable: este repo no arranca Minecraft en tests, y mi primer intento —un mapa estático de
+`ParticleTypes`— tumbó los ocho tests con `ExceptionInInitializerError`. Resolver el id contra el registro es
+glue y vive aparte.
+
+### Retirada de los modelos
+
+Cola propia por vencimiento, drenada en `TickEvent.SERVER_POST`, con tope de 256 modelos vivos. **No usa
+`ModScheduler`** a propósito: ese scheduler se inyecta en el dispatcher y no tiene acceso global; dárselo por
+una vía estática sólo para esto habría roto ese diseño.
+
+### Lo que este ticket NO hace
+
+No trae arte. Ninguna técnica declara `vfxModel` todavía: el campo existe y está probado, esperando a que haya
+modelos. Las 19 técnicas de estructura siguen sin visual propio y es correcto — colocan bloques vanilla reales,
+que ya se ven.
+
+### Validación
+
+`build` multiloader verde, **1106 tests** (+9). Falta la pasada en partida.

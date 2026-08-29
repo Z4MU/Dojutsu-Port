@@ -39,6 +39,9 @@ public final class PrimedStrikeEffect implements JutsuEffect {
             return; // el arma-y-golpea es de jugador; un caster IA lo tendra en F8
         }
         Params params = Params.parse(jutsu.effectParams().getAsJsonObject());
+        // Ancla visual (F11/DJT-239): durante la carga no se veia NADA, asi que ni el jugador ni su rival
+        // sabian que el golpe estaba armado. Radio corto: es un aura sobre uno mismo, no un area.
+        VfxService.playAt(level, jutsu, player, 1.0D);
         PrimedStrikeManager.arm(player, jutsu.id(), params.damage(), params.primingTicks());
         params.sfx().play(level, player.getX(), player.getY(), player.getZ());
         player.displayClientMessage(Component.translatable("jutsu.dojutsu.primed"), true);

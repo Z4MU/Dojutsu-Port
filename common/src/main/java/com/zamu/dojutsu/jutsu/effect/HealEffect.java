@@ -49,6 +49,9 @@ public final class HealEffect implements JutsuEffect {
             for (MobEffectSpec spec : params.effects()) {
                 spec.applyTo(target);
             }
+            // Ancla visual (F11/DJT-239) sobre el OBJETIVO, no sobre el caster: en medicina lo que importa
+            // ver es a quien estas curando.
+            VfxService.playAt(level, jutsu, target, 1.0D);
             playHealSound(level, caster);
         });
     }

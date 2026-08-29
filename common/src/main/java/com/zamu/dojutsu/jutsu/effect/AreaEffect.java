@@ -40,6 +40,9 @@ public final class AreaEffect implements JutsuEffect {
     @Override
     public void apply(ServerLevel level, LivingEntity caster, JutsuEntry jutsu) {
         Params params = Params.parse(jutsu.effectParams().getAsJsonObject());
+        // Ancla visual (F11/DJT-239). Hasta este ticket, las 54 tecnicas de area no dibujaban NADA: hacian
+        // dano y no se veia. Se dibuja alrededor del caster y del tamano del radio real del efecto.
+        VfxService.playAt(level, jutsu, caster, params.radius());
         for (LivingEntity target : targets(level, caster, params)) {
             if (params.launchY() > 0) {
                 target.teleportTo(target.getX(), target.getY() + params.launchY(), target.getZ());

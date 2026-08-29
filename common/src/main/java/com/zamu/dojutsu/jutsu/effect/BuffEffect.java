@@ -25,6 +25,9 @@ public final class BuffEffect implements JutsuEffect {
 
     @Override
     public void apply(ServerLevel level, LivingEntity caster, JutsuEntry jutsu) {
+        // Ancla visual (F11/DJT-239): antes solo se veia el icono del efecto de pocion, que no dice que
+        // acabas de lanzar una tecnica. Radio corto: es un buff sobre uno mismo.
+        VfxService.playAt(level, jutsu, caster, 1.0D);
         for (MobEffectSpec spec : Params.parse(jutsu.effectParams().getAsJsonObject()).effects()) {
             spec.applyTo(caster);
         }
