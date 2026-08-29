@@ -982,7 +982,7 @@ tanto como lo que sí.
 
 ---
 
-## Fase 11 — UX e interfaces (DJT-230…237) — 🔄 CÓDIGO TERMINADO, FALTA PARTIDA
+## Fase 11 — UX e interfaces (DJT-230…237) — ✅ CERRADA (queda DJT-237, bloqueado por arte)
 
 Nace de cinco ideas de UX del usuario (2026-08-08). Plan y desviaciones:
 [`PLAN_UI_ETAPAS_5-1-4-3.txt`](../PLAN_UI_ETAPAS_5-1-4-3.txt). La idea 2 —modelos 3D de los jutsus— va aparte,
@@ -1003,9 +1003,14 @@ podía vivir en el cliente sin romper R12— y una petición del usuario a mitad
 | **DJT-236** | **Fusión de pantallas**: menú ninja, habilidades oculares y libro pasan a **pestañas bajo M**; **N y P quedan libres** | ✅ (**1080 tests**) |
 | DJT-237 | **Editor de posición de la textura del ojo** (etapa D del plan) | ⬜ **BLOQUEADA** — no existe render de overlay ocular ni texturas de ojo en assets; la etapa las da por hechas |
 
-**Pendiente para cerrar la fase:** la validación **en partida en los dos loaders** (regla 2). Checklists:
-[`CHECKLIST_PRUEBAS_F11.txt`](../CHECKLIST_PRUEBAS_F11.txt) (A y C) y
-[`CHECKLIST_PRUEBAS_F11_ETAPA_B.txt`](../CHECKLIST_PRUEBAS_F11_ETAPA_B.txt) (B, bloques B1…B9).
+**Validada en partida (2026-08-28):** las **182 comprobaciones** de los dos checklists pasan en **NeoForge
+y en Fabric** (regla 2). Checklists: [`CHECKLIST_PRUEBAS_F11.txt`](../CHECKLIST_PRUEBAS_F11.txt) (A y C) y
+[`CHECKLIST_PRUEBAS_F11_ETAPA_B.txt`](../CHECKLIST_PRUEBAS_F11_ETAPA_B.txt) (B, bloques B1…B9). Sin
+incidencias: ni el bug de la fatiga, ni el vaciado de la lista por regeneración, ni el robo de la hotbar por
+ALT+número, que eran los tres riesgos que se vigilaban.
+
+**Lo que queda de la fase:** sólo **DJT-237**, y no depende de código — necesita el render de overlay ocular y
+las texturas de ojo, que son arte.
 
 ### DJT-230 — Toggle de dōjutsu ✅
 

@@ -14,13 +14,14 @@ Este fichero se escribio ANTES de picar codigo. Varias cosas cambiaron al
 implementarlas. Lo que sigue es el estado real; donde el plan original decia
 otra cosa, lo he marcado en su sitio con [CAMBIO] y el porque.
 
-  ETAPA A  Toggle de dojutsu ................. DJT-230 ... HECHO (falta partida)
-  ETAPA B  Interfaz de jutsus y cast por tecla  DJT-231..236  HECHO (falta partida)
-  ETAPA C  HUD movible ....................... DJT-233 ... HECHO (falta partida)
+  ETAPA A  Toggle de dojutsu ................. DJT-230 ....... CERRADA
+  ETAPA B  Interfaz de jutsus y cast por tecla  DJT-231..236 .. CERRADA
+  ETAPA C  HUD movible ....................... DJT-233 ....... CERRADA
   ETAPA D  Editor de posicion del ojo ........ DJT-237 ... NO EMPEZADA (bloqueada)
 
   Build multiloader verde, 1080 tests, 0 fallos.
-  Validacion EN PARTIDA pendiente en los dos loaders (regla 2):
+  Validacion EN PARTIDA: PASADA el 2026-08-28 en los dos loaders (regla 2), las
+  182 comprobaciones de los dos checklists, sin incidencias.
       CHECKLIST_PRUEBAS_F11.txt          -> etapas A y C
       CHECKLIST_PRUEBAS_F11_ETAPA_B.txt  -> etapa B completa
 

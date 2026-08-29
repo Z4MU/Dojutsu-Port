@@ -11,6 +11,10 @@
  Estado automatico: build multiloader VERDE . 1080 tests . 0 fallos
 ===============================================================================
 
+RESULTADO: PASADO el 2026-08-28 en NeoForge y en Fabric, sin incidencias.
+Las casillas se dejan sin marcar a proposito: este fichero vuelve a servir tal cual
+para la siguiente build, y una marca vieja se confunde con una comprobacion nueva.
+
 QUE ESTAS PROBANDO EXACTAMENTE
   Antes: la tecla de cast lanzaba "lo que llevabas en la mano principal".
   Ahora: la tecla lanza "el jutsu que tienes SELECCIONADO en tu estado".
