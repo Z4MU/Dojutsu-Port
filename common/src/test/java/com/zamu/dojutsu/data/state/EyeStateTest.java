@@ -168,4 +168,113 @@ class EyeStateTest {
         assertEquals(Optional.of(origin), base.withUseLevel(EyeFamily.RINNEGAN, 10).amenominakaOrigin());
         assertEquals(Optional.of(origin), base.withAwakened(EyeFamily.RINNEGAN).amenominakaOrigin());
     }
+
+    // ---------------------------------------------------------------------------------------------------
+    // F11/DJT-230: encendido/apagado del dojutsu. Tener el ojo y tenerlo encendido son cosas distintas.
+    // ---------------------------------------------------------------------------------------------------
+
+    @Test
+    void unOjoNaceEncendido() {
+        // despertar o equipar deja el ojo listo para usar: si naciera apagado, el jugador creeria que no le
+        // desperto nada
+        EyeState conOjo = EyeState.DEFAULT.withActiveEye("sharingan");
+
+        assertTrue(conOjo.enabled());
+        assertEquals(Optional.of("sharingan"), conOjo.poweredEye());
+    }
+
+    @Test
+    void apagarConservaElOjoYSuFormaEterna() {
+        // este es el fondo del bug que arreglo DJT-230: el apagado forzado por fatiga borraba el ojo entero,
+        // y no habia forma de recuperarlo en partida (no se re-despierta una familia ya despertada)
+        EyeState eterno = EyeState.DEFAULT.withActiveEye("mangekyo_itachi").withEternal(true);
+
+        EyeState apagado = eterno.withEnabled(false);
+
+        assertEquals(Optional.of("mangekyo_itachi"), apagado.activeEye()); // lo sigue teniendo
+        assertTrue(apagado.eternal());                                     // y sigue siendo eterno
+        assertFalse(apagado.enabled());
+        assertTrue(apagado.poweredEye().isEmpty());                        // pero no funciona
+    }
+
+    @Test
+    void apagarYVolverAEncenderDevuelveElMismoOjo() {
+        EyeState base = EyeState.DEFAULT.withActiveEye("byakugan");
+
+        EyeState reencendido = base.withEnabled(false).withEnabled(true);
+
+        assertEquals(Optional.of("byakugan"), reencendido.poweredEye());
+    }
+
+    @Test
+    void apagarSueltaLaHabilidadSeleccionada() {
+        // el menu ocular no aplica con el ojo apagado; dejar la seleccion puesta haria que al encender se
+        // lanzara sola la ultima habilidad elegida
+        EyeState conAbility = EyeState.DEFAULT.withActiveEye("rinnegan").withSelectedAbility("shinra_tensei");
+
+        assertTrue(conAbility.withEnabled(false).selectedAbility().isEmpty());
+    }
+
+    @Test
+    void sinOjoNoHayOjoEncendido() {
+        assertTrue(EyeState.DEFAULT.poweredEye().isEmpty());
+        assertTrue(EyeState.DEFAULT.withEnabled(true).poweredEye().isEmpty());
+    }
+
+    @Test
+    void elToggleEsIdempotente() {
+        EyeState base = EyeState.DEFAULT.withActiveEye("sharingan");
+
+        assertSame(base, base.withEnabled(true));
+    }
+
+    @Test
+    void equiparUnOjoNuevoLoEnciende() {
+        // si te apagan el ojo por fatiga y luego evolucionas, el ojo nuevo no puede heredar el apagado
+        EyeState apagado = EyeState.DEFAULT.withActiveEye("sharingan").withEnabled(false);
+
+        EyeState evolucionado = apagado.withActiveEye("mangekyo_itachi");
+
+        assertTrue(evolucionado.enabled());
+        assertEquals(Optional.of("mangekyo_itachi"), evolucionado.poweredEye());
+    }
+
+    @Test
+    void unaPartidaAnteriorCargaConElOjoEncendido() {
+        // compatibilidad hacia atras: el NBT guardado antes de DJT-230 no tiene el campo, y quien tenia un
+        // Sharingan funcionando debe seguir teniendolo funcionando tras actualizar
+        CompoundTag viejo = new CompoundTag();
+        viejo.putString("activeEye", "sharingan");
+        viejo.putBoolean("eternal", true);
+
+        EyeState cargado = decode(viejo);
+
+        assertTrue(cargado.enabled());
+        assertEquals(Optional.of("sharingan"), cargado.poweredEye());
+        assertTrue(cargado.eternal());
+    }
+
+    @Test
+    void elApagadoSobreviveAlGuardado() {
+        EyeState apagado = EyeState.DEFAULT.withActiveEye("byakugan").withEnabled(false);
+
+        EyeState recargado = roundTrip(apagado);
+
+        assertFalse(recargado.enabled());
+        assertEquals(Optional.of("byakugan"), recargado.activeEye());
+        assertTrue(recargado.poweredEye().isEmpty());
+    }
+
+    @Test
+    void losWithersConservanElEncendido() {
+        // mismo riesgo que el origen del Amenominaka: si un wither perdiera el flag, el ojo se encenderia solo
+        EyeState apagado = EyeState.DEFAULT.withActiveEye("rinnegan").withEnabled(false);
+
+        assertFalse(apagado.withEyeStrain(50).enabled());
+        assertFalse(apagado.withEternal(true).enabled());
+        assertFalse(apagado.withTimer("t", 5).enabled());
+        assertFalse(apagado.withUseLevel(EyeFamily.RINNEGAN, 10).enabled());
+        assertFalse(apagado.withAwakened(EyeFamily.RINNEGAN).enabled());
+        assertFalse(apagado.withoutSelectedAbility().enabled());
+    }
 }

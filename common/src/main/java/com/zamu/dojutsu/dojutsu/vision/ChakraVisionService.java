@@ -97,7 +97,7 @@ public final class ChakraVisionService implements PlayerTickSystem {
 
     private static boolean hasVisionActive(PlayerNinjaData data) {
         EyeState eye = data.eye();
-        boolean grants = eye.activeEye()
+        boolean grants = eye.poweredEye() // F11/DJT-230: apagado = sin vision
                 .flatMap(EyeRegistry::get)
                 .map(def -> def.grantsChakraVision(eye.useLevel(def.family())))
                 .orElse(false);

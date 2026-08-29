@@ -70,6 +70,7 @@ public final class EyeDebugCommand {
                                         .suggests(EYES)
                                         .executes(EyeDebugCommand::activate)))
                         .then(Commands.literal("deactivate").executes(EyeDebugCommand::deactivate))
+                        .then(Commands.literal("toggle").executes(EyeDebugCommand::toggle))
                         .then(Commands.literal("use")
                                 .then(Commands.argument("family", StringArgumentType.word())
                                         .suggests(FAMILIES)
@@ -116,11 +117,27 @@ public final class EyeDebugCommand {
         return 1;
     }
 
+    /**
+     * Alterna el dojutsu pasando por {@link com.zamu.dojutsu.dojutsu.EyeToggleService} (F11/DJT-230), no
+     * escribiendo el estado a mano: asi el QA cubre tambien el veto por fatiga y el rate-limit.
+     */
+    private static int toggle(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        boolean on = com.zamu.dojutsu.dojutsu.EyeToggleService.toggle(player);
+        PlayerNinjaData data = NinjaData.get(player);
+        ctx.getSource().sendSuccess(
+                () -> Component.literal("toggle -> " + (on ? "ENCENDIDO" : "APAGADO") + ": " + describe(data.eye())),
+                false);
+        return 1;
+    }
+
     private static int deactivate(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         PlayerNinjaData data = NinjaData.get(player);
         data.setEye(data.eye().withoutActiveEye());
-        ctx.getSource().sendSuccess(() -> Component.literal("ojo apagado: " + describe(data.eye())), false);
+        ctx.getSource().sendSuccess(
+                () -> Component.literal("ojo RETIRADO (no es apagar, usa toggle): " + describe(data.eye())),
+                false);
         return 1;
     }
 
@@ -201,6 +218,7 @@ public final class EyeDebugCommand {
 
     private static String describe(EyeState eye) {
         return "activeEye=" + eye.activeEye().orElse("(ninguno)")
+                + " enabled=" + eye.enabled()
                 + " eternal=" + eye.eternal()
                 + " strain=" + eye.eyeStrain()
                 + " selected=" + eye.selectedAbility().orElse("(ninguna)")

@@ -41,6 +41,7 @@ public final class RespawnHandler {
         // TODO F7+: formas de jinchuriki, velocidad base (namikaze) y bonus de taijutsu.
         EightGatesService.closeSafely(newPlayer);       // F6/DJT-145
         SageService.forget(newPlayer.getUUID());        // F6/DJT-136
+        com.zamu.dojutsu.dojutsu.EyeToggleService.forget(newPlayer.getUUID()); // F11/DJT-230
         CursedSealService.forget(newPlayer.getUUID());  // F6/DJT-140
         SoahSealService.forget(newPlayer.getUUID());    // F6/DJT-150 (la reserva del sello sobrevive)
         FormService.forget(newPlayer.getUUID());        // F7/DJT-166 (la bestia sellada sobrevive)

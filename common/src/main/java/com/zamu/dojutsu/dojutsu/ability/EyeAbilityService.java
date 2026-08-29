@@ -112,12 +112,13 @@ public final class EyeAbilityService {
     }
 
     /**
-     * Decision pura: que habilidad castear. Requiere un ojo activo y una habilidad seleccionada que este
-     * <b>registrada</b> (una habilidad data-only del menu sin clase aun no se puede lanzar). Vacio = no procede.
+     * Decision pura: que habilidad castear. Requiere un ojo <b>encendido</b> (F11/DJT-230: tener el ojo no
+     * basta, hay que tenerlo activo) y una habilidad seleccionada que este <b>registrada</b> (una habilidad
+     * data-only del menu sin clase aun no se puede lanzar). Vacio = no procede.
      */
     static Optional<EyeAbility> resolveCast(PlayerNinjaData data, Function<String, Optional<EyeAbility>> lookup) {
         EyeState eye = data.eye();
-        if (eye.activeEye().isEmpty()) {
+        if (eye.poweredEye().isEmpty()) {
             return Optional.empty();
         }
         return eye.selectedAbility().flatMap(lookup);

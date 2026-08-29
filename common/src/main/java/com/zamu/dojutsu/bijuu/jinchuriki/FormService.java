@@ -345,7 +345,7 @@ public final class FormService implements PlayerTickSystem {
 
         @Override
         public boolean hasRinneganActive() {
-            return NinjaData.get(player).eye().activeEye()
+            return NinjaData.get(player).eye().poweredEye() // F11/DJT-230: apagado no cuenta como activo
                     .map(eye -> eye.startsWith("rinnegan") || eye.equals("rinne_sharingan"))
                     .orElse(false);
         }

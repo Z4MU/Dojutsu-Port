@@ -30,6 +30,17 @@ import java.util.TreeMap;
  * {@code Eye:N} en el slot de casco) se modela como <b>estado</b>, no como armadura. Los 9 indices Eternal
  * Mangekyo son {@code activeEye} + {@link #eternal}, no ids aparte.
  *
+ * <p><b>Tener un ojo y tenerlo encendido son cosas distintas (F11/DJT-230).</b> {@link #activeEye} dice
+ * <i>cual</i> ojo posee el jugador (equivale a llevar el item en el slot de casco); {@link #enabled} dice si
+ * ahora mismo esta <i>encendido</i>. Los consumidores que representan "los poderes del ojo estan funcionando"
+ * (habilidades, chakra vision, penalizaciones de fatiga) deben usar {@link #poweredEye()}, no
+ * {@link #activeEye()}; los que representan "de que ojo soy dueno" (menu ocular, evolucion, despertar del EMS)
+ * siguen usando {@link #activeEye()} — si no, el menu para volver a encenderlo desapareceria al apagarlo.
+ *
+ * <p>El datapack no tenia apagado: alli "apagar" era quitarse el item, y {@code eye_strain/force_deactivate}
+ * devolvia el ojo al inventario con {@code give/check} para poder reequiparlo. Como aqui no hay item, apagar
+ * <b>conserva</b> el ojo y su forma eterna.
+ *
  * <p><b>El eye strain se persiste como {@code int}</b> (0..100), no como {@link StrainMeter}: el meter es un
  * objeto <b>mutable</b> con listeners (servicio), incompatible con un value object inmutable. El servicio de
  * strain (DJT-116) reconstruye un {@link StrainMeter} transitorio con {@link #eyeStrain()}, opera y escribe el
@@ -39,7 +50,10 @@ import java.util.TreeMap;
  * futura o corrupto) se descartan al leer en vez de romper la carga; un ojo activo desconocido se conserva como
  * string (el servicio decidira que hacer si su definicion no existe).
  *
- * @param activeEye        id del ojo activo, o vacio si no lleva ninguno
+ * @param activeEye        id del ojo que posee el jugador, o vacio si no lleva ninguno. <b>Poseerlo no
+ *                         implica tenerlo encendido</b>: ver {@link #enabled} y {@link #poweredEye()}
+ * @param enabled          el ojo esta encendido. {@code true} por defecto (quien ya tenia un ojo antes de
+ *                         F11/DJT-230 sigue con el encendido al cargar la partida)
  * @param eternal          el ojo activo esta en su forma eterna (EMS)
  * @param useLevels        uso acumulado por familia ({@code d.<eye>_use}); dispara las evoluciones
  * @param awakened         familias ya despertadas ({@code d.<eye>_wake}); evita volver a despertar
@@ -52,13 +66,13 @@ import java.util.TreeMap;
  *                          coordenadas en el estado, igual que la marca del Dios del Trueno (DJT-180), asi que
  *                          <b>no se mantiene ningun chunk cargado</b> por tener un regreso pendiente
  */
-public record EyeState(Optional<String> activeEye, boolean eternal, Map<EyeFamily, Integer> useLevels,
-        Set<EyeFamily> awakened, Map<String, Integer> timers, int eyeStrain,
+public record EyeState(Optional<String> activeEye, boolean enabled, boolean eternal,
+        Map<EyeFamily, Integer> useLevels, Set<EyeFamily> awakened, Map<String, Integer> timers, int eyeStrain,
         Optional<String> selectedAbility, Optional<GlobalPos> amenominakaOrigin) {
 
     /** Ninja nuevo: sin ojo, sin uso, sin despertares, sin fatiga. */
     public static final EyeState DEFAULT =
-            new EyeState(Optional.empty(), false, Map.of(), Set.of(), Map.of(), 0, Optional.empty(),
+            new EyeState(Optional.empty(), true, false, Map.of(), Set.of(), Map.of(), 0, Optional.empty(),
                     Optional.empty());
 
     /**
@@ -68,6 +82,7 @@ public record EyeState(Optional<String> activeEye, boolean eternal, Map<EyeFamil
      */
     public static final Codec<EyeState> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.optionalFieldOf("activeEye").forGetter(EyeState::activeEye),
+            Codec.BOOL.optionalFieldOf("enabled", true).forGetter(EyeState::enabled),
             Codec.BOOL.optionalFieldOf("eternal", false).forGetter(EyeState::eternal),
             Codec.unboundedMap(Codec.STRING, Codec.INT).optionalFieldOf("useLevels", Map.of())
                     .forGetter(s -> nameKeys(s.useLevels())),
@@ -104,22 +119,49 @@ public record EyeState(Optional<String> activeEye, boolean eternal, Map<EyeFamil
         return timers.getOrDefault(key, 0);
     }
 
-    /** Copia con otro ojo activo (idempotente). */
-    public EyeState withActiveEye(String eyeId) {
-        Objects.requireNonNull(eyeId, "eyeId");
-        if (activeEye.filter(eyeId::equals).isPresent()) {
+    /**
+     * Ojo cuyos poderes estan <b>funcionando</b> ahora mismo: el ojo activo si esta encendido, vacio si no hay
+     * ojo o si esta apagado (F11/DJT-230).
+     *
+     * <p>Es el metodo que deben usar los consumidores que preguntan "puede hacer esto el jugador": habilidades
+     * oculares, chakra vision, penalizaciones de fatiga y el coste pasivo de chakra. Los que preguntan "de que
+     * ojo es dueno" (menu, evolucion, EMS) usan {@link #activeEye()}.
+     */
+    public Optional<String> poweredEye() {
+        return enabled ? activeEye : Optional.empty();
+    }
+
+    /**
+     * Copia encendiendo o apagando el ojo (idempotente). No toca {@link #activeEye} ni {@link #eternal}: apagar
+     * <b>no</b> es perder el ojo. Apagar tambien suelta la habilidad seleccionada, porque el menu ocular no
+     * aplica con el ojo apagado.
+     */
+    public EyeState withEnabled(boolean value) {
+        if (enabled == value) {
             return this;
         }
-        return new EyeState(Optional.of(eyeId), eternal, useLevels, awakened, timers, eyeStrain,
+        Optional<String> ability = value ? selectedAbility : Optional.empty();
+        return new EyeState(activeEye, value, eternal, useLevels, awakened, timers, eyeStrain, ability,
+                amenominakaOrigin);
+    }
+
+    /** Copia con otro ojo activo (idempotente). Equipar/despertar un ojo lo deja <b>encendido</b>. */
+    public EyeState withActiveEye(String eyeId) {
+        Objects.requireNonNull(eyeId, "eyeId");
+        if (enabled && activeEye.filter(eyeId::equals).isPresent()) {
+            return this;
+        }
+        return new EyeState(Optional.of(eyeId), true, eternal, useLevels, awakened, timers, eyeStrain,
                 selectedAbility, amenominakaOrigin);
     }
 
     /** Copia sin ojo activo (desactiva; tambien limpia el flag eterno y la seleccion del menu). */
     public EyeState withoutActiveEye() {
-        if (activeEye.isEmpty() && !eternal && selectedAbility.isEmpty()) {
+        if (activeEye.isEmpty() && enabled && !eternal && selectedAbility.isEmpty()) {
             return this;
         }
-        return new EyeState(Optional.empty(), false, useLevels, awakened, timers, eyeStrain, Optional.empty(), amenominakaOrigin);
+        return new EyeState(Optional.empty(), true, false, useLevels, awakened, timers, eyeStrain,
+                Optional.empty(), amenominakaOrigin);
     }
 
     /** Copia con el flag de forma eterna (EMS). */
@@ -127,7 +169,8 @@ public record EyeState(Optional<String> activeEye, boolean eternal, Map<EyeFamil
         if (eternal == value) {
             return this;
         }
-        return new EyeState(activeEye, value, useLevels, awakened, timers, eyeStrain, selectedAbility, amenominakaOrigin);
+        return new EyeState(activeEye, enabled, value, useLevels, awakened, timers, eyeStrain, selectedAbility,
+                amenominakaOrigin);
     }
 
     /** Copia fijando (absoluto) el uso de una familia ({@code d.<eye>_use = N}). */
@@ -136,7 +179,8 @@ public record EyeState(Optional<String> activeEye, boolean eternal, Map<EyeFamil
         EnumMap<EyeFamily, Integer> next = new EnumMap<>(EyeFamily.class);
         next.putAll(useLevels);
         next.put(family, level);
-        return new EyeState(activeEye, eternal, next, awakened, timers, eyeStrain, selectedAbility, amenominakaOrigin);
+        return new EyeState(activeEye, enabled, eternal, next, awakened, timers, eyeStrain, selectedAbility,
+                amenominakaOrigin);
     }
 
     /** Copia marcando una familia como despertada (idempotente). */
@@ -148,7 +192,8 @@ public record EyeState(Optional<String> activeEye, boolean eternal, Map<EyeFamil
         EnumSet<EyeFamily> next = EnumSet.noneOf(EyeFamily.class);
         next.addAll(awakened);
         next.add(family);
-        return new EyeState(activeEye, eternal, useLevels, next, timers, eyeStrain, selectedAbility, amenominakaOrigin);
+        return new EyeState(activeEye, enabled, eternal, useLevels, next, timers, eyeStrain, selectedAbility,
+                amenominakaOrigin);
     }
 
     /** Copia fijando (absoluto) un temporizador por clave. */
@@ -156,7 +201,8 @@ public record EyeState(Optional<String> activeEye, boolean eternal, Map<EyeFamil
         Objects.requireNonNull(key, "key");
         Map<String, Integer> next = new HashMap<>(timers);
         next.put(key, value);
-        return new EyeState(activeEye, eternal, useLevels, awakened, next, eyeStrain, selectedAbility, amenominakaOrigin);
+        return new EyeState(activeEye, enabled, eternal, useLevels, awakened, next, eyeStrain, selectedAbility,
+                amenominakaOrigin);
     }
 
     /** Copia con otra fatiga ocular (clampada a 0..100 por el constructor). */
@@ -164,13 +210,15 @@ public record EyeState(Optional<String> activeEye, boolean eternal, Map<EyeFamil
         if (eyeStrain == clampStrain(value)) {
             return this;
         }
-        return new EyeState(activeEye, eternal, useLevels, awakened, timers, value, selectedAbility, amenominakaOrigin);
+        return new EyeState(activeEye, enabled, eternal, useLevels, awakened, timers, value, selectedAbility,
+                amenominakaOrigin);
     }
 
     /** Copia con otra habilidad seleccionada en el menu ocular. */
     public EyeState withSelectedAbility(String abilityId) {
         Objects.requireNonNull(abilityId, "abilityId");
-        return new EyeState(activeEye, eternal, useLevels, awakened, timers, eyeStrain, Optional.of(abilityId), amenominakaOrigin);
+        return new EyeState(activeEye, enabled, eternal, useLevels, awakened, timers, eyeStrain,
+                Optional.of(abilityId), amenominakaOrigin);
     }
 
     /** Copia sin habilidad seleccionada. */
@@ -178,13 +226,14 @@ public record EyeState(Optional<String> activeEye, boolean eternal, Map<EyeFamil
         if (selectedAbility.isEmpty()) {
             return this;
         }
-        return new EyeState(activeEye, eternal, useLevels, awakened, timers, eyeStrain, Optional.empty(), amenominakaOrigin);
+        return new EyeState(activeEye, enabled, eternal, useLevels, awakened, timers, eyeStrain,
+                Optional.empty(), amenominakaOrigin);
     }
 
     /** Copia recordando desde donde se salio del Overworld con el Amenominaka ({@code set_original_pos}). */
     public EyeState withAmenominakaOrigin(GlobalPos origin) {
         Objects.requireNonNull(origin, "origin");
-        return new EyeState(activeEye, eternal, useLevels, awakened, timers, eyeStrain, selectedAbility,
+        return new EyeState(activeEye, enabled, eternal, useLevels, awakened, timers, eyeStrain, selectedAbility,
                 Optional.of(origin));
     }
 
@@ -193,15 +242,15 @@ public record EyeState(Optional<String> activeEye, boolean eternal, Map<EyeFamil
         if (amenominakaOrigin.isEmpty()) {
             return this;
         }
-        return new EyeState(activeEye, eternal, useLevels, awakened, timers, eyeStrain, selectedAbility,
+        return new EyeState(activeEye, enabled, eternal, useLevels, awakened, timers, eyeStrain, selectedAbility,
                 Optional.empty());
     }
 
-    private static EyeState fromCodec(Optional<String> activeEye, boolean eternal, Map<String, Integer> useLevels,
-            List<String> awakened, Map<String, Integer> timers, int eyeStrain,
+    private static EyeState fromCodec(Optional<String> activeEye, boolean enabled, boolean eternal,
+            Map<String, Integer> useLevels, List<String> awakened, Map<String, Integer> timers, int eyeStrain,
             Optional<String> selectedAbility, Optional<GlobalPos> amenominakaOrigin) {
-        return new EyeState(activeEye, eternal, parseUseLevels(useLevels), parseFamilies(awakened), timers,
-                eyeStrain, selectedAbility, amenominakaOrigin);
+        return new EyeState(activeEye, enabled, eternal, parseUseLevels(useLevels), parseFamilies(awakened),
+                timers, eyeStrain, selectedAbility, amenominakaOrigin);
     }
 
     /** Serializa el mapa de uso con claves por nombre en minusculas, ordenadas (salida determinista). */

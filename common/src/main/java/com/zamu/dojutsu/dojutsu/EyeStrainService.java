@@ -57,7 +57,8 @@ public final class EyeStrainService implements PlayerTickSystem {
 
     private static final int WEAKNESS_AT = 95;
     private static final int BLINDNESS_AT = 98;
-    private static final int FORCE_DEACTIVATE_AT = 100;
+    /** Fatiga a la que el ojo se apaga solo. Package-private: {@link EyeToggleService} veta encenderlo ahi. */
+    static final int FORCE_DEACTIVATE_AT = 100;
 
     /** Ojo exento de ceguera y apagado por fatiga (Rinne Sharingan, {@code eye:10}). */
     static final String STRAINLESS_EYE = "rinne_sharingan";
@@ -75,15 +76,15 @@ public final class EyeStrainService implements PlayerTickSystem {
     public void tick(ServerPlayer player) {
         PlayerNinjaData data = NinjaData.get(player);
         EyeState eyeState = data.eye();
-        if (eyeState.eyeStrain() == 0 && eyeState.activeEye().isEmpty()) {
-            return; // sin fatiga ni ojo activo: nada que hacer (caso comun, sin trabajo por tick)
+        if (eyeState.eyeStrain() == 0 && eyeState.poweredEye().isEmpty()) {
+            return; // sin fatiga ni ojo encendido: nada que hacer (caso comun, sin trabajo por tick)
         }
         EyeState afterRegen = regen(eyeState, data.natures().hashiramaDna());
         EyeState finalState = applyEffects(player, afterRegen);
         if (finalState != eyeState) {
             data.setEye(finalState);
         }
-        warnStrain(player, finalState.eyeStrain(), finalState.activeEye().isPresent());
+        warnStrain(player, finalState.eyeStrain(), finalState.poweredEye().isPresent());
     }
 
     /**
@@ -115,10 +116,10 @@ public final class EyeStrainService implements PlayerTickSystem {
 
     /** Aplica los efectos por umbral al jugador (glue) y devuelve el estado (apagado forzado al 100%). */
     private static EyeState applyEffects(ServerPlayer player, EyeState eyeState) {
-        if (eyeState.activeEye().isEmpty()) {
-            return eyeState; // sin ojo activo no hay penalizacion; la fatiga solo regena
+        if (eyeState.poweredEye().isEmpty()) {
+            return eyeState; // sin ojo encendido no hay penalizacion; la fatiga solo regena
         }
-        StrainEffects effects = effectsFor(eyeState.eyeStrain(), STRAINLESS_EYE.equals(eyeState.activeEye().get()));
+        StrainEffects effects = effectsFor(eyeState.eyeStrain(), STRAINLESS_EYE.equals(eyeState.poweredEye().get()));
         if (effects.weakness()) {
             player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 20, 0, false, false)); // 1s, refrescado
         }
@@ -134,7 +135,12 @@ public final class EyeStrainService implements PlayerTickSystem {
                     Component.translatable("eye_strain.dojutsu.at_percent", eyeState.eyeStrain())
                             .withStyle(ChatFormatting.RED),
                     false);
-            return eyeState.withoutActiveEye(); // el ojo se apaga a la fuerza (force_deactivate)
+            // force_deactivate: APAGA el ojo, no lo quita. El datapack devolvia el item al inventario con
+            // give/check para poder reequiparlo; aqui el equivalente es conservar activeEye y eternal.
+            // Antes de F11/DJT-230 esto llamaba a withoutActiveEye(), que borraba el ojo y su forma eterna sin
+            // ninguna via de recuperacion en partida (AwakeningService no re-despierta una familia ya despertada
+            // y EvolutionService exige un ojo activo).
+            return eyeState.withEnabled(false);
         }
         return eyeState;
     }
