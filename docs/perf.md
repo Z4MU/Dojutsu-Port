@@ -1,8 +1,12 @@
-# Rendimiento — auditoría del coste por tick (F10/DJT-222)
+# Rendimiento — auditoría del coste por tick y por frame
 
-> 2026-08-01. Cubre **todos** los puntos de entrada por tick del mod. La conclusión en una línea: **el mod no
-> tiene un problema de rendimiento por tick**; lo que sí tiene es un eje de escalado —los barridos de
-> entidades— que crece con el contenido del mundo y no con el trabajo constante por jugador.
+> **§0–§6 (F10/DJT-222, 2026-08-01) — el tick de servidor.** Cubre **todos** los puntos de entrada por tick del
+> mod. La conclusión en una línea: **el mod no tiene un problema de rendimiento por tick**; lo que sí tiene es
+> un eje de escalado —los barridos de entidades— que crece con el contenido del mundo y no con el trabajo
+> constante por jugador.
+>
+> **§7 (F11/DJT-233, 2026-08-08) — el frame de cliente.** Eje distinto y más frecuente (60–144 veces por
+> segundo, frente a 20). Ahí manda la asignación, no el cálculo. Léelo antes de tocar el HUD.
 
 ## 0. La escala, primero
 
@@ -151,3 +155,78 @@ No se ha medido el mod **en partida**. Todo lo de aquí es coste unitario de cam
 estructural; el MSPT real, con jugadores, entidades y chunks de verdad, sólo se ve jugando. Es la misma
 frontera que encontró DJT-223 y por el mismo motivo. Lo que sí se puede afirmar: **no hay ningún sistema por
 tick sin acotar**, y los tres barridos que escalan están identificados, con su intervalo y su puerta.
+
+
+---
+
+## 7. El otro eje: el coste **por frame** (F11/DJT-233)
+
+> Añadido 2026-08-08, al portar el HUD movible. Las secciones 0–6 son de DJT-222 y miran **el tick de
+> servidor**. Este apartado abre el eje que faltaba, y no por completismo: el HUD se dibuja en el **frame de
+> cliente**, que a 60 fps corre **tres veces más a menudo** que el tick, y a 144 fps, siete.
+
+### 7.1. Por qué el tick no era todo
+
+Todo lo auditado en DJT-222 vive en `PlayerTickSystem` o en `TickEvent.SERVER_POST`: 20 veces por segundo. El
+HUD cuelga de `ClientGuiEvent.RENDER_HUD`, que corre **una vez por frame renderizado**. La referencia de §0
+(«1 µs por jugador es el 0,04 % del tick») no sirve aquí, porque ni hay 20 jugadores ni el presupuesto es de
+50 ms: es un solo cliente y un frame de ~16 ms (60 fps) o ~7 ms (144 fps).
+
+La consecuencia práctica es que **en el HUD importa la asignación, no el cálculo**. La aritmética de colocar
+tres elementos es despreciable; lo que se nota es la basura que se genera para tirarla en el frame siguiente.
+
+### 7.2. Lo que se corrigió
+
+**`HudElement.defaultPlacement()` construía un `HudPlacement` nuevo en cada llamada.**
+
+`HudLayout.get()` cae en ese default siempre que el jugador **no** haya movido nada — que es el caso por
+defecto y, por tanto, el de la mayoría. Con tres elementos dibujados por frame, eso son **180 objetos por
+segundo a 60 fps** (432 a 144 fps) para devolver siempre exactamente la misma respuesta.
+
+Ahora se construye una vez en el constructor del enum y se comparte. Es seguro porque `HudPlacement` es un
+value object inmutable: la misma propiedad que en §4 justifica *pagar* las copias de los sub-estados es la que
+aquí permite *no* pagarlas, porque nadie puede mutar la instancia compartida.
+
+**`HudElement.values()` en bucles por frame.** `values()` clona el array defensivamente en cada llamada (la
+JVM no puede saber que no lo vas a modificar). Se llamaba en el bucle de render del editor y en el
+`elementAt` de cada clic. Añadido `HudElement.all()`, que devuelve un array cacheado.
+
+### 7.3. Método, y qué NO se puede afirmar
+
+**No hay benchmark de esto.** `TickHotPathBenchmark` (§5) mide caminos de tick y no se ha extendido al frame.
+Las dos correcciones salieron de **lectura del código**, y las cifras de arriba son **aritmética**
+(elementos × fps), no medición: describen cuántos objetos se dejan de crear, no cuántos milisegundos se
+ahorran — que es casi seguro que sean cero coma nada.
+
+Se hicieron igualmente por dos motivos, y conviene que consten para no confundirlos con una optimización
+justificada por datos:
+
+1. Son de **coste nulo**: menos código y más simple, no un cache que haya que invalidar. La regla de §4 («no
+   añadir superficie de error para ahorrar nanosegundos») no se rompe porque aquí no se añade superficie.
+2. Estaban en el camino de crecer. El HUD va a ganar elementos (el jutsu seleccionado de la etapa B), y el
+   editor los recorre todos por frame. Es más barato no arrancar torcido.
+
+Si algún día hace falta la medición de verdad, lo que hay que mirar **no** es ns/op: es el ritmo de asignación
+del cliente con el HUD visible, en un perfilador, con el editor abierto y arrastrando.
+
+### 7.4. Lo que se decidió NO tocar en el HUD
+
+Mismo criterio que §4: se anota para no volver a discutirlo.
+
+- **`RankHudOverlay` y `ChakraHudOverlay` construyen `Component` y `String` por frame** (el título del rango,
+  el `chakra / maxChakra` formateado). Es anterior a este ticket y es lo que hace todo el HUD de vanilla.
+  Cachearlo obligaría a invalidar cuando cambia el valor observado — justo el tipo de estado derivado que §4
+  descarta.
+- **`HudLayout` es estado estático mutable.** Es deliberado y sigue el patrón de `ClientNinjaData`: hay un
+  solo cliente por proceso, y pasar la colocación por parámetro hasta cada overlay no compraría nada.
+- **Los overlays consultan `HudLayout.get()` por frame** en vez de recibir la colocación resuelta. Es una
+  consulta a un `EnumMap` y mantiene cada overlay autónomo, que es lo que permite dibujarlos también desde el
+  editor.
+
+### 7.5. Guía para lo que venga
+
+Al añadir un elemento nuevo al HUD:
+
+- Declararlo en el enum `HudElement` (una línea): hereda editor, guardado, clamp y tolerancia del config.
+- Recorrer con `HudElement.all()`, nunca con `values()`, en cualquier código por frame.
+- No asignar en el camino de dibujado si el valor no cambia entre frames.

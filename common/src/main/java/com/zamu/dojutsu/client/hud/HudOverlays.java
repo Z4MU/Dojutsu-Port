@@ -20,6 +20,7 @@ public final class HudOverlays {
 
     /** Suscribe el dibujado del HUD. Llamar una vez en la inicializacion de cliente. */
     public static void register() {
+        HudLayout.load(); // colocacion elegida por el jugador (F11/DJT-233); sin archivo, defaults
         ClientGuiEvent.RENDER_HUD.register(HudOverlays::onRenderHud);
     }
 
