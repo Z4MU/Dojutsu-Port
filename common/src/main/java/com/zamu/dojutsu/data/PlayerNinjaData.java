@@ -273,14 +273,28 @@ public final class PlayerNinjaData {
      * Reemplaza el conocimiento de jutsus. La llaman {@code JutsuLearningService} (aprendizaje), el
      * pipeline de cast (cooldowns, DJT-077) y el reset atomico.
      *
-     * <p>Marca observable <b>solo si cambian los cooldowns</b> (lo que ve el HUD de cd, DJT-081): igual
-     * que {@code setChakra}, un cambio no observable (aprender un jutsu, avanzar el progreso del learner)
-     * no genera delta de red inutil. {@code known}/{@code learnProgress} no cruzan la red.
+     * <p>Marca observable <b>por campo</b>, no en bloque: los cooldowns (HUD de cd, DJT-081) y, desde
+     * F11/DJT-231, los jutsus <b>aprendidos</b>, que el selector de jutsu necesita en cliente. Igual que
+     * {@code setChakra}, un cambio no observable (avanzar el progreso del learner) no genera delta inutil;
+     * {@code learnProgress} sigue sin cruzar la red.
+     *
+     * <p>Que sean dos marcas y no una importa: los cooldowns cambian en cada cast y la lista de aprendidos
+     * casi nunca, y esa lista es lo mas grande que se sincroniza. Marcarlas juntas mandaria los 128 ids en
+     * cada enfriamiento.
      */
     public void setJutsu(JutsuKnowledge jutsu) {
         Objects.requireNonNull(jutsu, "jutsu");
         if (!this.jutsu.cooldowns().equals(jutsu.cooldowns())) {
             dirtyTracker.markDirty(ObservableField.JUTSU_COOLDOWNS);
+        }
+        if (!this.jutsu.known().equals(jutsu.known())) {
+            dirtyTracker.markDirty(ObservableField.JUTSU_KNOWN);
+        }
+        if (!this.jutsu.selectedJutsu().equals(jutsu.selectedJutsu())) {
+            dirtyTracker.markDirty(ObservableField.JUTSU_SELECTED);
+        }
+        if (!this.jutsu.quickSlots().equals(jutsu.quickSlots())) {
+            dirtyTracker.markDirty(ObservableField.JUTSU_SLOTS);
         }
         this.jutsu = jutsu;
     }

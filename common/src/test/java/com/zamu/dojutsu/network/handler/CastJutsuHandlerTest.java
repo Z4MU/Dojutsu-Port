@@ -8,8 +8,8 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 /**
- * Tests de las partes puras del handler de la tecla de cast (F4/DJT-080): anti-spam y la puerta
- * "solo se castea lo que se conoce". El glue con {@code ServerPlayer}/inventario se valida en runtime.
+ * Tests de las partes puras del handler de la tecla de cast (F4/DJT-080): anti-spam y de donde sale el jutsu
+ * que se lanza. El glue con {@code ServerPlayer} se valida en runtime.
  */
 class CastJutsuHandlerTest {
 
@@ -38,12 +38,20 @@ class CastJutsuHandlerTest {
         assertFalse(CastJutsuHandler.isRateLimited(a, 1_000L)); // sin memoria previa
     }
 
-    // --- Puerta "solo se castea lo conocido" (la valida el handler contra JutsuKnowledge) ---
+    // --- De donde sale el jutsu (F11/DJT-231: del estado, ya no del item de la mano) ---
 
     @Test
-    void soloSeCasteaUnJutsuConocido() {
-        JutsuKnowledge knowledge = JutsuKnowledge.DEFAULT.withKnown("fire_bullet");
-        assertTrue(knowledge.knows("fire_bullet"));   // aprendido con el learner -> casteable
-        assertFalse(knowledge.knows("great_fireball")); // item por comando/residuo -> rechazado
+    void sinSeleccionNoHayNadaQueLanzar() {
+        assertTrue(JutsuKnowledge.DEFAULT.selectedJutsu().isEmpty());
+    }
+
+    @Test
+    void laSeleccionQueLlegaAlPipelineEstaYaValidadaContraLoConocido() {
+        // La puerta "solo se castea lo conocido" no se perdio al mudarse al selector: la sostiene el estado,
+        // asi que una seleccion que deje de estar entre los aprendidos no puede llegar al cast.
+        JutsuKnowledge knowledge = JutsuKnowledge.DEFAULT.withKnown("fire_bullet").withSelected("fire_bullet");
+        assertTrue(knowledge.selectedJutsu().isPresent());
+        assertFalse(knowledge.withSelected("great_fireball").selectedJutsu()
+                .filter("great_fireball"::equals).isPresent()); // no aprendido -> descartado
     }
 }

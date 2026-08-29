@@ -13,6 +13,7 @@ import com.zamu.dojutsu.dojutsu.EternalAwakeningService;
 import com.zamu.dojutsu.dojutsu.EvolutionService;
 import com.zamu.dojutsu.dojutsu.EyeReloadListener;
 import com.zamu.dojutsu.dojutsu.EyeStrainService;
+import com.zamu.dojutsu.dojutsu.EyeToggleService;
 import com.zamu.dojutsu.dojutsu.ability.EyeAbilityService;
 import com.zamu.dojutsu.dojutsu.susanoo.SusanooService;
 import com.zamu.dojutsu.dojutsu.tenseigan.TenseiganChakraModeService;
@@ -68,6 +69,8 @@ import com.zamu.dojutsu.network.NinjaSync;
 import com.zamu.dojutsu.network.OnboardingSync;
 import com.zamu.dojutsu.network.handler.CastJutsuHandler;
 import com.zamu.dojutsu.network.handler.EyeMenuHandler;
+import com.zamu.dojutsu.network.handler.JutsuBookHandler;
+import com.zamu.dojutsu.network.handler.SelectJutsuHandler;
 import com.zamu.dojutsu.network.handler.MenuActionHandler;
 import com.zamu.dojutsu.network.handler.OnboardingChoiceHandler;
 import dev.architectury.event.events.common.EntityEvent;
@@ -290,6 +293,7 @@ public final class DojutsuLifecycle {
         TenseiganChakraModeService.forget(player); // retira el vuelo del chakra mode al desconectar (fleco F5)
         EyeStrainService.forgetWarnings(player.getUUID()); // olvida el "ya avisado" de fatiga (fleco F5)
         SageService.forget(player.getUUID()); // el modo sabio no sobrevive a la sesion (F6/DJT-136)
+        EyeToggleService.forget(player.getUUID()); // rate-limit del toggle ocular (F11/DJT-230)
         CursedSealService.forget(player.getUUID()); // el sello se apaga al desconectar (F6/DJT-140)
         EightGatesService.forget(player.getUUID()); // las puertas se cierran al desconectar (F6/DJT-145)
         SoahSealService.forget(player.getUUID()); // el SOAH se apaga al desconectar; la reserva persiste (DJT-150)
@@ -300,6 +304,8 @@ public final class DojutsuLifecycle {
         WaterWalkService.forget(player.getUUID()); // el sostenimiento sobre agua no sobrevive a la sesion (DJT-205)
         CraftingGateService.forget(player.getUUID()); // libera el anti-spam del aviso de crafteo (F9/DJT-206)
         CastJutsuHandler.forget(player.getUUID()); // libera el estado anti-spam de la tecla de cast (DJT-080)
+        SelectJutsuHandler.forget(player.getUUID()); // rate-limit del selector de jutsu (F11/DJT-231)
+        JutsuBookHandler.forget(player.getUUID()); // rate-limit del libro de jutsus (F11/DJT-235)
         PrimedStrikeManager.forget(player.getUUID()); // libera el golpe cargado sin descargar (DJT-085d)
         JutsuLearningService.forget(player.getUUID()); // libera el cooldown transitorio del learner (DJT-075)
         LOGGER.info("[{}] Jugador {} salio.", DojutsuMod.MOD_NAME, player.getGameProfile().getName());
@@ -329,9 +335,12 @@ public final class DojutsuLifecycle {
         OnboardingSync.register();           // S2C: opciones de clan de la creacion del ninja (DJT-060)
         MenuActionHandler.register();        // C2S: acciones del menu, validadas en servidor (DJT-042)
         OnboardingChoiceHandler.register();  // C2S: elecciones de la creacion del ninja (DJT-059)
-        CastJutsuHandler.register();         // C2S: tecla de cast, lee el item real y valida (DJT-080)
+        CastJutsuHandler.register();         // C2S: tecla de cast, lee el jutsu seleccionado y valida (DJT-080)
+        SelectJutsuHandler.register();       // C2S: elegir el jutsu que lanza la tecla (F11/DJT-231)
+        JutsuBookHandler.register();         // C2S abrir/asignar + S2C vista del libro (F11/DJT-235)
         EyeMenuHandler.register();           // C2S abrir/seleccionar + S2C vista del menu ocular (DJT-117)
         EyeAbilityService.register();        // habilidades oculares (Amaterasu) + C2S de uso (DJT-118)
+        EyeToggleService.register();         // C2S de encender/apagar el dojutsu (F11/DJT-230)
         DialogueController.register();       // S2C abrir dialogo del Sabio + C2S eleccion de camino (F9/DJT-200)
     }
 }

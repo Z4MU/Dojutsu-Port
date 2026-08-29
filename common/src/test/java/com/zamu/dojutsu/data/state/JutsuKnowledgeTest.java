@@ -5,7 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
@@ -47,7 +49,7 @@ class JutsuKnowledgeTest {
     @Test
     void elNbtCorruptoConProgresoNegativoSeSanea() {
         // El canonico constructor sanea (codec de estado tolerante: nunca bloquea el save).
-        JutsuKnowledge k = new JutsuKnowledge(Set.of(), Map.of("fire", -5), Map.of());
+        JutsuKnowledge k = new JutsuKnowledge(Set.of(), Map.of("fire", -5), Map.of(), java.util.Optional.empty(), List.of());
         assertEquals(0, k.progressOf("fire"));
     }
 
@@ -116,5 +118,66 @@ class JutsuKnowledgeTest {
     void elCodecToleraElCompoundVacio() {
         Tag empty = JutsuKnowledge.CODEC.encodeStart(NbtOps.INSTANCE, JutsuKnowledge.DEFAULT).getOrThrow();
         assertEquals(JutsuKnowledge.DEFAULT, JutsuKnowledge.CODEC.parse(NbtOps.INSTANCE, empty).getOrThrow());
+    }
+
+    // ------------------------------------------------------------------
+    // Jutsu seleccionado (F11/DJT-231)
+    // ------------------------------------------------------------------
+
+    @Test
+    void unNinjaNuevoNoTieneNadaSeleccionado() {
+        assertTrue(JutsuKnowledge.DEFAULT.selectedJutsu().isEmpty());
+    }
+
+    @Test
+    void seSeleccionaUnJutsuAprendido() {
+        JutsuKnowledge k = JutsuKnowledge.DEFAULT.withKnown("chidori").withSelected("chidori");
+
+        assertEquals(Optional.of("chidori"), k.selectedJutsu());
+    }
+
+    @Test
+    void noSePuedeSeleccionarUnJutsuQueNoSeConoce() {
+        // la invariante: el selector no puede acabar mostrando algo que el servidor jamas dejaria lanzar
+        JutsuKnowledge k = JutsuKnowledge.DEFAULT.withSelected("chidori");
+
+        assertTrue(k.selectedJutsu().isEmpty());
+    }
+
+    @Test
+    void olvidarLaSeleccionFunciona() {
+        JutsuKnowledge k = JutsuKnowledge.DEFAULT.withKnown("chidori").withSelected("chidori");
+
+        assertTrue(k.withoutSelected().selectedJutsu().isEmpty());
+    }
+
+    @Test
+    void laSeleccionSobreviveALosDemasCambios() {
+        // si un wither la perdiera, al jugador se le desarmaria la tecla de cast en mitad de un combate
+        JutsuKnowledge base = JutsuKnowledge.DEFAULT.withKnown("chidori").withSelected("chidori");
+
+        assertEquals(Optional.of("chidori"), base.withKnown("rasengan").selectedJutsu());
+        assertEquals(Optional.of("chidori"), base.withProgress("fire", 3).selectedJutsu());
+        assertEquals(Optional.of("chidori"), base.withCooldown("chidori", 100L, 40).selectedJutsu());
+    }
+
+    @Test
+    void laSeleccionSobreviveAlGuardado() {
+        JutsuKnowledge k = JutsuKnowledge.DEFAULT.withKnown("chidori").withSelected("chidori");
+
+        JutsuKnowledge recargado = JutsuKnowledge.CODEC
+                .parse(net.minecraft.nbt.NbtOps.INSTANCE,
+                        JutsuKnowledge.CODEC.encodeStart(net.minecraft.nbt.NbtOps.INSTANCE, k).getOrThrow())
+                .getOrThrow();
+
+        assertEquals(Optional.of("chidori"), recargado.selectedJutsu());
+    }
+
+    @Test
+    void unaSeleccionHuerfanaEnElSaveSeDescarta() {
+        // NBT de una partida en la que el jutsu seleccionado ya no esta entre los conocidos
+        JutsuKnowledge k = new JutsuKnowledge(Set.of("rasengan"), Map.of(), Map.of(), Optional.of("chidori"), List.of());
+
+        assertTrue(k.selectedJutsu().isEmpty());
     }
 }
