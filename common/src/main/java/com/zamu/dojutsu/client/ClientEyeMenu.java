@@ -4,7 +4,7 @@ import java.util.List;
 
 /**
  * Cache <b>de solo lectura</b> de la vista del menu de habilidades oculares en el <b>cliente</b> (DJT-117). La
- * alimenta el receptor de {@code EyeMenuPayload} (S2C); la consulta la {@code AbilitySelectScreen}.
+ * alimenta el receptor de {@code EyeMenuPayload} (S2C); la consulta la {@code EyeAbilitiesTab} del menu ninja.
  *
  * <p>Mismas reglas que {@link ClientNinjaData}/{@link ClientOnboardingOptions}: solo cliente, solo presentacion
  * (el servidor re-valida toda seleccion), no se persiste y se limpia al salir del mundo. Sin imports de

@@ -1,104 +1,170 @@
 package com.zamu.dojutsu.client.screen;
 
-import com.zamu.dojutsu.client.ClientNinjaData;
-import com.zamu.dojutsu.data.state.Skill;
-import com.zamu.dojutsu.network.MenuActionPayload;
-import com.zamu.dojutsu.network.ProgressionSnapshot;
-import com.zamu.dojutsu.platform.PlatformServices;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 
 /**
- * Menu ninja: GUI real que reemplaza el "fake-GUI" por {@code title}/{@code actionbar} + hotbar secuestrado del
- * datapack ({@code [S13]}). <b>Solo cliente.</b>
+ * Menu ninja: la <b>unica</b> pantalla de preparacion del mod ({@code [S13]}). <b>Solo cliente.</b> Reemplaza
+ * el "fake-GUI" por {@code title}/{@code actionbar} + hotbar secuestrado del datapack.
  *
- * <p>Reglas ({@code [ADD/07]}): lee <b>solo</b> de {@link ClientNinjaData} (cache read-only) y <b>nunca</b>
- * aplica gameplay. El boton "+" solo <b>solicita</b> el gasto con {@link MenuActionPayload}; el servidor valida
- * (DJT-042) y, si procede, aplica y sincroniza: la UI se refresca cuando llega el sync, no antes.
+ * <p><b>F11/DJT-236 — las tres bajo una tecla.</b> Antes habia tres pantallas de preparacion con tres teclas:
+ * el menu ({@code M}), las habilidades oculares ({@code N}) y el libro de jutsus ({@code P}). Ninguna se usa en
+ * combate y las tres responden a la misma pregunta —"que tengo, y que va a lanzar cada tecla"—, asi que ahora
+ * son <b>pestañas</b> de esta: Ninja / Jutsus / Ojo. {@code N} y {@code P} quedan libres.
  *
- * <p>Version minima y enriquecible (RM-2): info + lista de habilidades. El gasto es de 1 punto por clic.
+ * <p>El precedente ya estaba en el propio proyecto: el editor de HUD nunca tuvo tecla, se abre con un boton
+ * desde aqui. Sigue igual.
+ *
+ * <p>La <b>rueda</b> ({@code Z}) se queda fuera a proposito: es la unica pantalla de combate, se usa
+ * manteniendo la tecla y su virtud es no hacerte pensar. Meterla aqui la habria matado.
+ *
+ * <p>Reglas ({@code [ADD/07]}): las pestañas leen <b>solo</b> caches read-only de cliente y <b>nunca</b>
+ * aplican gameplay; toda accion viaja como intencion y el servidor valida.
  */
 public final class NinjaMenuScreen extends Screen {
 
-    private static final int ROW_HEIGHT = 22;
-    private static final int LIST_TOP = 92;
-    private static final int PLUS_SIZE = 20;
+    /** Indices de pestaña, para abrir el menu directamente donde interese. */
+    public static final int TAB_NINJA = 0;
+    public static final int TAB_JUTSUS = 1;
+    public static final int TAB_EYE = 2;
 
-    private final List<Button> plusButtons = new ArrayList<>();
+    private static final int TAB_BAR_HEIGHT = 22;
+    private static final int TAB_TOP = 30;
+    private static final int TAB_WIDTH = 90;
+    private static final int TAB_GAP = 2;
+
+    private final List<MenuTab> tabs = List.of(new NinjaStatsTab(), new JutsuBookTab(), new EyeAbilitiesTab());
+
+    /** Pestañas cuya peticion inicial ya se mando (una vez por apertura, no en cada cambio de pestaña). */
+    private final boolean[] requested = new boolean[3];
+
+    private int active;
+    private int builtVersion = Integer.MIN_VALUE;
 
     public NinjaMenuScreen() {
-        super(Component.translatable("screen.dojutsu.ninja_menu"));
+        this(TAB_NINJA);
     }
+
+    /** Abre el menu directamente en una pestaña. */
+    public NinjaMenuScreen(int tab) {
+        super(Component.translatable("screen.dojutsu.ninja_menu"));
+        this.active = Math.clamp(tab, TAB_NINJA, TAB_EYE);
+    }
+
+    private MenuTab current() {
+        return tabs.get(active);
+    }
+
+    // ------------------------------------------------------------------
+    // Servicios que las pestañas necesitan del contenedor
+    // ------------------------------------------------------------------
+
+    /** Registra un widget de la pestaña activa (los miembros de {@code Screen} son inaccesibles desde fuera). */
+    void addTabWidget(AbstractWidget widget) {
+        addRenderableWidget(widget);
+    }
+
+    /** Fuente del juego. */
+    Font font() {
+        return this.font;
+    }
+
+    /** Primera fila util por debajo de la barra de pestañas. */
+    int contentTop() {
+        return TAB_TOP + TAB_BAR_HEIGHT + 8;
+    }
+
+    /** Ultima fila util por encima del pie (donde vive el boton de cerrar). */
+    int contentBottom() {
+        return this.height - 34;
+    }
+
+    /** Reconstruye la pestaña activa. Lo usan las pestañas cuando cambia algo suyo (un filtro, por ejemplo). */
+    void rebuild() {
+        init();
+    }
+
+    // ------------------------------------------------------------------
 
     @Override
     protected void init() {
-        plusButtons.clear();
-        int left = this.width / 2 - 80;
-        for (Skill skill : Skill.values()) {
-            int y = LIST_TOP + skill.ordinal() * ROW_HEIGHT;
-            Button plus = Button.builder(Component.literal("+"), button -> requestSpend(skill))
-                    .bounds(left + 140, y - 6, PLUS_SIZE, PLUS_SIZE)
-                    .tooltip(Tooltip.create(Component.translatable("screen.dojutsu.spend_tooltip", label(skill))))
-                    .build();
-            addRenderableWidget(plus);
-            plusButtons.add(plus);
+        clearWidgets();
+        buildTabBar();
+        if (!requested[active]) {
+            current().request(); // pide su vista al servidor la primera vez que se muestra
+            requested[active] = true;
         }
+        builtVersion = current().observedVersion();
+        current().init(this);
+        addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, b -> onClose())
+                .bounds(this.width / 2 - 50, this.height - 28, 100, 20)
+                .build());
+    }
+
+    private void buildTabBar() {
+        int total = tabs.size() * TAB_WIDTH + (tabs.size() - 1) * TAB_GAP;
+        int left = this.width / 2 - total / 2;
+        for (int i = 0; i < tabs.size(); i++) {
+            int index = i;
+            Button button = Button.builder(tabs.get(i).title(), b -> switchTo(index))
+                    .bounds(left + i * (TAB_WIDTH + TAB_GAP), TAB_TOP, TAB_WIDTH, TAB_BAR_HEIGHT - 2)
+                    .build();
+            // La pestaña abierta queda inactiva: se ve cual es sin pintar un marco aparte, y de paso no se
+            // puede reconstruir la pantalla pulsandola una y otra vez.
+            button.active = i != active;
+            addRenderableWidget(button);
+        }
+    }
+
+    private void switchTo(int index) {
+        if (index == active) {
+            return;
+        }
+        active = index;
+        init();
     }
 
     @Override
     public void tick() {
-        // Solo habilita "+" si hay puntos observados. La autoridad sigue siendo el servidor (esto es UX).
-        boolean hasPoints = ClientNinjaData.progression().skillPoints() > 0;
-        for (Button plus : plusButtons) {
-            plus.active = hasPoints;
+        current().tick();
+        if (current().observedVersion() != builtVersion) {
+            init(); // llego una vista nueva del servidor: los widgets ya creados no se enteran solos
         }
     }
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        // super.render() PRIMERO: aplica el desenfoque de fondo y dibuja los widgets. Si se llama al final, el
+        // desenfoque cae ENCIMA de lo ya dibujado (el bug que tuvo el editor de HUD en su dia).
         super.render(graphics, mouseX, mouseY, partialTick);
-        int centerX = this.width / 2;
-        graphics.drawCenteredString(this.font, this.title, centerX, 20, 0xFFFFFF);
+        graphics.drawCenteredString(this.font, this.title, this.width / 2, 14, 0xFFFFFF);
+        current().render(graphics, mouseX, mouseY, partialTick);
+    }
 
-        boolean synced = ClientNinjaData.hasData();
-        ProgressionSnapshot progression = ClientNinjaData.progression();
-
-        graphics.drawCenteredString(this.font, Component.literal(synced
-                ? "Chakra: " + ClientNinjaData.chakra() + " / " + ClientNinjaData.maxChakra()
-                : "Chakra: --"), centerX, 42, 0xFFFFFF);
-        graphics.drawCenteredString(this.font, Component.literal(synced
-                ? "Rango: " + progression.rank().title() + "  (" + progression.ninjaXp() + " XP ninja)"
-                : "Rango: --"), centerX, 54, 0xFFFFFF);
-        graphics.drawCenteredString(this.font, Component.literal(
-                "Skill Points: " + progression.skillPoints()), centerX, 66, 0xFFD700);
-
-        int left = centerX - 80;
-        for (Skill skill : Skill.values()) {
-            int y = LIST_TOP + skill.ordinal() * ROW_HEIGHT;
-            graphics.drawString(this.font, label(skill), left, y, 0xFFFFFF);
-            graphics.drawString(this.font, Component.literal("Nv " + progression.levelOf(skill)),
-                    left + 100, y, 0xAAAAAA);
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (super.mouseClicked(mouseX, mouseY, button)) {
+            return true; // lo consumio un widget (pestaña, boton "+", buscador...)
         }
+        return current().mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double deltaX, double deltaY) {
+        if (super.mouseScrolled(mouseX, mouseY, deltaX, deltaY)) {
+            return true;
+        }
+        return current().mouseScrolled(mouseX, mouseY, deltaX, deltaY);
     }
 
     @Override
     public boolean isPauseScreen() {
         return false; // no pausa el juego en un solo jugador
-    }
-
-    /** Envia la <b>intencion</b> de gastar 1 punto. No modifica nada en cliente: espera el sync del servidor. */
-    private void requestSpend(Skill skill) {
-        PlatformServices.NETWORK.sendToServer(new MenuActionPayload(
-                MenuActionPayload.Action.SPEND_SKILL, skill.name().toLowerCase(Locale.ROOT), 1));
-    }
-
-    private static Component label(Skill skill) {
-        return Component.translatable("skill.dojutsu." + skill.name().toLowerCase(Locale.ROOT));
     }
 }

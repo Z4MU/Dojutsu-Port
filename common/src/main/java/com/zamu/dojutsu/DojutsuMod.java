@@ -3,6 +3,7 @@ package com.zamu.dojutsu;
 import com.mojang.logging.LogUtils;
 import com.zamu.dojutsu.client.ClientDialogue;
 import com.zamu.dojutsu.client.ClientEyeMenu;
+import com.zamu.dojutsu.client.ClientJutsuBook;
 import com.zamu.dojutsu.client.ClientNinjaData;
 import com.zamu.dojutsu.client.ClientOnboardingOptions;
 import com.zamu.dojutsu.client.ClientWaterWalk;
@@ -128,6 +129,7 @@ public final class DojutsuMod {
             ClientNinjaData.clear();
             ClientOnboardingOptions.clear();
             ClientEyeMenu.clear();
+            ClientJutsuBook.clear();
             ClientDialogue.clear();
             ClientWaterWalk.clear();
         });
