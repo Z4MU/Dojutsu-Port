@@ -50,6 +50,20 @@ class JutsuEffectParamsTest {
         assertFalse(p.igniteGround());
         assertEquals(0.0F, p.damage());
         assertEquals("minecraft:snowball", p.displayItem());
+        assertEquals(0.0F, p.hitboxSize()); // la caja de 0.25 de siempre
+        assertEquals(com.zamu.dojutsu.entity.ProjectileTrail.NONE, p.trail());
+    }
+
+    @Test
+    void laBalaDeFuegoPrendeElSueloYLlevaEstela() {
+        // F11/DJT-241. fire_bullet/run.mcfunction hacia "setblock ~ ~0 ~ fire" en cada tick de vuelo; el port no
+        // lo tenia activado y en partida el suelo no ardia.
+        ProjectileEffect.Params p = ProjectileEffect.Params.parse(effectParams("fire/fire_bullet"));
+        assertTrue(p.igniteGround());
+        assertEquals(3.0, p.radius());     // distance=0..3
+        assertEquals(100, p.fireTicks());  // Fire set value 100
+        assertEquals(0.8F, p.hitboxSize(), 1.0e-6F);
+        assertEquals(com.zamu.dojutsu.entity.ProjectileTrail.FIRE, p.trail());
     }
 
     @Test

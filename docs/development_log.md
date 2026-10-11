@@ -6476,3 +6476,46 @@ que ya se ven.
 ### Validación
 
 `build` multiloader verde, **1106 tests** (+9). Falta la pasada en partida.
+
+## 2026-10-11 · DJT-241 — La Bala de fuego, como se ve en partida
+
+Ticket nacido de un vídeo de prueba del usuario sobre DJT-240. Señaló dos cosas (la hitbox no encaja con el
+modelo; la bola no tiene animación ni efectos) y al revisarlo salieron cinco más.
+
+### Lo que se vio y su causa
+
+- **La hitbox no encajaba, por dos motivos a la vez.** La caja medía 0.25, la de una bola de nieve, contra una
+  bola de 0.8. Y la bola ni siquiera estaba encima de la caja: Minecraft centra el modelo en (8, 8, 8) y la bola
+  va delante de la estela, así que a escala 1.6 volaba **un bloque por delante** de la entidad. Corregido el
+  pivote en el generador (traslación de `ground`) y añadida una hitbox por proyectil (`hitboxSize`).
+- **El rayo de vanilla no mira el tamaño del proyectil.** `ProjectileUtil` traza desde los pies y engorda a los
+  objetivos 0.3 fijos. Con hitbox propia, el rayo sale ahora del centro de la caja y engorda con su medio lado:
+  el barrido exacto de caja contra caja. Sin `hitboxSize`, la colisión de siempre; los otros 12 sitios que
+  lanzan `NinjaProjectile` no cambian.
+- **No ardía el suelo.** `fire_bullet/run.mcfunction` hace `setblock ~ ~0 ~ fire` en cada tick; el JSON del port
+  no tenía `igniteGround`. Era una pérdida de fidelidad, no un efecto nuevo.
+- **No había estela.** El datapack soltaba 120 partículas de polvo por tick sobre el armor stand; el port, cero.
+  Ahora cada cliente la pinta desde el tick de la entidad con los mismos colores, repartida por el segmento
+  recorrido. Viaja un byte (`ProjectileTrail`), no un paquete por tick (regla 13).
+- **Al impactar no pasaba nada visible.** Estallido de llamas, lava y humo con el sonido de una carga ígnea. El
+  original no lo tenía; el cliente no se entera del impacto (solo ve desaparecer la entidad), así que lo emite el
+  servidor.
+- **Contra el cielo se veía marrón.** El modelo usaba la luz del sitio. Ahora brillo máximo.
+- **Era un objeto rígido.** Gira sobre el eje de vuelo y late un 6 %.
+
+### La prueba que faltaba
+
+Nada de lo anterior daba error: se veía mal y ya. `Jutsu3dFitTest` lo hace fallar en el build para **todo**
+jutsu con `displayModel3d`: la hitbox debe medir lo que la bola (`bola_*`), la bola debe caer en la entidad y el
+jutsu debe llevar estela.
+
+### Lo que este ticket NO hace
+
+- El proyectil del datapack **atravesaba** a las entidades (solo lo paraban los bloques y el agua); el del port
+  se detiene en la primera. Con una caja mayor se detendrá antes. Se deja como estaba: cambiarlo es jugabilidad.
+- Las variantes azul y negra del fuego (`d.blue`/`d.black`) siguen sin portar.
+- El brazo no hace gesto al lanzar.
+
+### Validación
+
+`build` multiloader verde, **1130 tests** (+14). Falta la pasada en partida.

@@ -1,0 +1,75 @@
+CHECKLIST DE PRUEBAS - DJT-241 (la Bala de fuego, como se ve en partida)
+==========================================================================
+
+Hazlo en los DOS loaders (NeoForge y Fabric). Marca [x] lo que pase.
+
+PREPARACION
+-----------
+  Mundo de pruebas en SUPERVIVENCIA (en creativo no gasta chakra y el fuego no te quema):
+      /gamemode survival
+      /dojutsuchakra full
+      /dojutsujutsu learn fire_bullet
+      /dojutsujutsu select fire_bullet
+  Lanza con tu tecla de lanzar, o sin requisitos con:
+      /dojutsujutsu cast fire_bullet
+  Para ver las hitbox:  F3 + B
+  Para que el fuego no se apague solo:  /gamerule doFireTick true   (viene asi por defecto)
+
+
+1. HITBOX (lo que senalaste en el video)
+----------------------------------------
+  [ ] 1.1  Con F3+B, lanza y mira la bala en vuelo (desde un lado, en F5 si hace falta).
+           -> la caja blanca envuelve la BOLA, no va un bloque por detras de ella.
+  [ ] 1.2  La caja mide mas o menos lo que la bola (0.8 bloques), no un cuadradito diminuto.
+  [ ] 1.3  /summon pig  a unos 8 bloques. Apunta de forma que la bola pase ROZANDO al cerdo.
+           -> lo golpea (antes la atravesaba).
+  [ ] 1.4  Al salir, la bala no aparece por encima de tu cabeza: sale de la altura de los ojos.
+
+2. ESTELA EN VUELO
+------------------
+  [ ] 2.1  Detras de la bola queda un rastro de polvo naranja y llamitas, continuo, sin huecos.
+  [ ] 2.2  Un poco de humo gris en la cola.
+  [ ] 2.3  Los primeros 2 ticks no te tapa la vista con particulas al lanzar.
+  [ ] 2.4  (opcional) Ajustes > Video > Particulas: Minimas -> la estela se reduce mucho.
+
+3. IMPACTO
+----------
+  [ ] 3.1  Dispara a una pared de tierra o piedra -> estallido de llamas, chispas de lava y humo,
+           con el sonido de una carga ignea ("fwoosh").
+  [ ] 3.2  Dispara a un mob -> el mismo estallido, delante del mob (no en sus pies).
+  [ ] 3.3  Dispara al aire, hacia el cielo, sin nada delante -> NO hay estallido: desaparece sola
+           a los 5 s. (Es lo esperado: el estallido es solo al chocar.)
+
+4. FUEGO EN EL SUELO (ahora fiel al datapack)
+---------------------------------------------
+  [ ] 4.1  Dispara casi horizontal, rasando un prado de hierba -> va dejando fuego en el suelo
+           por donde pasa.
+  [ ] 4.2  Los mobs a menos de 3 bloques de la trayectoria arden (esto ya funcionaba).
+  OJO: en un bosque puede provocar un incendio. Es lo que hacia el datapack original.
+
+5. BRILLO
+---------
+  [ ] 5.1  /time set night  y lanza -> la bola se ve brillante, no apagada.
+  [ ] 5.2  Lanza dentro de una cueva oscura -> igual de brillante.
+  [ ] 5.3  Lanza hacia el cielo de dia -> amarilla y naranja, no un punto marron.
+
+6. ANIMACION
+------------
+  [ ] 6.1  En vuelo, la estela y las chispas giran despacio alrededor de la bola.
+  [ ] 6.2  La bola "respira" un poco (crece y encoge). Sutil, no un globo.
+  [ ] 6.3  Con la bala subiendo o bajando, sigue apuntando en la direccion de vuelo (DJT-240).
+
+7. NADA MAS SE ROMPIO
+---------------------
+  Los demas proyectiles NO tienen estela ni caja nueva; deben verse y golpear igual que antes:
+  [ ] 7.1  Shinobi hostil con kunai (pepita de hierro) -> golpea como siempre.
+  [ ] 7.2  /dojutsujutsu cast great_fireball -> sigue funcionando (aun con la carga ignea plana).
+  [ ] 7.3  Si tienes a mano un bijuu o el lanzamiento de shuriken: sin cambios.
+
+8. LO QUE QUEDA FUERA (no es fallo de este ticket)
+--------------------------------------------------
+  - La bala se detiene en el primer mob; en el datapack lo atravesaba. Es jugabilidad, se decide aparte.
+  - Variantes de fuego azul y negro: sin portar.
+  - El brazo no hace gesto al lanzar.
+
+Si algo falla, dime el numero del punto y el loader.

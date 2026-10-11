@@ -13,7 +13,9 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -103,6 +105,20 @@ public class NinjaProjectile extends ThrowableItemProjectile {
     private static final EntityDataAccessor<Float> DATA_GRAVITY =
             SynchedEntityData.defineId(NinjaProjectile.class, EntityDataSerializers.FLOAT);
 
+    /**
+     * Lado de la hitbox de este proyectil en bloques (F11/DJT-241); 0 = el de la {@code EntityType} (0.25).
+     * Sincronizado para que el cliente vea la misma caja (F3+B) y centre el modelo en ella.
+     */
+    private static final EntityDataAccessor<Float> DATA_SIZE =
+            SynchedEntityData.defineId(NinjaProjectile.class, EntityDataSerializers.FLOAT);
+
+    /** Estela visual ({@link ProjectileTrail#id()}): cada cliente la pinta por su cuenta (F11/DJT-241). */
+    private static final EntityDataAccessor<Byte> DATA_TRAIL =
+            SynchedEntityData.defineId(NinjaProjectile.class, EntityDataSerializers.BYTE);
+
+    /** Hitbox maxima admitida: por encima ya no es un proyectil, es un area. */
+    public static final float MAX_HITBOX_SIZE = 4.0F;
+
     private int maxLifetimeTicks = DEFAULT_LIFETIME_TICKS;
     private ImpactCallback impactCallback;
     private FlightTick flightTick;
@@ -155,6 +171,33 @@ public class NinjaProjectile extends ThrowableItemProjectile {
     public NinjaProjectile withFlightTick(FlightTick callback) {
         this.flightTick = Objects.requireNonNull(callback, "callback");
         return this;
+    }
+
+    /**
+     * Lado de la hitbox en bloques (F11/DJT-241). Por defecto mide 0.25, como una bola de nieve; un modelo 3D
+     * grande necesita una caja de su tamano o atraviesa a los mobs sin tocarlos. Conserva el <b>centro</b>: el
+     * proyectil sigue saliendo de los ojos del dueno aunque la caja crezca.
+     */
+    public NinjaProjectile withHitboxSize(float size) {
+        if (!(size > 0.0F) || size > MAX_HITBOX_SIZE) {
+            throw new IllegalArgumentException("hitbox fuera de (0, " + MAX_HITBOX_SIZE + "]: " + size);
+        }
+        Vec3 center = this.getBoundingBox().getCenter();
+        this.entityData.set(DATA_SIZE, size);
+        this.refreshDimensions();
+        this.setPos(center.x, center.y - size / 2.0D, center.z);
+        return this;
+    }
+
+    /** Estela visual en vuelo y estallido al impactar (F11/DJT-241). */
+    public NinjaProjectile withTrail(ProjectileTrail trail) {
+        this.entityData.set(DATA_TRAIL, Objects.requireNonNull(trail, "trail").id());
+        return this;
+    }
+
+    /** La estela de este proyectil (sincronizada, la lee tambien el cliente). */
+    public ProjectileTrail trail() {
+        return ProjectileTrail.fromId(this.entityData.get(DATA_TRAIL));
     }
 
     /** Item con el que se renderiza el proyectil (default: bola de nieve). */
@@ -229,7 +272,11 @@ public class NinjaProjectile extends ThrowableItemProjectile {
                     return; // el aura puede decidir descartar
                 }
             }
-            HitResult hit = RaycastHelper.firstHitAlongMotion(this, this::canHitEntity);
+            // Con hitbox propia el rayo sale del centro de la caja y engorda a los objetivos con su medio lado
+            // (F11/DJT-241). Sin ella, la colision de siempre: no cambia nada para el resto de proyectiles.
+            HitResult hit = this.entityData.get(DATA_SIZE) > 0.0F
+                    ? RaycastHelper.firstHitAlongMotion(this, this::canHitEntity, this.getBbWidth() / 2.0D)
+                    : RaycastHelper.firstHitAlongMotion(this, this::canHitEntity);
             if (hit.getType() != HitResult.Type.MISS) {
                 this.onHit(hit);
                 return; // onHit descarta; no avanzar tras impactar
@@ -237,8 +284,15 @@ public class NinjaProjectile extends ThrowableItemProjectile {
         }
 
         // Avance + gravedad en ambos lados: el cliente interpola entre syncs con la misma fisica.
+        Vec3 centerBefore = this.getBoundingBox().getCenter();
         Vec3 next = ProjectileMath.advance(this.position(), this.getDeltaMovement());
         this.setPos(next.x, next.y, next.z);
+        // Estela (F11/DJT-241): solo pinta en el cliente. Los dos primeros ticks el proyectil esta en la cara de
+        // quien lo lanza; ahi las particulas solo taparian la vista.
+        if (this.level().isClientSide && this.tickCount >= 2) {
+            ProjectileTrailFx.emitTrail(this.level(), this.trail(), centerBefore,
+                    this.getBoundingBox().getCenter(), this.random);
+        }
         this.setDeltaMovement(ProjectileMath.applyGravity(
                 this.getDeltaMovement(), this.entityData.get(DATA_GRAVITY)));
         // Rumbo y cabeceo siguen a la velocidad (F11/DJT-240). Este tick sustituye entero al de vanilla y se
@@ -277,6 +331,25 @@ public class NinjaProjectile extends ThrowableItemProjectile {
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder); // el item de display del throwable vanilla
         builder.define(DATA_GRAVITY, 0.0F);
+        builder.define(DATA_SIZE, 0.0F);
+        builder.define(DATA_TRAIL, ProjectileTrail.NONE.id());
+    }
+
+    /** La caja de {@link #withHitboxSize}, o la de la {@code EntityType} si no se fijo ninguna. */
+    @Override
+    public EntityDimensions getDimensions(Pose pose) {
+        // entityData es null si vanilla pregunta durante el constructor de Entity
+        float size = this.entityData == null ? 0.0F : this.entityData.get(DATA_SIZE);
+        return size > 0.0F ? EntityDimensions.fixed(size, size) : super.getDimensions(pose);
+    }
+
+    /** El cliente recibe el tamano despues de crear la entidad: hay que recalcular la caja al llegar. */
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
+        super.onSyncedDataUpdated(key);
+        if (DATA_SIZE.equals(key)) {
+            this.refreshDimensions();
+        }
     }
 
     /** Item mostrado por el {@code ThrownItemRenderer} si nadie configura otro. */

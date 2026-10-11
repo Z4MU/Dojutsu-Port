@@ -14,6 +14,9 @@
     "radius": 3.0,
     "fireTicks": 100,
     "displayItem": "minecraft:fire_charge",
-    "displayModel3d": true
+    "displayModel3d": true,
+    "igniteGround": true,
+    "hitboxSize": 0.8,
+    "trail": "fire"
   }
 }

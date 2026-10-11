@@ -30,6 +30,11 @@ Construye el modelo de cubos y su textura 16×16 a partir de la paleta de la ref
   **gris** en partida. Pasó con el primer núcleo de la Bala de fuego.
 - Para fuego, rayo y todo lo que deba brillar: `"shade": false` en cada cubo.
 - `custom_model_data` del modelo 3D = **3000 + el del pergamino** (`JutsuModelData.worldModelOf`).
+- Los cubos de la bola se llaman **`bola_*`**. De ellos salen el pivote y la hitbox (abajo).
+- **Pivote:** Minecraft centra el modelo en (8, 8, 8), pero la bola va delante de la estela. La traslación Z de
+  `display.ground` debe llevar el centro de la bola a la posición de la entidad:
+  `translation.z = -(centro_z_bola - 8) × escala`. Sin ella, la Bala de fuego volaba un bloque por delante de
+  su hitbox (DJT-241). `fire_bullet.py` la calcula sola.
 
 ## Conectar un modelo nuevo
 
@@ -37,6 +42,9 @@ Construye el modelo de cubos y su textura 16×16 a partir de la paleta de la ref
    `assets/dojutsu/textures/item/jutsu_3d/<jutsu>.png`.
 2. Override en `assets/dojutsu/models/item/jutsu.json` con el número 3D, **en orden ascendente**.
 3. En el JSON del jutsu: `"displayModel3d": true` (proyectiles) o `"vfxModel"` (el resto, DJT-239).
+4. Si es proyectil, también `"hitboxSize"` (el diámetro de la bola en bloques: ancho de `bola_*` × escala / 16,
+   que `fire_bullet.py` imprime) y `"trail"` (la estela; hoy existe `"fire"`).
 
 `JutsuModelDataTest` comprueba los puntos 1 y 2: una override 3D huérfana o un modelo que no existe
-hacen fallar el build.
+hacen fallar el build. `Jutsu3dFitTest` comprueba el 4 y el pivote: si la hitbox no mide lo que la bola, si la
+bola no cae en la entidad o si falta la estela, el build falla.

@@ -5,8 +5,12 @@ Fuente: imagenes referencias jutsus/Fuego/Bala de fuego.png
   - Paleta: nucleo brillante, fuego claro, fuego medio, fuego oscuro, contorno caliente, chispas.
   - Escala: 0.8 ~ 1 bloque de diametro.
 
-El modelo mira hacia -Z (la "nariz" de la bala va al frente, la estela hacia +Z). El ThrownItemRenderer
-lo orienta a camara, asi que lo que importa es que se lea como bola con cola desde cualquier lado.
+Se construye con la nariz en z bajo y al final se refleja: en el fichero la nariz mira a +Z, que es lo que
+NinjaProjectileRenderer apunta en la direccion de vuelo (DJT-240).
+
+Los cubos de la bola se llaman "bola_*". Con ellos se calcula el centro de la bola (el pivote, que debe caer
+en la posicion de la entidad) y su diametro (que debe coincidir con la hitbox, DJT-241). Jutsu3dFitTest lo
+comprueba en el build.
 
 Unidades: 16 = 1 bloque. Limites vanilla: coordenadas en [-16, 32]; rotacion un eje, +-22.5/45.
 """
@@ -96,9 +100,8 @@ elements += [
     cube([C + 0.5, C + 0.5, 23.0], [C + 1.5, C + 1.5, 24.0], "dark", "chispa_5"),
 ]
 
-# ORIENTACION. El ThrownItemRenderer de vanilla gira el item hacia la camara y lo mira desde +Z (igual que la
-# GUI, que por eso enseña la cara "south"). Construido con la nariz en z bajo, en vuelo se veria la PUNTA DE LA
-# ESTELA delante de la bola. Se refleja en Z: nariz al frente de la camara, estela detras.
+# ORIENTACION. NinjaProjectileRenderer apunta el +Z del modelo en la direccion de vuelo. Construido con la nariz
+# en z bajo, se refleja en Z para que la nariz quede en +Z y la estela detras.
 for e in elements:
     z0, z1 = e["from"][2], e["to"][2]
     e["from"][2], e["to"][2] = 24.0 - z1, 24.0 - z0
@@ -109,15 +112,27 @@ for e in elements:
     for v in e["from"] + e["to"]:
         assert -16 <= v <= 32, (e["name"], v)
 
+# PIVOTE (DJT-241). Minecraft dibuja el modelo centrado en (8, 8, 8), pero la bola no esta en el centro: va
+# delante y la estela detras. Sin corregirlo, a escala 1.6 la bola volaba ~1 bloque por DELANTE de la entidad y
+# la hitbox parecia desplazada. La traslacion de "ground" lleva el centro de la bola a la posicion de la entidad.
+GROUND_SCALE = 1.6
+ball = [e for e in elements if e["name"].startswith("bola_")]
+ball_z = (min(e["from"][2] for e in ball) + max(e["to"][2] for e in ball)) / 2.0
+ground_z = round(-(ball_z - 8.0) * GROUND_SCALE, 2)
+ball_diameter = (max(e["to"][0] for e in ball) - min(e["from"][0] for e in ball)) * GROUND_SCALE / 16.0
+print("bola: centro z=%.2f, traslacion ground z=%.2f, diametro=%.2f bloques (= hitboxSize del jutsu)"
+      % (ball_z, ground_z, ball_diameter))
+
 model = {
     "credit": "Dojutsu Port - piloto de arte DJT-240 (base para retocar en Blockbench)",
     "textures": {"fire": "dojutsu:item/jutsu_3d/fire_bullet", "particle": "dojutsu:item/jutsu_3d/fire_bullet"},
     "elements": elements,
-    # ground es lo que usa el ThrownItemRenderer para un proyectil en vuelo. La escala sale de la referencia:
+    # ground es lo que usa NinjaProjectileRenderer para un proyectil en vuelo. La escala sale de la referencia:
     # 0.8 ~ 1 bloque de diametro. La bola mide 8 de ancho (media vuelta de bloque) y la estela alarga hasta 22,
     # asi que a escala 1.0 la bola ronda los 0.5 bloques; 1.6 la deja en ~0.8.
     "display": {
-        "ground":            {"rotation": [0, 0, 0],   "translation": [0, 0, 0],   "scale": [1.6, 1.6, 1.6]},
+        "ground":            {"rotation": [0, 0, 0],   "translation": [0, 0, ground_z],
+                              "scale": [GROUND_SCALE, GROUND_SCALE, GROUND_SCALE]},
         "fixed":             {"rotation": [0, 90, 0],  "translation": [0, 0, 0],   "scale": [1.0, 1.0, 1.0]},
         "gui":               {"rotation": [30, 45, 0], "translation": [0, 0, 0],   "scale": [0.6, 0.6, 0.6]},
         "thirdperson_righthand": {"rotation": [0, 0, 0], "translation": [0, 2, 0], "scale": [0.5, 0.5, 0.5]},

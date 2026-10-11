@@ -4,7 +4,11 @@ import java.util.function.Predicate;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * Raycast del proyectil ninja (F4/DJT-070). Encuentra el primer impacto (bloque o entidad,
@@ -36,5 +40,33 @@ public final class RaycastHelper {
      */
     public static HitResult firstHitAlongMotion(Projectile projectile, Predicate<Entity> canHit) {
         return ProjectileUtil.getHitResultOnMoveVector(projectile, canHit);
+    }
+
+    /** Margen con el que vanilla engorda a los objetivos: una hitbox propia nunca acierta peor que esto. */
+    private static final double VANILLA_MARGIN = 0.3D;
+
+    /**
+     * Igual que {@link #firstHitAlongMotion(Projectile, Predicate)}, pero para un proyectil con hitbox propia
+     * (F11/DJT-241). Vanilla traza el rayo desde los <b>pies</b> de la entidad y engorda a los objetivos 0.3
+     * bloques, sin mirar el tamano del proyectil: con una caja de 0.8 la bola visible podia rozar a un mob sin
+     * tocarlo. Aqui el rayo sale del <b>centro</b> de la caja y cada objetivo se engorda con su medio lado, que es
+     * exactamente el barrido de una caja contra otra.
+     *
+     * @param halfSize medio lado de la hitbox del proyectil
+     */
+    public static HitResult firstHitAlongMotion(Projectile projectile, Predicate<Entity> canHit, double halfSize) {
+        Level level = projectile.level();
+        Vec3 motion = projectile.getDeltaMovement();
+        Vec3 start = projectile.getBoundingBox().getCenter();
+        Vec3 end = start.add(motion);
+        HitResult blockHit = level.clip(
+                new ClipContext(start, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, projectile));
+        if (blockHit.getType() != HitResult.Type.MISS) {
+            end = blockHit.getLocation(); // una entidad detras de la pared no cuenta
+        }
+        EntityHitResult entityHit = ProjectileUtil.getEntityHitResult(level, projectile, start, end,
+                projectile.getBoundingBox().expandTowards(motion).inflate(1.0D), canHit,
+                (float) Math.max(halfSize, VANILLA_MARGIN));
+        return entityHit != null ? entityHit : blockHit;
     }
 }

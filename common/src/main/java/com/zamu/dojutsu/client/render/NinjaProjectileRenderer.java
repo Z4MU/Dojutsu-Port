@@ -1,12 +1,15 @@
 package com.zamu.dojutsu.client.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import com.zamu.dojutsu.entity.NinjaProjectile;
 import com.zamu.dojutsu.items.JutsuModelData;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -25,6 +28,15 @@ import net.minecraft.world.item.component.CustomModelData;
  * <p>Este renderer <b>orienta los modelos 3D de jutsu segun la direccion de vuelo</b> y deja todo lo demas
  * exactamente como estaba: los proyectiles con items de vanilla (shuriken de los shinobi, bolas de las bestias)
  * siguen girando hacia la camara. Si se orientaran tambien, un sprite plano visto de canto desapareceria.
+ *
+ * <p><b>DJT-241.</b> Ademas, el modelo 3D se dibuja:
+ * <ul>
+ *   <li><b>con brillo maximo</b>: es fuego, no debe apagarse de noche ni en una cueva (antes usaba la luz del
+ *       sitio por donde pasaba y contra el cielo se veia marron);</li>
+ *   <li><b>centrado en la hitbox</b>: la posicion de la entidad son sus pies, y la bola del modelo va en el centro
+ *       de la caja;</li>
+ *   <li><b>animado</b>, con giro sobre el eje de vuelo y latido ({@link ProjectileAnimation}).</li>
+ * </ul>
  *
  * <p>Reutiliza el {@code ThrownItemRenderer} heredando de el, asi que no se registra ninguna {@code EntityType}
  * nueva (regla 5): solo se sustituye el renderer de una que ya existia.
@@ -53,12 +65,17 @@ public final class NinjaProjectileRenderer extends ThrownItemRenderer<NinjaProje
             return;
         }
         poseStack.pushPose();
+        poseStack.translate(0.0D, projectile.getBbHeight() / 2.0D, 0.0D); // de los pies al centro de la caja
         float yaw = Mth.lerp(partialTick, projectile.yRotO, projectile.getYRot());
         float pitch = Mth.lerp(partialTick, projectile.xRotO, projectile.getXRot());
         poseStack.mulPose(ProjectileOrientation.noseAlongFlight(yaw, pitch));
-        items.renderStatic(stack, ItemDisplayContext.GROUND, packedLight,
-                net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY, poseStack, buffers,
-                projectile.level(), projectile.getId());
+        // Despues de orientar, el +Z local es el eje de vuelo: girar en Z es girar sobre la trayectoria.
+        float age = projectile.tickCount + partialTick;
+        poseStack.mulPose(Axis.ZP.rotationDegrees(ProjectileAnimation.rollDegrees(age)));
+        float pulse = ProjectileAnimation.pulseScale(age);
+        poseStack.scale(pulse, pulse, pulse);
+        items.renderStatic(stack, ItemDisplayContext.GROUND, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY,
+                poseStack, buffers, projectile.level(), projectile.getId());
         poseStack.popPose();
     }
 
