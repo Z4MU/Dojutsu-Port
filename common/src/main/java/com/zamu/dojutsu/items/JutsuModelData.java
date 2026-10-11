@@ -196,6 +196,11 @@ public final class JutsuModelData {
      * inmediatamente inferior -el de otro jutsu-. Por eso el modelo 3D es <b>opt-in</b> por tecnica
      * ({@code displayModel3d} en su JSON) y no se aplica a todas automaticamente.
      */
+    /** Un {@code CustomModelData} es de modelo 3D en el mundo (rango 3000+), no de pergamino. */
+    public static boolean isWorldModel(int customModelData) {
+        return customModelData >= WORLD_MODEL_OFFSET;
+    }
+
     public static int worldModelOf(String jutsuId) {
         int scroll = of(jutsuId);
         return scroll == 0 ? 0 : WORLD_MODEL_OFFSET + scroll;

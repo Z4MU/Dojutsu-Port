@@ -241,6 +241,10 @@ public class NinjaProjectile extends ThrowableItemProjectile {
         this.setPos(next.x, next.y, next.z);
         this.setDeltaMovement(ProjectileMath.applyGravity(
                 this.getDeltaMovement(), this.entityData.get(DATA_GRAVITY)));
+        // Rumbo y cabeceo siguen a la velocidad (F11/DJT-240). Este tick sustituye entero al de vanilla y se
+        // habia quedado sin esta linea, asi que los angulos solo se fijaban una vez, al lanzar. Sin ella, un
+        // modelo 3D orientado por NinjaProjectileRenderer llevaria la nariz rigida mientras cae en arco.
+        this.updateRotation();
         this.checkInsideBlocks();
     }
 

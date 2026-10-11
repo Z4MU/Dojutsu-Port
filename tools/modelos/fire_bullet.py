@@ -19,8 +19,10 @@ OUT_MODEL, OUT_TEX = sys.argv[1], sys.argv[2]
 # ---------------------------------------------------------------- textura 16x16
 # Seis franjas horizontales de la paleta de la referencia, con ruido de pixel para que no sea plano.
 PALETTE = {
-    "core":   (255, 250, 210),   # NUCLEO BRILLANTE
-    "light":  (255, 214, 64),    # FUEGO CLARO
+    # El nucleo era crema (255, 250, 210) y en partida se leia BLANCO GRISACEO, no fuego: con luz de dia un
+    # color tan desaturado pierde el tono. Amarillo saturado, como el centro de la ficha de referencia.
+    "core":   (255, 228, 92),    # NUCLEO BRILLANTE
+    "light":  (255, 194, 40),    # FUEGO CLARO
     "mid":    (255, 146, 20),    # FUEGO MEDIO
     "dark":   (236, 84, 12),     # FUEGO OSCURO
     "rim":    (222, 40, 6),      # CONTORNO CALIENTE

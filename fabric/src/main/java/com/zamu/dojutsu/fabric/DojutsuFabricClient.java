@@ -7,6 +7,7 @@ import com.zamu.dojutsu.registry.ModEntities;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.renderer.entity.NoopRenderer;
+import com.zamu.dojutsu.client.render.NinjaProjectileRenderer;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 
 /**
@@ -21,7 +22,7 @@ public final class DojutsuFabricClient implements ClientModInitializer {
         DojutsuMod.initClient();
         // Toda entidad registrada necesita un renderer (regla 5).
         // El proyectil ninja se dibuja como item lanzado (su display item, sin assets propios).
-        EntityRendererRegistry.register(ModEntities.NINJA_PROJECTILE.get(), ThrownItemRenderer::new);
+        EntityRendererRegistry.register(ModEntities.NINJA_PROJECTILE.get(), NinjaProjectileRenderer::new);
         // Ancla y marcador son invisibles (logica de servidor).
         EntityRendererRegistry.register(ModEntities.ABILITY_ANCHOR.get(), NoopRenderer::new);
         EntityRendererRegistry.register(ModEntities.MARKER.get(), NoopRenderer::new);

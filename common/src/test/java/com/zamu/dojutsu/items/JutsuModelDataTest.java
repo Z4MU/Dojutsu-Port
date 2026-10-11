@@ -80,6 +80,16 @@ class JutsuModelDataTest {
     }
 
     @Test
+    void elRendererDistingueLosModelos3dDeLosPergaminos() {
+        // NinjaProjectileRenderer orienta segun el vuelo SOLO los modelos 3D; un sprite plano orientado
+        // desapareceria visto de canto
+        org.junit.jupiter.api.Assertions.assertTrue(JutsuModelData.isWorldModel(3356));
+        org.junit.jupiter.api.Assertions.assertTrue(JutsuModelData.isWorldModel(JutsuModelData.WORLD_MODEL_OFFSET));
+        org.junit.jupiter.api.Assertions.assertFalse(JutsuModelData.isWorldModel(356));
+        org.junit.jupiter.api.Assertions.assertFalse(JutsuModelData.isWorldModel(0));
+    }
+
+    @Test
     void unJutsuSinPergaminoNoTieneModelo3d() {
         assertEquals(0, JutsuModelData.worldModelOf("jutsu_inexistente"));
     }

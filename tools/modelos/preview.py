@@ -67,10 +67,12 @@ def render(yaw, pitch, size=300, scale=9.0):
     return img
 
 
+# Con NinjaProjectileRenderer (DJT-240) el modelo se orienta segun el vuelo, nariz hacia +Z. El visor esta en
+# +Z, asi que la vista frontal es lo que ve el OBJETIVO, y girando 180 grados, lo que ve quien lanza.
 views = [
-    ("FRONTAL (lo que ves en vuelo)", 0.0, 0.0),
+    ("LO QUE VE EL OBJETIVO", 0.0, 0.0),
+    ("LO QUE VE QUIEN LANZA", math.pi, math.radians(8)),
     ("LATERAL", math.pi / 2, 0.0),
-    ("SUPERIOR", math.pi / 2, math.pi / 2),
     ("PERSPECTIVA 3/4", math.radians(55), math.radians(25)),
 ]
 W, H, PAD = 300, 300, 28

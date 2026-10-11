@@ -5,6 +5,7 @@ import com.zamu.dojutsu.client.render.ShinobiRenderer;
 import com.zamu.dojutsu.client.render.TailedBeastRenderer;
 import com.zamu.dojutsu.registry.ModEntities;
 import net.minecraft.client.renderer.entity.NoopRenderer;
+import com.zamu.dojutsu.client.render.NinjaProjectileRenderer;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -25,7 +26,7 @@ public final class DojutsuNeoForgeClientEvents {
     static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
         // Toda entidad registrada necesita un renderer (regla 5).
         // El proyectil ninja se dibuja como item lanzado (su display item, sin assets propios).
-        event.registerEntityRenderer(ModEntities.NINJA_PROJECTILE.get(), ThrownItemRenderer::new);
+        event.registerEntityRenderer(ModEntities.NINJA_PROJECTILE.get(), NinjaProjectileRenderer::new);
         // Ancla y marcador son invisibles (logica de servidor).
         event.registerEntityRenderer(ModEntities.ABILITY_ANCHOR.get(), NoopRenderer::new);
         event.registerEntityRenderer(ModEntities.MARKER.get(), NoopRenderer::new);
