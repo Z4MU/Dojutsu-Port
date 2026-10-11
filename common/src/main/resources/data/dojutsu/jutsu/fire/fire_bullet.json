@@ -17,6 +17,13 @@
     "displayModel3d": true,
     "igniteGround": true,
     "hitboxSize": 0.8,
-    "trail": "fire"
+    "trail": "fire",
+    "casterEffects": [
+      {
+        "id": "minecraft:fire_resistance",
+        "seconds": 2,
+        "amplifier": 255
+      }
+    ]
   }
 }

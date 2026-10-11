@@ -2,11 +2,25 @@
   "id": "fire_dragon_flame_bullet",
   "chakraCost": 100,
   "cooldownTicks": 100,
-  "affinity": { "nature": "fire", "amount": 100 },
+  "affinity": {
+    "nature": "fire",
+    "amount": 100
+  },
   "category": "fire",
   "effect": "projectile",
   "effectParams": {
-    "speed": 1.2, "lifetimeTicks": 100, "radius": 3.0, "fireTicks": 100, "damage": 6.0,
-    "displayItem": "minecraft:fire_charge"
+    "speed": 1.2,
+    "lifetimeTicks": 100,
+    "radius": 3.0,
+    "fireTicks": 100,
+    "damage": 6.0,
+    "displayItem": "minecraft:fire_charge",
+    "casterEffects": [
+      {
+        "id": "minecraft:fire_resistance",
+        "seconds": 2,
+        "amplifier": 255
+      }
+    ]
   }
 }

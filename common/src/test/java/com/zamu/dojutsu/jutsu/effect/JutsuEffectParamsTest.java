@@ -52,6 +52,7 @@ class JutsuEffectParamsTest {
         assertEquals("minecraft:snowball", p.displayItem());
         assertEquals(0.0F, p.hitboxSize()); // la caja de 0.25 de siempre
         assertEquals(com.zamu.dojutsu.entity.ProjectileTrail.NONE, p.trail());
+        assertTrue(p.casterEffects().isEmpty());
     }
 
     @Test
@@ -64,6 +65,18 @@ class JutsuEffectParamsTest {
         assertEquals(100, p.fireTicks());  // Fire set value 100
         assertEquals(0.8F, p.hitboxSize(), 1.0e-6F);
         assertEquals(com.zamu.dojutsu.entity.ProjectileTrail.FIRE, p.trail());
+    }
+
+    @Test
+    void losJutsusDeFuegoConProyectilProtegenAQuienLanza() {
+        // Los cinco cast.mcfunction hacen "effect give @s fire_resistance 2 255 true". El port lo habia perdido y,
+        // con el suelo ardiendo desde el primer tick, el lanzador se quemaba con su propio fuego (DJT-241).
+        for (String id : new String[] {"fire_bullet", "great_fireball", "fire_dragon_flame_bullet",
+                "great_fire_annihilation", "exploding_dragon_strike"}) {
+            ProjectileEffect.Params p = ProjectileEffect.Params.parse(effectParams("fire/" + id));
+            assertEquals(java.util.List.of(new MobEffectSpec("minecraft:fire_resistance", 2, 255)),
+                    p.casterEffects(), id);
+        }
     }
 
     @Test

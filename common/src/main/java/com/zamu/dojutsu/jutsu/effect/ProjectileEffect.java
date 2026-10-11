@@ -35,7 +35,13 @@ import net.minecraft.world.phys.HitResult;
  * {@code fireTicks} (fuego del aura/impacto, def. 0) · {@code igniteGround} (def. false) ·
  * {@code damage} (al impactar una entidad, def. 0) · {@code displayItem} (def. bola de nieve) ·
  * {@code displayModel3d} (F11/DJT-240, def. false) · {@code hitboxSize} (F11/DJT-241, lado en bloques, def. 0 =
- * la caja de 0.25 de siempre) · {@code trail} (F11/DJT-241, estela y estallido: {@code "fire"}, def. sin estela).
+ * la caja de 0.25 de siempre) · {@code trail} (F11/DJT-241, estela y estallido: {@code "fire"}, def. sin estela) ·
+ * {@code casterEffects} (F11/DJT-241, pociones para quien lanza, como {@link MobEffectSpec}; def. ninguna).
+ *
+ * <p><b>Proteccion del lanzador (DJT-241).</b> Los cinco jutsus de fuego con proyectil hacian en su
+ * {@code cast.mcfunction} {@code effect give @s fire_resistance 2 255 true}: el proyectil sale de la cara de quien
+ * lo lanza y prende el suelo desde el primer tick. El port lo habia perdido, y al activar {@code igniteGround} el
+ * lanzador ardia con su propio fuego. Lo recupera {@code casterEffects}.
  *
  * <p><b>Hitbox y estela (DJT-241).</b> Un modelo 3D de 0.8 bloques con la caja de una bola de nieve atravesaba a
  * los mobs sin tocarlos: {@code hitboxSize} la ajusta al diametro de la bola del modelo ({@code Jutsu3dFitTest}
@@ -53,7 +59,7 @@ public final class ProjectileEffect implements JutsuEffect {
     /** Parametros de la familia, parseados de {@code effectParams} (puro y testeable). */
     public record Params(double speed, double gravity, int lifetimeTicks, double radius,
             int fireTicks, boolean igniteGround, float damage, String displayItem, boolean displayModel3d,
-            float hitboxSize, ProjectileTrail trail, EffectSfx sfx) {
+            float hitboxSize, ProjectileTrail trail, java.util.List<MobEffectSpec> casterEffects, EffectSfx sfx) {
 
         public static Params parse(JsonObject json) {
             return new Params(
@@ -68,6 +74,7 @@ public final class ProjectileEffect implements JutsuEffect {
                     GsonHelper.getAsBoolean(json, "displayModel3d", false),
                     GsonHelper.getAsFloat(json, "hitboxSize", 0.0F),
                     ProjectileTrail.byName(GsonHelper.getAsString(json, "trail", "")),
+                    MobEffectSpec.parseList(json, "casterEffects"),
                     EffectSfx.parse(json));
         }
     }
@@ -78,6 +85,8 @@ public final class ProjectileEffect implements JutsuEffect {
         // Suena al lanzar, no al impactar: el playsound del Rasenshuriken esta en throw.mcfunction, la primera
         // linea (F10/DJT-227). Es el unico proyectil con sonido propio en el datapack.
         params.sfx().play(level, caster.getX(), caster.getY(), caster.getZ());
+        // Antes de lanzar: el proyectil prende el suelo desde el primer tick, junto a quien lo lanza.
+        params.casterEffects().forEach(effect -> effect.applyTo(caster));
         NinjaProjectile projectile = NinjaProjectile.create(level, caster)
                 .withGravity(params.gravity())
                 .withLifetime(params.lifetimeTicks())

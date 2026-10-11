@@ -6516,6 +6516,20 @@ jutsu debe llevar estela.
 - Las variantes azul y negra del fuego (`d.blue`/`d.black`) siguen sin portar.
 - El brazo no hace gesto al lanzar.
 
+### Segunda prueba en partida (vídeo del usuario)
+
+Dos fallos que no estaban en el primer vídeo y que trajo este mismo ticket:
+
+- **El lanzador se quemaba con su propio fuego.** Las llamas que tapaban la pantalla eran el overlay de estar
+  ardiendo. Los cinco jutsus de fuego con proyectil daban en su `cast.mcfunction`
+  `effect give @s fire_resistance 2 255 true`, justo porque el proyectil sale de la cara del lanzador y prende el
+  suelo desde el primer tick. El port lo había perdido y no se notaba hasta activar `igniteGround`. Nuevo
+  parámetro `casterEffects`, puesto en los cinco JSON.
+- **La pantalla entera amarilla al lanzar.** La cámara quedaba dentro del modelo: al centrar la bola en la
+  entidad, la estela quedó 1.8 bloques por detrás y atravesaba la cara del lanzador. Ahora el modelo **crece** al
+  salir (de 0 a tamaño real entre los ticks 2 y 6) y la cola nunca llega a la cámara. Lo comprueba un test con la
+  longitud real de la estela.
+
 ### Validación
 
-`build` multiloader verde, **1130 tests** (+14). Falta la pasada en partida.
+`build` multiloader verde, **1134 tests** (+18). Falta repetir la pasada en partida.

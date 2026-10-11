@@ -35,7 +35,9 @@ import net.minecraft.world.item.component.CustomModelData;
  *       sitio por donde pasaba y contra el cielo se veia marron);</li>
  *   <li><b>centrado en la hitbox</b>: la posicion de la entidad son sus pies, y la bola del modelo va en el centro
  *       de la caja;</li>
- *   <li><b>animado</b>, con giro sobre el eje de vuelo y latido ({@link ProjectileAnimation}).</li>
+ *   <li><b>animado</b>, con giro sobre el eje de vuelo y latido ({@link ProjectileAnimation});</li>
+ *   <li><b>creciendo al salir</b>: a tamano real desde el primer tick, la estela envolvia la camara de quien
+ *       lanzaba.</li>
  * </ul>
  *
  * <p>Reutiliza el {@code ThrownItemRenderer} heredando de el, asi que no se registra ninguna {@code EntityType}
@@ -72,8 +74,12 @@ public final class NinjaProjectileRenderer extends ThrownItemRenderer<NinjaProje
         // Despues de orientar, el +Z local es el eje de vuelo: girar en Z es girar sobre la trayectoria.
         float age = projectile.tickCount + partialTick;
         poseStack.mulPose(Axis.ZP.rotationDegrees(ProjectileAnimation.rollDegrees(age)));
-        float pulse = ProjectileAnimation.pulseScale(age);
-        poseStack.scale(pulse, pulse, pulse);
+        float scale = ProjectileAnimation.pulseScale(age) * ProjectileAnimation.spawnScale(age);
+        if (scale <= 0.0F) {
+            poseStack.popPose();
+            return; // aun no ha empezado a formarse
+        }
+        poseStack.scale(scale, scale, scale);
         items.renderStatic(stack, ItemDisplayContext.GROUND, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY,
                 poseStack, buffers, projectile.level(), projectile.getId());
         poseStack.popPose();

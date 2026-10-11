@@ -2,7 +2,10 @@
   "id": "great_fireball",
   "chakraCost": 140,
   "cooldownTicks": 100,
-  "affinity": { "nature": "fire", "amount": 170 },
+  "affinity": {
+    "nature": "fire",
+    "amount": 170
+  },
   "category": "fire",
   "effect": "projectile",
   "effectParams": {
@@ -11,6 +14,13 @@
     "radius": 3.0,
     "fireTicks": 100,
     "igniteGround": true,
-    "displayItem": "minecraft:fire_charge"
+    "displayItem": "minecraft:fire_charge",
+    "casterEffects": [
+      {
+        "id": "minecraft:fire_resistance",
+        "seconds": 2,
+        "amplifier": 255
+      }
+    ]
   }
 }

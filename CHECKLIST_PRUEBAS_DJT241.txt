@@ -16,6 +16,14 @@ PREPARACION
   Para que el fuego no se apague solo:  /gamerule doFireTick true   (viene asi por defecto)
 
 
+0. LO QUE FALLO EN TU VIDEO (repetir primero)
+---------------------------------------------
+  [ ] 0.1  En un prado con hierba alta, lanza en supervivencia -> NO ardes. Te sale el icono de
+           Resistencia al fuego un par de segundos.
+  [ ] 0.2  Al lanzar, la pantalla NO se pone amarilla: la bala aparece pequena delante de ti y crece
+           mientras se aleja.
+  [ ] 0.3  Lo mismo con /dojutsujutsu cast great_fireball (tambien da la resistencia).
+
 1. HITBOX (lo que senalaste en el video)
 ----------------------------------------
   [ ] 1.1  Con F3+B, lanza y mira la bala en vuelo (desde un lado, en F5 si hace falta).

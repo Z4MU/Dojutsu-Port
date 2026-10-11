@@ -22,6 +22,12 @@ public final class ProjectileAnimation {
     /** Velocidad del latido, en radianes por tick: unos tres latidos por segundo. */
     static final float PULSE_RATE = 0.9F;
 
+    /** Edad a la que el modelo empieza a crecer: antes esta en la cara de quien lo lanza. */
+    static final float GROW_START_TICKS = 2.0F;
+
+    /** Ticks que tarda en alcanzar su tamano real. */
+    static final float GROW_TICKS = 4.0F;
+
     private ProjectileAnimation() {
     }
 
@@ -29,6 +35,24 @@ public final class ProjectileAnimation {
     public static float rollDegrees(float ageTicks) {
         float roll = (ageTicks * SPIN_DEGREES_PER_TICK) % 360.0F;
         return roll < 0.0F ? roll + 360.0F : roll;
+    }
+
+    /**
+     * Escala de aparicion, de 0 a 1: el jutsu se forma en vez de aparecer de golpe (F11/DJT-241).
+     *
+     * <p>No es solo estetica. La estela del modelo se alarga casi dos bloques por detras de la bola; a tamano real
+     * desde el primer tick, envolvia la camara de quien lanzaba y le pintaba la pantalla entera de amarillo. Al
+     * crecer mientras se aleja, la cola nunca llega a la camara.
+     */
+    public static float spawnScale(float ageTicks) {
+        float t = (ageTicks - GROW_START_TICKS) / GROW_TICKS;
+        if (t <= 0.0F) {
+            return 0.0F;
+        }
+        if (t >= 1.0F) {
+            return 1.0F;
+        }
+        return t * t * (3.0F - 2.0F * t); // smoothstep: arranca y llega sin tirones
     }
 
     /** Escala del latido, alrededor de 1. */

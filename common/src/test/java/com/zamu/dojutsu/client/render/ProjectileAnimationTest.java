@@ -45,4 +45,37 @@ class ProjectileAnimationTest {
         // el primer frame visible no debe dar un salto de tamano
         assertEquals(1.0F, ProjectileAnimation.pulseScale(0.0F), EPS);
     }
+
+    @Test
+    void alSalirNoSeVeYLuegoLlegaATamanoReal() {
+        assertEquals(0.0F, ProjectileAnimation.spawnScale(0.0F), EPS);
+        assertEquals(0.0F, ProjectileAnimation.spawnScale(ProjectileAnimation.GROW_START_TICKS), EPS);
+        assertEquals(1.0F, ProjectileAnimation.spawnScale(
+                ProjectileAnimation.GROW_START_TICKS + ProjectileAnimation.GROW_TICKS), EPS);
+        assertEquals(1.0F, ProjectileAnimation.spawnScale(500.0F), EPS);
+    }
+
+    @Test
+    void creceSinEncogerNunca() {
+        float previous = 0.0F;
+        for (float age = 0.0F; age < 12.0F; age += 0.05F) {
+            float scale = ProjectileAnimation.spawnScale(age);
+            assertTrue(scale >= previous - EPS, "encoge a la edad " + age);
+            previous = scale;
+        }
+    }
+
+    @Test
+    void laEstelaNuncaLlegaALaCamaraDeQuienLanza() {
+        // El fallo del segundo video de prueba: la pantalla entera amarilla al lanzar. La estela de la Bala de fuego
+        // se alarga 1.8 bloques por detras de la bola (18 px x 1.6 / 16); a 1 bloque por tick, la bola esta a
+        // "edad" bloques de la camara. La cola debe quedarse siempre por delante, con margen.
+        float tailBlocks = 1.8F;
+        float speed = 1.0F;
+        for (float age = 0.0F; age < 20.0F; age += 0.05F) {
+            float tailEnd = age * speed - tailBlocks * ProjectileAnimation.spawnScale(age);
+            assertTrue(tailEnd > 0.3F || ProjectileAnimation.spawnScale(age) == 0.0F,
+                    "a la edad " + age + " la cola llega a " + tailEnd + " bloques de la camara");
+        }
+    }
 }
