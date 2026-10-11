@@ -124,6 +124,7 @@
     { "predicate": { "custom_model_data": 496 }, "model": "dojutsu:item/jutsu/assassination_technique" },
     { "predicate": { "custom_model_data": 497 }, "model": "dojutsu:item/jutsu/chakra_shock_slash" },
     { "predicate": { "custom_model_data": 498 }, "model": "dojutsu:item/jutsu/chakra_shockwave_slash" },
-    { "predicate": { "custom_model_data": 499 }, "model": "dojutsu:item/jutsu/secret_sword_snowstorm_beheading" }
+    { "predicate": { "custom_model_data": 499 }, "model": "dojutsu:item/jutsu/secret_sword_snowstorm_beheading" },
+    { "predicate": { "custom_model_data": 3356 }, "model": "dojutsu:item/jutsu_3d/fire_bullet" }
   ]
 }

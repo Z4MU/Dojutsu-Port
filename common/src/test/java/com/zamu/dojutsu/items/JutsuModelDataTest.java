@@ -61,7 +61,75 @@ class JutsuModelDataTest {
             assertTrue(cmd > 0, id + " deberia tener CustomModelData");
             mapCmds.add(cmd);
         }
-        assertEquals(mapCmds, modelCmds, "el modelo base y JutsuModelData deben declarar los mismos CustomModelData");
+        // F11/DJT-240: el modelo base tiene ahora DOS rangos. El de pergamino (< 3000) sigue debiendo coincidir
+        // 1:1 con el mapa; el de modelos 3D en el mundo (>= 3000) se comprueba aparte, abajo.
+        Set<Integer> scrollCmds = new HashSet<>();
+        modelCmds.stream().filter(cmd -> cmd < JutsuModelData.WORLD_MODEL_OFFSET).forEach(scrollCmds::add);
+        assertEquals(mapCmds, scrollCmds, "el modelo base y JutsuModelData deben declarar los mismos CustomModelData");
+    }
+
+    // ------------------------------------------------------------------
+    // Modelos 3D en el mundo (F11/DJT-240)
+    // ------------------------------------------------------------------
+
+    @Test
+    void elModelo3dEsTresMilMasElDelPergamino() {
+        // la regla de la guia de Blockbench, seccion 6.1: deducible, sin segunda tabla que mantener
+        assertEquals(3356, JutsuModelData.worldModelOf("fire_bullet"));
+        assertEquals(3301, JutsuModelData.worldModelOf("great_fireball"));
+    }
+
+    @Test
+    void unJutsuSinPergaminoNoTieneModelo3d() {
+        assertEquals(0, JutsuModelData.worldModelOf("jutsu_inexistente"));
+    }
+
+    @Test
+    void todaOverride3dApuntaAUnJutsuRealYAUnModeloQueExiste() {
+        // Una override 3D sin jutsu detras, o que apunta a un fichero que no existe, se veria en partida como
+        // "el modelo de otra tecnica" (las overrides se resuelven con >=) o como el cubo morado.
+        Set<Integer> validWorld = new HashSet<>();
+        for (String id : ALL_TEXTURED) {
+            validWorld.add(JutsuModelData.worldModelOf(id));
+        }
+        try (InputStream in = JutsuModelDataTest.class.getResourceAsStream(
+                "/assets/dojutsu/models/item/jutsu.json")) {
+            JsonObject model = GSON.fromJson(new InputStreamReader(in, StandardCharsets.UTF_8), JsonObject.class);
+            model.getAsJsonArray("overrides").forEach(el -> {
+                JsonObject override = el.getAsJsonObject();
+                int cmd = override.getAsJsonObject("predicate").get("custom_model_data").getAsInt();
+                if (cmd < JutsuModelData.WORLD_MODEL_OFFSET) {
+                    return;
+                }
+                assertTrue(validWorld.contains(cmd), "override 3D huerfana: " + cmd);
+                String path = "/assets/dojutsu/models/" + override.get("model").getAsString()
+                        .replace("dojutsu:", "") + ".json";
+                assertTrue(JutsuModelDataTest.class.getResource(path) != null, "no existe el modelo " + path);
+            });
+        } catch (java.io.IOException e) {
+            throw new IllegalStateException("no se pudo leer el modelo base", e);
+        }
+    }
+
+    @Test
+    void elModeloDeLaBalaDeFuegoRespetaLosLimitesDeVanilla() {
+        // un modelo de item con coordenadas fuera de [-16, 32] no carga, y no avisa: sale el cubo morado
+        try (InputStream in = JutsuModelDataTest.class.getResourceAsStream(
+                "/assets/dojutsu/models/item/jutsu_3d/fire_bullet.json")) {
+            JsonObject model = GSON.fromJson(new InputStreamReader(in, StandardCharsets.UTF_8), JsonObject.class);
+            model.getAsJsonArray("elements").forEach(el -> {
+                JsonObject e = el.getAsJsonObject();
+                for (String key : new String[] {"from", "to"}) {
+                    e.getAsJsonArray(key).forEach(v -> {
+                        double value = v.getAsDouble();
+                        assertTrue(value >= -16 && value <= 32, "fuera de limites: " + value);
+                    });
+                }
+            });
+            assertTrue(model.getAsJsonArray("elements").size() > 0);
+        } catch (java.io.IOException e) {
+            throw new IllegalStateException("no se pudo leer el modelo 3D", e);
+        }
     }
 
     /** Los jutsus con textura portada (DJT-085b fuego/rayo/otros + DJT-086 agua). */

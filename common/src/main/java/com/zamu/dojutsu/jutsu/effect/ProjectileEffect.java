@@ -3,8 +3,11 @@ package com.zamu.dojutsu.jutsu.effect;
 import com.google.gson.JsonObject;
 import com.zamu.dojutsu.entity.NinjaProjectile;
 import com.zamu.dojutsu.jutsu.JutsuEntry;
+import com.zamu.dojutsu.registry.ModItems;
+import com.zamu.dojutsu.items.JutsuModelData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.GsonHelper;
@@ -12,6 +15,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomModelData;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -26,13 +30,21 @@ import net.minecraft.world.level.block.state.BlockState;
  * <p>Parametros ({@code effectParams}): {@code speed} (bloques/tick, def. 1.0) · {@code gravity}
  * (def. 0) · {@code lifetimeTicks} (def. 100) · {@code radius} (aura, def. 0 = sin aura) ·
  * {@code fireTicks} (fuego del aura/impacto, def. 0) · {@code igniteGround} (def. false) ·
- * {@code damage} (al impactar una entidad, def. 0) · {@code displayItem} (def. bola de nieve).
+ * {@code damage} (al impactar una entidad, def. 0) · {@code displayItem} (def. bola de nieve) ·
+ * {@code displayModel3d} (F11/DJT-240, def. false).
+ *
+ * <p><b>Modelo 3D en vuelo (DJT-240).</b> Con {@code displayModel3d: true} el proyectil se dibuja con el item del
+ * mod {@code dojutsu:jutsu} y el {@code CustomModelData} 3D de la tecnica ({@link JutsuModelData#worldModelOf}),
+ * en vez de con un item de vanilla. La entidad ya se pinta con el {@code ThrownItemRenderer}, que dibuja el item
+ * que se le diga: por eso el modelo aparece <b>sin escribir un renderer nuevo</b>. Es opt-in por tecnica, porque
+ * un numero 3D sin modelo detras mostraria el de otro jutsu (ver {@link JutsuModelData#worldModelOf}).
  */
 public final class ProjectileEffect implements JutsuEffect {
 
     /** Parametros de la familia, parseados de {@code effectParams} (puro y testeable). */
     public record Params(double speed, double gravity, int lifetimeTicks, double radius,
-            int fireTicks, boolean igniteGround, float damage, String displayItem, EffectSfx sfx) {
+            int fireTicks, boolean igniteGround, float damage, String displayItem, boolean displayModel3d,
+            EffectSfx sfx) {
 
         public static Params parse(JsonObject json) {
             return new Params(
@@ -44,6 +56,7 @@ public final class ProjectileEffect implements JutsuEffect {
                     GsonHelper.getAsBoolean(json, "igniteGround", false),
                     GsonHelper.getAsFloat(json, "damage", 0.0F),
                     GsonHelper.getAsString(json, "displayItem", "minecraft:snowball"),
+                    GsonHelper.getAsBoolean(json, "displayModel3d", false),
                     EffectSfx.parse(json));
         }
     }
@@ -57,7 +70,9 @@ public final class ProjectileEffect implements JutsuEffect {
         NinjaProjectile projectile = NinjaProjectile.create(level, caster)
                 .withGravity(params.gravity())
                 .withLifetime(params.lifetimeTicks())
-                .withDisplayItem(displayStack(params.displayItem()))
+                .withDisplayItem(params.displayModel3d()
+                        ? worldModelStack(jutsu.id(), params.displayItem())
+                        : displayStack(params.displayItem()))
                 .withFlightTick(p -> flightAura(level, caster, p, params))
                 .withImpactCallback((p, hit) -> {
                     if (params.damage() > 0
@@ -101,6 +116,20 @@ public final class ProjectileEffect implements JutsuEffect {
         if (state.isAir() && Blocks.FIRE.defaultBlockState().canSurvive(level, pos)) {
             level.setBlockAndUpdate(pos, Blocks.FIRE.defaultBlockState());
         }
+    }
+
+    /**
+     * El item del mod con el modelo 3D de la tecnica. Si la tecnica no tiene numero de modelo, cae al
+     * {@code displayItem} de vanilla en vez de dibujar un pergamino generico volando.
+     */
+    private static ItemStack worldModelStack(String jutsuId, String fallbackItem) {
+        int modelData = JutsuModelData.worldModelOf(jutsuId);
+        if (modelData == 0) {
+            return displayStack(fallbackItem);
+        }
+        ItemStack stack = new ItemStack(ModItems.JUTSU.get());
+        stack.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(modelData));
+        return stack;
     }
 
     private static ItemStack displayStack(String itemId) {

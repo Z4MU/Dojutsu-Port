@@ -179,4 +179,25 @@ public final class JutsuModelData {
     public static int of(String jutsuId) {
         return MODEL_DATA.getOrDefault(jutsuId, 0);
     }
+
+    /**
+     * Desplazamiento del rango de modelos <b>3D en el mundo</b> (F11/DJT-240, decidido en la guia de Blockbench,
+     * seccion 6.1). El pergamino del inventario usa el numero autentico del datapack (301-499); su modelo 3D usa
+     * {@code 3000 +} ese mismo numero. Asi los dos conviven en el mismo item sin pisarse, y el numero 3D se
+     * deduce del del pergamino sin una segunda tabla que mantener.
+     */
+    public static final int WORLD_MODEL_OFFSET = 3000;
+
+    /**
+     * {@code CustomModelData} del modelo 3D en el mundo de un jutsu, o 0 si no tiene numero de pergamino.
+     *
+     * <p><b>Ojo al usarlo:</b> que exista el numero no significa que exista el modelo. Las overrides de vanilla
+     * se resuelven con {@code >=}, asi que un numero sin override propia muestra el modelo de la override
+     * inmediatamente inferior -el de otro jutsu-. Por eso el modelo 3D es <b>opt-in</b> por tecnica
+     * ({@code displayModel3d} en su JSON) y no se aplica a todas automaticamente.
+     */
+    public static int worldModelOf(String jutsuId) {
+        int scroll = of(jutsuId);
+        return scroll == 0 ? 0 : WORLD_MODEL_OFFSET + scroll;
+    }
 }
