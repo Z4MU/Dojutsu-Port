@@ -21,6 +21,8 @@ import net.minecraft.world.item.component.CustomModelData;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 
 /**
@@ -36,7 +38,11 @@ import net.minecraft.world.phys.HitResult;
  * {@code damage} (al impactar una entidad, def. 0) · {@code displayItem} (def. bola de nieve) ·
  * {@code displayModel3d} (F11/DJT-240, def. false) · {@code hitboxSize} (F11/DJT-241, lado en bloques, def. 0 =
  * la caja de 0.25 de siempre) · {@code trail} (F11/DJT-241, estela y estallido: {@code "fire"}, def. sin estela) ·
- * {@code casterEffects} (F11/DJT-241, pociones para quien lanza, como {@link MobEffectSpec}; def. ninguna).
+ * {@code casterEffects} (F11/DJT-241, pociones para quien lanza, como {@link MobEffectSpec}; def. ninguna) ·
+ * {@code stopInWater} (F11/DJT-242, el agua lo detiene; def. false).
+ *
+ * <p><b>Sonidos y agua (DJT-242).</b> Con {@code trail} el proyectil suena al salir, crepita en vuelo y se apaga con
+ * un "fsss" al chocar con agua o al agotarse en el aire (ver {@link ProjectileTrailFx}).
  *
  * <p><b>Proteccion del lanzador (DJT-241).</b> Los cinco jutsus de fuego con proyectil hacian en su
  * {@code cast.mcfunction} {@code effect give @s fire_resistance 2 255 true}: el proyectil sale de la cara de quien
@@ -59,7 +65,8 @@ public final class ProjectileEffect implements JutsuEffect {
     /** Parametros de la familia, parseados de {@code effectParams} (puro y testeable). */
     public record Params(double speed, double gravity, int lifetimeTicks, double radius,
             int fireTicks, boolean igniteGround, float damage, String displayItem, boolean displayModel3d,
-            float hitboxSize, ProjectileTrail trail, java.util.List<MobEffectSpec> casterEffects, EffectSfx sfx) {
+            float hitboxSize, ProjectileTrail trail, java.util.List<MobEffectSpec> casterEffects,
+            boolean stopInWater, EffectSfx sfx) {
 
         public static Params parse(JsonObject json) {
             return new Params(
@@ -75,6 +82,7 @@ public final class ProjectileEffect implements JutsuEffect {
                     GsonHelper.getAsFloat(json, "hitboxSize", 0.0F),
                     ProjectileTrail.byName(GsonHelper.getAsString(json, "trail", "")),
                     MobEffectSpec.parseList(json, "casterEffects"),
+                    GsonHelper.getAsBoolean(json, "stopInWater", false),
                     EffectSfx.parse(json));
         }
     }
@@ -94,11 +102,19 @@ public final class ProjectileEffect implements JutsuEffect {
                         ? worldModelStack(jutsu.id(), params.displayItem())
                         : displayStack(params.displayItem()))
                 .withTrail(params.trail())
+                .withStopInWater(params.stopInWater())
+                .withExpireCallback(p -> ProjectileTrailFx.fizzle(level, params.trail(),
+                        p.getBoundingBox().getCenter(), false))
                 .withFlightTick(p -> flightAura(level, caster, p, params))
                 .withImpactCallback((p, hit) -> {
                     if (params.damage() > 0
                             && hit instanceof net.minecraft.world.phys.EntityHitResult entityHit) {
                         entityHit.getEntity().hurt(level.damageSources().indirectMagic(p, caster), params.damage());
+                    }
+                    if (hit instanceof BlockHitResult blockHit
+                            && level.getFluidState(blockHit.getBlockPos()).is(FluidTags.WATER)) {
+                        ProjectileTrailFx.fizzle(level, params.trail(), hit.getLocation(), true); // apagado, no estalla
+                        return;
                     }
                     // Contra una entidad, el estallido va en la bola (justo delante del objetivo), no en sus pies.
                     ProjectileTrailFx.burst(level, params.trail(), hit.getType() == HitResult.Type.ENTITY
@@ -109,6 +125,7 @@ public final class ProjectileEffect implements JutsuEffect {
         }
         projectile.launch(caster.getLookAngle(), (float) params.speed());
         level.addFreshEntity(projectile);
+        ProjectileTrailFx.launch(level, params.trail(), caster.getEyePosition());
     }
 
     /**

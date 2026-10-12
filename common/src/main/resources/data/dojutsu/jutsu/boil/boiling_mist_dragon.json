@@ -1,4 +1,4 @@
 { "id": "boiling_mist_dragon", "chakraCost": 150, "cooldownTicks": 100,
   "affinity": [ { "nature": "fire", "amount": 140 }, { "nature": "water", "amount": 140 } ],
   "kekkeiGenkai": "boil", "category": "boil", "effect": "projectile",
-  "effectParams": { "speed": 1.5, "lifetimeTicks": 100, "radius": 2.0, "damage": 10.0, "displayItem": "minecraft:magma_cream" } }
+  "effectParams": { "stopInWater": true, "speed": 1.5, "lifetimeTicks": 100, "radius": 2.0, "damage": 10.0, "displayItem": "minecraft:magma_cream" } }

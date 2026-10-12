@@ -1,4 +1,4 @@
 { "id": "judgment", "chakraCost": 120, "cooldownTicks": 100,
   "affinity": [ { "nature": "wind", "amount": 140 }, { "nature": "yin", "amount": 140 } ],
   "kekkeiGenkai": "dark", "category": "dark", "effect": "projectile",
-  "effectParams": { "speed": 1.6, "lifetimeTicks": 100, "radius": 2.0, "damage": 10.0, "displayItem": "minecraft:coal" } }
+  "effectParams": { "stopInWater": true, "speed": 1.6, "lifetimeTicks": 100, "radius": 2.0, "damage": 10.0, "displayItem": "minecraft:coal" } }

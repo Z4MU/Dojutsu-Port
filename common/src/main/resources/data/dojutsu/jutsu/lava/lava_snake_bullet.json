@@ -1,4 +1,4 @@
 { "id": "lava_snake_bullet", "chakraCost": 180, "cooldownTicks": 100,
   "affinity": [ { "nature": "earth", "amount": 150 }, { "nature": "fire", "amount": 150 } ],
   "kekkeiGenkai": "lava", "category": "lava", "effect": "projectile",
-  "effectParams": { "speed": 1.5, "lifetimeTicks": 100, "radius": 2.0, "damage": 9.0, "displayItem": "minecraft:magma_cream" } }
+  "effectParams": { "stopInWater": true, "speed": 1.5, "lifetimeTicks": 100, "radius": 2.0, "damage": 9.0, "displayItem": "minecraft:magma_cream" } }

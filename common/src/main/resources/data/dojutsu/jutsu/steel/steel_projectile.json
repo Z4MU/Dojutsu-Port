@@ -1,4 +1,4 @@
 { "id": "steel_projectile", "chakraCost": 120, "cooldownTicks": 100,
   "affinity": [ { "nature": "earth", "amount": 80 }, { "nature": "fire", "amount": 80 }, { "nature": "water", "amount": 80 } ],
   "kekkeiGenkai": "steel", "category": "steel", "effect": "projectile",
-  "effectParams": { "speed": 1.7, "lifetimeTicks": 100, "radius": 2.0, "damage": 9.0, "displayItem": "minecraft:iron_ingot" } }
+  "effectParams": { "stopInWater": true, "speed": 1.7, "lifetimeTicks": 100, "radius": 2.0, "damage": 9.0, "displayItem": "minecraft:iron_ingot" } }

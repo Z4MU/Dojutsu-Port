@@ -7,6 +7,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
@@ -20,6 +21,10 @@ import org.joml.Vector3f;
  *   <li><b>Estallido:</b> lo emite el <b>servidor</b> al impactar, porque el cliente no se entera del impacto:
  *       solo ve que la entidad desaparece.</li>
  * </ul>
+ *
+ * <p><b>Sonidos (DJT-242).</b> El datapack no tenia ninguno para el fuego (su resource pack trae viento, rayo,
+ * tierra y madera, pero no fuego). Todos son de vanilla: lanzar, crepitar en vuelo pegado a la bala, estallar,
+ * apagarse en el agua y apagarse al agotarse en el aire.
  */
 public final class ProjectileTrailFx {
 
@@ -61,6 +66,49 @@ public final class ProjectileTrailFx {
             level.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y, at.z, 10, 0.3D, 0.3D, 0.3D, 0.02D);
             level.playSound(null, at.x, at.y, at.z, SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS,
                     1.0F, 0.9F + level.random.nextFloat() * 0.2F);
+        }
+    }
+
+    /** Sonido de lanzamiento, en la posicion de quien lanza (servidor). */
+    public static void launch(ServerLevel level, ProjectileTrail trail, Vec3 at) {
+        if (trail == ProjectileTrail.FIRE) {
+            // El disparo del blaze: el sonido de bola de fuego que cualquier jugador reconoce. Algo mas agudo para
+            // distinguirlo de un blaze de verdad.
+            level.playSound(null, at.x, at.y, at.z, SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS,
+                    1.0F, 1.1F + level.random.nextFloat() * 0.2F);
+        }
+    }
+
+    /**
+     * Crepitar de vuelo (cliente). Va <b>pegado a la entidad</b>: Minecraft lo mueve con ella y lo corta cuando
+     * desaparece, asi que el objetivo la oye acercarse y de que lado viene, y el sonido muere con el impacto.
+     */
+    public static void flightSound(Level level, ProjectileTrail trail, Entity projectile, RandomSource random) {
+        if (!level.isClientSide || trail != ProjectileTrail.FIRE) {
+            return;
+        }
+        level.playLocalSound(projectile, SoundEvents.FIRE_AMBIENT, SoundSource.PLAYERS,
+                1.2F, 1.2F + random.nextFloat() * 0.3F);
+    }
+
+    /**
+     * Se apaga (servidor): contra el agua, con su "fsss" y una nube de vapor; al agotarse en el aire, lo mismo pero
+     * bajito, para que no se esfume en silencio.
+     *
+     * @param water {@code true} si choco con agua, {@code false} si se agoto su vida en vuelo
+     */
+    public static void fizzle(ServerLevel level, ProjectileTrail trail, Vec3 at, boolean water) {
+        if (trail != ProjectileTrail.FIRE) {
+            return;
+        }
+        if (water) {
+            level.sendParticles(ParticleTypes.CLOUD, at.x, at.y, at.z, 14, 0.4D, 0.3D, 0.4D, 0.03D);
+            level.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y, at.z, 6, 0.3D, 0.2D, 0.3D, 0.01D);
+            level.playSound(null, at.x, at.y, at.z, SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 1.0F,
+                    0.9F + level.random.nextFloat() * 0.2F);
+        } else {
+            level.sendParticles(ParticleTypes.SMOKE, at.x, at.y, at.z, 10, 0.2D, 0.2D, 0.2D, 0.01D);
+            level.playSound(null, at.x, at.y, at.z, SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.35F, 1.6F);
         }
     }
 

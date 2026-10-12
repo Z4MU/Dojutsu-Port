@@ -1,0 +1,31 @@
+CHECKLIST DE PRUEBAS - DJT-242 (sonidos de la Bala de fuego y el agua)
+=======================================================================
+
+Hazlo en los DOS loaders. Sube el volumen de "Jugadores" en Opciones > Musica y sonidos.
+Preparacion: la misma que DJT-241 (/dojutsujutsu learn fire_bullet, select, o cast directo).
+Para ver que suena:  Opciones > Accesibilidad > Mostrar subtitulos.
+
+1. SONIDOS
+----------
+  [ ] 1.1  Al lanzar suena el disparo de un blaze (el subtitulo lo nombra como blaze).
+  [ ] 1.2  En vuelo se oye un crepitar de fuego que SE ALEJA con la bala, no se queda donde lanzaste.
+  [ ] 1.3  Al chocar con una pared, el "fwoosh" de la carga ignea, y el crepitar se corta.
+  [ ] 1.4  Dispara al cielo sin nada delante: a los 5 s se apaga con un "fsss" bajito y un poco de humo.
+  [ ] 1.5  Ponte delante de la trayectoria (o pide a alguien en LAN que te la lance): la oyes venir y
+           de que lado viene.
+
+2. AGUA
+-------
+  [ ] 2.1  Dispara a un lago -> la bala se para en la superficie, "fsss" fuerte y nube de vapor.
+           NO estalla en llamas.
+  [ ] 2.2  Dispara a hierba marina bajo el agua desde la orilla -> igual.
+  [ ] 2.3  Lanza estando tu dentro del agua -> se apaga al instante (asi era en el datapack).
+  [ ] 2.4  /dojutsujutsu cast wind_torpedo contra el agua -> tambien se para (sin sonido de fuego).
+  [ ] 2.5  /dojutsujutsu cast rasenshuriken contra el agua -> la ATRAVIESA (el datapack no lo paraba).
+
+3. NADA MAS SE ROMPIO
+---------------------
+  [ ] 3.1  El kunai de los shinobi sigue cruzando el agua y golpeando.
+  [ ] 3.2  Lo de DJT-241 sigue bien (estela, estallido, no ardes al lanzar).
+
+Si algo falla, dime el numero del punto y el loader.

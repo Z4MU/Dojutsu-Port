@@ -53,6 +53,27 @@ class JutsuEffectParamsTest {
         assertEquals(0.0F, p.hitboxSize()); // la caja de 0.25 de siempre
         assertEquals(com.zamu.dojutsu.entity.ProjectileTrail.NONE, p.trail());
         assertTrue(p.casterEffects().isEmpty());
+        assertFalse(p.stopInWater()); // un kunai cruza el agua
+    }
+
+    @Test
+    void losProyectilesQueElDatapackParabaEnElAguaSeParan() {
+        // F11/DJT-242. Sale de grep sobre los move/run del datapack: los que marcan d.hit si el bloque de delante es
+        // #dojutsu:waters. Los otros cuatro proyectiles del port (Honoikazuchi, Rasenshuriken, C1 y el dragon de
+        // tierra) no tienen esa linea y siguen cruzando el agua.
+        String[] stop = {"boil/boiling_mist_dragon", "crystal/crystal_needles", "dark/judgment", "earth/rock_gun",
+                "fire/exploding_dragon_strike", "fire/fire_bullet", "fire/fire_dragon_flame_bullet",
+                "fire/great_fireball", "fire/great_fire_annihilation", "lava/lava_snake_bullet",
+                "magnet/iron_sand_wave", "scorch/great_steaming_explosive_blast", "steel/steel_projectile",
+                "storm/laser_circus", "water/rising_water_slicer", "water/water_severing_wave",
+                "wind/drilling_air_bullet", "wind/wind_torpedo", "yin_yang/truth_seeking_scorched_earth"};
+        for (String id : stop) {
+            assertTrue(ProjectileEffect.Params.parse(effectParams(id)).stopInWater(), id);
+        }
+        for (String id : new String[] {"blaze/honoikazuchi", "wind/rasenshuriken", "explosion/c1",
+                "earth/earth_dragon_blast"}) {
+            assertFalse(ProjectileEffect.Params.parse(effectParams(id)).stopInWater(), id);
+        }
     }
 
     @Test

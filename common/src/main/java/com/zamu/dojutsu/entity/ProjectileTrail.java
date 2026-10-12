@@ -34,6 +34,21 @@ public enum ProjectileTrail {
         return NONE;
     }
 
+    /**
+     * Cada cuantos ticks se relanza el crepitar de vuelo (F11/DJT-242). Cada sonido dura algo mas de un segundo y
+     * va pegado a la entidad; solaparlos un poco evita huecos sin amontonar voces.
+     */
+    public static final int FLIGHT_SOUND_INTERVAL_TICKS = 10;
+
+    /** Primer tick con sonido de vuelo: el mismo en que empieza la estela, cuando ya ha salido de la cara. */
+    public static final int FLIGHT_SOUND_FIRST_TICK = 2;
+
+    /** Si en este tick toca relanzar el sonido de vuelo. */
+    public static boolean flightSoundDue(int tickCount) {
+        return tickCount >= FLIGHT_SOUND_FIRST_TICK
+                && (tickCount - FLIGHT_SOUND_FIRST_TICK) % FLIGHT_SOUND_INTERVAL_TICKS == 0;
+    }
+
     /** Identificador de red (el byte sincronizado). */
     public byte id() {
         return (byte) ordinal();

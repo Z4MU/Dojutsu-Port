@@ -122,6 +122,8 @@ public class NinjaProjectile extends ThrowableItemProjectile {
     private int maxLifetimeTicks = DEFAULT_LIFETIME_TICKS;
     private ImpactCallback impactCallback;
     private FlightTick flightTick;
+    private java.util.function.Consumer<NinjaProjectile> expireCallback;
+    private boolean stopInWater;
     private UUID ownerUuid;
 
     public NinjaProjectile(EntityType<? extends NinjaProjectile> type, Level level) {
@@ -186,6 +188,22 @@ public class NinjaProjectile extends ThrowableItemProjectile {
         this.entityData.set(DATA_SIZE, size);
         this.refreshDimensions();
         this.setPos(center.x, center.y - size / 2.0D, center.z);
+        return this;
+    }
+
+    /**
+     * Se detiene al tocar agua (F11/DJT-242), como 19 de los 23 proyectiles del datapack, cuyo {@code move}
+     * marcaba impacto si el bloque de delante era {@code #dojutsu:waters}. El impacto llega al callback como un
+     * {@code BlockHitResult} sobre el bloque de agua. Por defecto lo atraviesa (un kunai cruza el agua).
+     */
+    public NinjaProjectile withStopInWater(boolean stop) {
+        this.stopInWater = stop;
+        return this;
+    }
+
+    /** Reaccion al agotarse la vida en vuelo, sin impactar (server-side), justo antes del descarte (F11/DJT-242). */
+    public NinjaProjectile withExpireCallback(java.util.function.Consumer<NinjaProjectile> callback) {
+        this.expireCallback = Objects.requireNonNull(callback, "callback");
         return this;
     }
 
@@ -256,6 +274,13 @@ public class NinjaProjectile extends ThrowableItemProjectile {
         // Deteccion y expiracion: solo con autoridad de servidor.
         if (!this.level().isClientSide) {
             if (ProjectileMath.isExpired(this.tickCount, this.maxLifetimeTicks)) {
+                if (this.expireCallback != null) {
+                    try {
+                        this.expireCallback.accept(this);
+                    } catch (RuntimeException e) {
+                        LOGGER.error("[Dojutsu] Fallo el callback de expiracion del proyectil {}", this.getId(), e);
+                    }
+                }
                 this.discard();
                 return;
             }
@@ -274,8 +299,10 @@ public class NinjaProjectile extends ThrowableItemProjectile {
             }
             // Con hitbox propia el rayo sale del centro de la caja y engorda a los objetivos con su medio lado
             // (F11/DJT-241). Sin ella, la colision de siempre: no cambia nada para el resto de proyectiles.
-            HitResult hit = this.entityData.get(DATA_SIZE) > 0.0F
-                    ? RaycastHelper.firstHitAlongMotion(this, this::canHitEntity, this.getBbWidth() / 2.0D)
+            // El agua (DJT-242) tambien necesita el rayo propio: el de vanilla no mira fluidos.
+            HitResult hit = this.entityData.get(DATA_SIZE) > 0.0F || this.stopInWater
+                    ? RaycastHelper.firstHitAlongMotion(this, this::canHitEntity, this.getBbWidth() / 2.0D,
+                            this.stopInWater)
                     : RaycastHelper.firstHitAlongMotion(this, this::canHitEntity);
             if (hit.getType() != HitResult.Type.MISS) {
                 this.onHit(hit);
@@ -292,6 +319,9 @@ public class NinjaProjectile extends ThrowableItemProjectile {
         if (this.level().isClientSide && this.tickCount >= 2) {
             ProjectileTrailFx.emitTrail(this.level(), this.trail(), centerBefore,
                     this.getBoundingBox().getCenter(), this.random);
+        }
+        if (this.level().isClientSide && ProjectileTrail.flightSoundDue(this.tickCount)) {
+            ProjectileTrailFx.flightSound(this.level(), this.trail(), this, this.random);
         }
         this.setDeltaMovement(ProjectileMath.applyGravity(
                 this.getDeltaMovement(), this.entityData.get(DATA_GRAVITY)));

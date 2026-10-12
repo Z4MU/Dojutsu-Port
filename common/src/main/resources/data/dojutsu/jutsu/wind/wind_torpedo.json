@@ -1,3 +1,3 @@
 { "id": "wind_torpedo", "chakraCost": 60, "cooldownTicks": 100,
   "affinity": { "nature": "wind", "amount": 50 }, "category": "wind", "effect": "projectile",
-  "effectParams": { "speed": 1.6, "lifetimeTicks": 100, "damage": 7.0, "displayItem": "minecraft:phantom_membrane" } }
+  "effectParams": { "stopInWater": true, "speed": 1.6, "lifetimeTicks": 100, "damage": 7.0, "displayItem": "minecraft:phantom_membrane" } }

@@ -5,5 +5,5 @@
   "affinity": { "nature": "earth", "amount": 30 },
   "category": "earth",
   "effect": "projectile",
-  "effectParams": { "speed": 1.5, "gravity": 0.03, "lifetimeTicks": 100, "damage": 7.0, "displayItem": "minecraft:cobblestone" }
+  "effectParams": { "stopInWater": true, "speed": 1.5, "gravity": 0.03, "lifetimeTicks": 100, "damage": 7.0, "displayItem": "minecraft:cobblestone" }
 }

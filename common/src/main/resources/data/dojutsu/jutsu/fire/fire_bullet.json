@@ -24,6 +24,7 @@
         "seconds": 2,
         "amplifier": 255
       }
-    ]
+    ],
+    "stopInWater": true
   }
 }

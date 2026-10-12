@@ -52,15 +52,19 @@ public final class RaycastHelper {
      * tocarlo. Aqui el rayo sale del <b>centro</b> de la caja y cada objetivo se engorda con su medio lado, que es
      * exactamente el barrido de una caja contra otra.
      *
-     * @param halfSize medio lado de la hitbox del proyectil
+     * @param halfSize    medio lado de la hitbox del proyectil
+     * @param stopInWater si el agua lo detiene (F11/DJT-242): el rayo choca tambien con fluidos de agua, incluidos
+     *                    los bloques anegados como la hierba marina (el {@code #dojutsu:waters} del datapack)
      */
-    public static HitResult firstHitAlongMotion(Projectile projectile, Predicate<Entity> canHit, double halfSize) {
+    public static HitResult firstHitAlongMotion(Projectile projectile, Predicate<Entity> canHit, double halfSize,
+            boolean stopInWater) {
         Level level = projectile.level();
         Vec3 motion = projectile.getDeltaMovement();
         Vec3 start = projectile.getBoundingBox().getCenter();
         Vec3 end = start.add(motion);
         HitResult blockHit = level.clip(
-                new ClipContext(start, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, projectile));
+                new ClipContext(start, end, ClipContext.Block.COLLIDER,
+                        stopInWater ? ClipContext.Fluid.WATER : ClipContext.Fluid.NONE, projectile));
         if (blockHit.getType() != HitResult.Type.MISS) {
             end = blockHit.getLocation(); // una entidad detras de la pared no cuenta
         }

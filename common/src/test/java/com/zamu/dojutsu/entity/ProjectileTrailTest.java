@@ -34,4 +34,27 @@ class ProjectileTrailTest {
         assertEquals(ProjectileTrail.NONE, ProjectileTrail.fromId((byte) 99));
         assertEquals(ProjectileTrail.NONE, ProjectileTrail.fromId((byte) -1));
     }
+
+    @Test
+    void elCrepitarDeVueloEmpiezaConLaEstelaYSeRepite() {
+        // F11/DJT-242: no suena pegado a la cara de quien lanza, y luego cada FLIGHT_SOUND_INTERVAL_TICKS
+        assertEquals(false, ProjectileTrail.flightSoundDue(0));
+        assertEquals(false, ProjectileTrail.flightSoundDue(1));
+        assertEquals(true, ProjectileTrail.flightSoundDue(ProjectileTrail.FLIGHT_SOUND_FIRST_TICK));
+        assertEquals(false, ProjectileTrail.flightSoundDue(ProjectileTrail.FLIGHT_SOUND_FIRST_TICK + 1));
+        assertEquals(true, ProjectileTrail.flightSoundDue(
+                ProjectileTrail.FLIGHT_SOUND_FIRST_TICK + ProjectileTrail.FLIGHT_SOUND_INTERVAL_TICKS));
+    }
+
+    @Test
+    void enCincoSegundosDeVueloSuenaUnPunadoDeVeces() {
+        // ni silencio ni un enjambre de voces: 100 ticks de vida dan 10 crepitares
+        int count = 0;
+        for (int tick = 0; tick < 100; tick++) {
+            if (ProjectileTrail.flightSoundDue(tick)) {
+                count++;
+            }
+        }
+        assertEquals(10, count);
+    }
 }

@@ -6533,3 +6533,38 @@ Dos fallos que no estaban en el primer vídeo y que trajo este mismo ticket:
 ### Validación
 
 `build` multiloader verde, **1134 tests** (+18). Falta repetir la pasada en partida.
+
+## 2026-10-11 · DJT-242 — La Bala de fuego suena, y el agua vuelve a pararla
+
+El datapack no tenía **ningún** sonido para el fuego: su resource pack trae viento, rayo, tierra, madera, Chidori
+y Rasengan, pero no fuego. Todo lo de aquí es nuevo y de vanilla, salvo lo del agua, que es fidelidad.
+
+| Momento | Sonido |
+|---|---|
+| Lanzar | `entity.blaze.shoot`, algo más agudo |
+| En vuelo | `block.fire.ambient` **pegado a la entidad**, cada 10 ticks |
+| Impacto | `item.firecharge.use` (ya estaba, DJT-241) |
+| Contra agua | `block.fire.extinguish` + vapor, y no estalla |
+| Se agota en el aire | `block.fire.extinguish` bajito + humo |
+
+### El sonido de vuelo va pegado a la bala
+
+`Level.playLocalSound(Entity, ...)` crea en el cliente un sonido que **sigue a la entidad** y se corta cuando
+desaparece. Así el objetivo oye la bala acercarse y de qué lado viene, y el crepitar muere con el impacto. No hace
+falta una clase de sonido propia ni tocar código solo de cliente desde la entidad: es API común.
+
+### El agua: 19 de 23
+
+El `move` de los proyectiles del datapack marcaba impacto si el bloque de delante era `#dojutsu:waters` (agua,
+hierba marina, pepinos de mar). El port dejaba que todos lo atravesaran. Un grep sobre los `.mcfunction` da **19**
+proyectiles con esa línea; los otros cuatro del port (Honoikazuchi, Rasenshuriken, C1, el dragón de tierra) no la
+tienen y siguen cruzando. Nuevo `stopInWater`, puesto exactamente en esos 19. El rayo propio usa
+`ClipContext.Fluid.WATER`, que también ve el agua de los bloques anegados.
+
+Con el agua, la regla es la del datapack para todos; el **sonido** de apagarse, en cambio, va con la estela
+(`trail: fire`), así que hoy solo lo tiene la Bala de fuego.
+
+### Validación
+
+`build` multiloader verde, **1137 tests** (+3). Falta la pasada en partida.
+

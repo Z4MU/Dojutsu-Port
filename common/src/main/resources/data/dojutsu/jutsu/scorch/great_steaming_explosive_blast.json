@@ -1,4 +1,4 @@
 { "id": "great_steaming_explosive_blast", "chakraCost": 180, "cooldownTicks": 100,
   "affinity": [ { "nature": "fire", "amount": 150 }, { "nature": "wind", "amount": 150 } ],
   "kekkeiGenkai": "scorch", "category": "scorch", "effect": "projectile",
-  "effectParams": { "speed": 1.6, "lifetimeTicks": 100, "radius": 3.0, "damage": 11.0, "displayItem": "minecraft:blaze_powder" } }
+  "effectParams": { "stopInWater": true, "speed": 1.6, "lifetimeTicks": 100, "radius": 3.0, "damage": 11.0, "displayItem": "minecraft:blaze_powder" } }

@@ -1,4 +1,4 @@
 { "id": "iron_sand_wave", "chakraCost": 140, "cooldownTicks": 100,
   "affinity": [ { "nature": "earth", "amount": 140 }, { "nature": "wind", "amount": 140 } ],
   "kekkeiGenkai": "magnet", "category": "magnet", "effect": "projectile",
-  "effectParams": { "speed": 1.6, "lifetimeTicks": 100, "radius": 2.0, "damage": 9.0, "displayItem": "minecraft:iron_nugget" } }
+  "effectParams": { "stopInWater": true, "speed": 1.6, "lifetimeTicks": 100, "radius": 2.0, "damage": 9.0, "displayItem": "minecraft:iron_nugget" } }
